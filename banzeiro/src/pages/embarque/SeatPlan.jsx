@@ -36,7 +36,7 @@ export function computeLayout(vehicle, s, orient) {
 
   let bowL, consoleL, rowStart
   if (boat) {
-    bowL = Math.round(B * 0.62 + s * 0.5)
+    bowL = Math.round(B * 0.7 + s * 0.6)
     consoleL = bowL - s * 0.15
     rowStart = consoleL + s * 0.95 + rg * 1.4
   } else {
@@ -92,13 +92,13 @@ export function computeLayout(vehicle, s, orient) {
     const tip = i * 2.6, Lb = bowL, Le = L - i, r = s * 0.55 - i * 0.5, k = Lb - tip
     return P([
       ['M', tip, bc],
-      ['C', tip + k * 0.06, bc + Bw * 0.36, tip + k * 0.5, b1, Lb, b1],
+      ['C', tip + k * 0.3, bc + Bw * 0.2, tip + k * 0.62, b1, Lb, b1],
       ['L', Le - r, b1],
       ['Q', Le, b1, Le, b1 - r],
       ['Q', Le + s * 0.1, bc, Le, b0 + r],
       ['Q', Le, b0, Le - r, b0],
       ['L', Lb, b0],
-      ['C', tip + k * 0.5, b0, tip + k * 0.06, bc - Bw * 0.36, tip, bc],
+      ['C', tip + k * 0.62, b0, tip + k * 0.3, bc - Bw * 0.2, tip, bc],
       ['Z'],
     ])
   }
@@ -140,10 +140,9 @@ export function computeLayout(vehicle, s, orient) {
     decor.motors = motorBs.map((mb) => rect(L - 4, mb - mw / 2, ml, mw))
     const sw = L + ml
     decor.wake = [
-      P([['M', sw, bc - s * 0.5], ['Q', sw + aft * 0.5, bc - s * 0.6, sw + aft * 0.95, bc - s * 1.25]]),
-      P([['M', sw, bc + s * 0.5], ['Q', sw + aft * 0.5, bc + s * 0.6, sw + aft * 0.95, bc + s * 1.25]]),
-      P([['M', sw + aft * 0.15, bc - s * 0.15], ['Q', sw + aft * 0.5, bc - s * 0.2, sw + aft * 0.75, bc - s * 0.55]]),
-      P([['M', sw + aft * 0.15, bc + s * 0.15], ['Q', sw + aft * 0.5, bc + s * 0.2, sw + aft * 0.75, bc + s * 0.55]]),
+      P([['M', sw - s * 0.1, bc - s * 0.42], ['Q', sw + aft * 0.55, bc - s * 0.5, sw + aft * 0.95, bc - s * 0.95]]),
+      P([['M', sw - s * 0.1, bc + s * 0.42], ['Q', sw + aft * 0.55, bc + s * 0.5, sw + aft * 0.95, bc + s * 0.95]]),
+      P([['M', sw + aft * 0.2, bc], ['L', sw + aft * 0.8, bc]]),
     ]
   } else {
     const ga = car ? s * 0.95 : s * 0.22, gb = ga + s * 0.36
@@ -159,7 +158,7 @@ export function computeLayout(vehicle, s, orient) {
       decor.wheels.push(rect(wl, -4, ww, wh), rect(wl, B - wh + 4, ww, wh))
     })
     decor.mirrors.push(rect(gb - s * 0.05, -s * 0.22, s * 0.2, s * 0.26), rect(gb - s * 0.05, B - s * 0.04, s * 0.2, s * 0.26))
-    decor.wheelRing = { c: pt(consoleL - s * 0.2, seatB(0) + s / 2), r: s * 0.17 }
+    decor.wheelRing = { c: pt(consoleL - s * 0.3, seatB(0) + s / 2), r: s * 0.15 }
     decor.door = rect(consoleL, B - ps - 1, s * 1.1, ps - s * 0.16 + 1)
   }
 
@@ -314,7 +313,6 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
         style={{ left: cons.left, top: cons.top, width: cons.width, height: cons.height }}
       >
         <span className={cx('font-mono font-semibold tracking-wide', s < 40 ? 'text-[9.5px]' : 'text-[10.5px]')}>{skipperInitials}</span>
-        <span className={cx('absolute rounded-full bg-lime', v ? 'top-1.5 left-1/2 h-[3px] w-3 -translate-x-1/2' : 'right-1.5 top-1/2 h-3 w-[3px] -translate-y-1/2')} />
       </div>
 
       {guideSpot && guide && (
@@ -333,7 +331,7 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
       {vest && (
         <div
           title={`Coletes · ${vehicle.capacity + 2}`}
-          className="absolute flex items-center justify-center gap-1 rounded-[8px] bg-land-tint text-land"
+          className={cx('absolute flex items-center justify-center gap-1 rounded-[8px] bg-land-tint text-land', !v && 'flex-col')}
           style={{ left: vest.left, top: vest.top, width: vest.width, height: vest.height }}
         >
           <Lifebuoy size={s < 40 ? 11 : 13} weight="bold" />
@@ -395,7 +393,7 @@ export function Legend({ online, queued, className }) {
     { k: 'noshow', label: 'Ausente', sw: 'hatch' },
   ]
   return (
-    <div className={cx('inline-flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-full bg-surface px-4 py-2 shadow-pill', className)}>
+    <div className={cx('inline-flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-full bg-surface px-3.5 py-2 shadow-pill sm:gap-x-4 sm:px-4', className)}>
       {items.map((i) => (
         <span key={i.k} className="inline-flex items-center gap-1.5 text-[12px] text-ink-2">
           <span className={cx('size-[11px] rounded-[4px]', i.sw)} />

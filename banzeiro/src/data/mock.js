@@ -194,7 +194,7 @@ export function initialStatus(now = BASE_NOW) {
     const d = DEPARTURES.find((x) => x.id === p.depId)
     if (d.id === 'd7') {
       const idx = Number(p.id.split('-p')[1])
-      status[p.id] = idx <= 7 ? { s: 'boarded', at: d.start - 38 + idx * 3, via: idx === 4 ? 'manual' : 'qr', synced: true } : { s: 'waiting' }
+      status[p.id] = idx <= 7 ? { s: 'boarded', at: d.start - 40 + idx * 2, via: idx === 4 ? 'manual' : 'qr', synced: true } : { s: 'waiting' }
     } else if (d.start <= now) {
       const noshow = r() < 0.04
       status[p.id] = noshow ? { s: 'noshow' } : { s: 'boarded', at: d.start - 30 + Math.floor(r() * 28), via: r() < 0.9 ? 'qr' : 'manual', synced: true }

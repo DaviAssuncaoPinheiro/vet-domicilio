@@ -1,4 +1,5 @@
 import { createContext, useContext, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { House, Scan, ListChecks, UserCircle, CellSignalFull, WifiHigh, WifiSlash, BatteryHigh, CheckCircle } from '@phosphor-icons/react'
 import { cx, ease } from '../../components/ui'
@@ -10,6 +11,13 @@ export const GuiaCtx = createContext(null)
 export const useGuia = () => useContext(GuiaCtx)
 
 export const SHEET_EASE = [0.2, 0.9, 0.3, 1]
+
+/** Renderiza acima da bottom nav, no host do app. */
+export function Portal({ children }) {
+  const ctx = useGuia()
+  if (!ctx?.portalEl) return null
+  return createPortal(children, ctx.portalEl)
+}
 
 /* ---------- helpers ---------- */
 const HUES = ['#6F66F0', '#3D6DF5', '#0E9AA7', '#3DBE83', '#E6B05C', '#EE6849', '#C2185B', '#43434B']
@@ -174,6 +182,7 @@ export function Screen({ children, className }) {
 /* ---------- bottom sheet ---------- */
 export function Sheet({ open, onClose, children, label }) {
   return (
+    <Portal>
     <AnimatePresence>
       {open && (
         <motion.div key="bd" className="absolute inset-0 z-50 bg-[rgba(10,12,20,.38)]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.22 }} onClick={onClose} />
@@ -195,6 +204,7 @@ export function Sheet({ open, onClose, children, label }) {
         </motion.div>
       )}
     </AnimatePresence>
+    </Portal>
   )
 }
 
@@ -217,7 +227,7 @@ export function NetPill({ className, glass }) {
           className={cx('inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full pl-3 pr-3.5 text-[12px] font-semibold', glass ? 'bg-land/20 text-[#F6D08F] ring-1 ring-inset ring-land/30 backdrop-blur-md' : 'bg-land-tint text-[#8A5A12]', className)}
         >
           <span className="live-dot !size-[6px] text-land" />
-          Sem internet · <span className="font-mono tnum">{stats.queued}</span> na fila
+          <span>Sem internet · <span className="font-mono tnum">{stats.queued}</span> na fila</span>
         </motion.span>
       ) : synced ? (
         <motion.span
@@ -226,7 +236,7 @@ export function NetPill({ className, glass }) {
           className={cx('inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full pl-2.5 pr-3.5 text-[12px] font-semibold', glass ? 'bg-ok/25 text-[#9BE8C3] ring-1 ring-inset ring-ok/35 backdrop-blur-md' : 'bg-ok-tint text-ok', className)}
         >
           <CheckCircle size={15} weight="fill" />
-          <span className="font-mono tnum">{synced.n}</span> {synced.n === 1 ? 'sincronizado' : 'sincronizados'}
+          <span><span className="font-mono tnum">{synced.n}</span> {synced.n === 1 ? 'sincronizado' : 'sincronizados'}</span>
         </motion.span>
       ) : null}
     </AnimatePresence>

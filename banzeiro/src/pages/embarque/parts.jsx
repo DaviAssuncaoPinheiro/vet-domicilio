@@ -112,10 +112,10 @@ export function DepartureStrip({ groups, now, status, activeId, onPick }) {
   const ref = useRef(null)
   useEffect(() => {
     const el = ref.current?.querySelector('[aria-current="true"]')
-    if (el && ref.current) ref.current.scrollTo({ left: el.offsetLeft - 8, behavior: 'smooth' })
+    if (el && ref.current) ref.current.scrollTo({ left: Math.max(0, el.offsetLeft - 16), behavior: 'smooth' })
   }, [activeId])
   return (
-    <div ref={ref} className="no-scrollbar -mx-2 flex snap-x gap-2 overflow-x-auto px-2 pb-1 sm:-mx-3 sm:px-3 md:-mx-4 md:px-4 xl:hidden">
+    <div ref={ref} className="no-scrollbar relative -mx-2 flex snap-x gap-2 overflow-x-auto px-2 pb-1 sm:-mx-3 sm:px-3 md:-mx-4 md:px-4 xl:hidden">
       {groups.flatMap((g, gi) => [
         gi > 0 ? <span key={`sep-${g.key}`} className="my-3 w-px shrink-0 bg-ink/10" /> : null,
         ...g.items.map((d) => {
@@ -154,7 +154,7 @@ export function DepartureStrip({ groups, now, status, activeId, onPick }) {
 
 function Row({ icon: Icon, label, children }) {
   return (
-    <div className="flex min-h-[38px] items-center justify-between gap-3 border-b border-line/70 py-1.5 last:border-0">
+    <div className="flex min-h-[38px] items-center justify-between gap-3 border-b border-line/70 py-1.5">
       <span className="flex items-center gap-2 text-[12.5px] text-ink-3"><Icon size={15} />{label}</span>
       <span className="flex min-w-0 items-center gap-1.5 truncate text-right text-[13px] text-ink">{children}</span>
     </div>
@@ -186,7 +186,7 @@ export function PaxDetail({ p, st, onClose, actions }) {
         <PaxStatusChip st={st} />
       </div>
 
-      <div className="mt-2">
+      <div className="mt-2 grid gap-x-8 @2xl:grid-cols-2">
         <Row icon={Translate} label="Idioma"><LangTag code={p.lang} /><span className="text-ink-2">{LANGS[p.lang].label}</span></Row>
         <Row icon={Ticket} label="Reserva"><span className="font-mono text-[12.5px]">{p.booking}</span></Row>
         <Row icon={Broadcast} label="Canal">
@@ -210,8 +210,8 @@ export function PaxDetail({ p, st, onClose, actions }) {
       <div className="mt-4 flex flex-wrap gap-2">
         {s === 'waiting' && (
           <>
-            <Button icon={HandTap} onClick={actions.board} className="flex-1">Embarcar manualmente</Button>
-            <Button variant="light" icon={UserMinus} onClick={actions.noshow}>Marcar ausência</Button>
+            <Button icon={HandTap} onClick={actions.board} className="flex-1 whitespace-nowrap">Embarcar manualmente</Button>
+            <Button variant="light" icon={UserMinus} onClick={actions.noshow} className="flex-1 whitespace-nowrap">Marcar ausência</Button>
           </>
         )}
         {s !== 'waiting' && <Button variant="light" icon={ArrowCounterClockwise} onClick={actions.undo} className="flex-1">Desfazer</Button>}
@@ -232,7 +232,8 @@ export function PlanSummary({ pax, status, stats, guide }) {
     { label: 'Ausentes', n: stats.noshow, sw: 'hatch' },
   ]
   return (
-    <div className="flex flex-col">
+    <div className="grid gap-x-10 @2xl:grid-cols-2">
+      <div className="flex flex-col">
       <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Resumo</span>
       <div className="mt-2">
         {rows.map((r) => (
@@ -242,7 +243,9 @@ export function PlanSummary({ pax, status, stats, guide }) {
           </div>
         ))}
       </div>
-      <span className="mt-5 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Idiomas</span>
+      </div>
+      <div className="flex flex-col">
+      <span className="mt-5 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 @2xl:mt-0">Idiomas</span>
       <div className="mt-2.5 flex flex-wrap gap-1.5">
         {langs.map(([code, n]) => {
           const covered = !guide || guide.langs.includes(code)
@@ -255,6 +258,7 @@ export function PlanSummary({ pax, status, stats, guide }) {
         })}
       </div>
       <p className="mt-5 text-[12.5px] text-ink-3">Toque em um assento para ver o passageiro.</p>
+      </div>
     </div>
   )
 }
@@ -349,7 +353,7 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
                     <span className="min-w-0">
                       <span className="flex items-center gap-1.5">
                         <span className="truncate text-[13.5px] font-medium">{p.name}</span>
-                        <CountryCode code={p.country} className="hidden @2xl:inline-flex" />
+                        <span className="hidden @2xl:inline-flex"><CountryCode code={p.country} /></span>
                       </span>
                       <span className="flex items-center gap-1.5 text-[11.5px] text-ink-3 @2xl:hidden">
                         <CountryCode code={p.country} />

@@ -15,7 +15,6 @@ export default function Inicio() {
   const { dep, tour, vehicle, guide, pax, stats, now, go, released } = useGuia()
   const online = useOps((s) => s.online)
   const setOnline = useOps((s) => s.setOnline)
-  const status = useOps((s) => s.status)
   const phase = depPhase(dep, now)
   const mins = dep.start - now
   const first = guide.name.split(' ')[0]
