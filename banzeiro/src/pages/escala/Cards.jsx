@@ -5,11 +5,11 @@ import { cx } from '../../components/ui'
 import { GUIDES, KIND, WEEK } from '../../data/mock'
 import { tourOf, missingLangs, overlaps, dayLabel, fmtT } from './logic'
 
-const strong = (k) => `color-mix(in oklab, ${KIND[k].color} 62%, #14120F)`
+const strong = (k) => `color-mix(in oklab, ${KIND[k].color} 62%, var(--color-ink))`
 
 export function Chip({ children, alert }) {
   return (
-    <span className={cx('inline-flex h-[18px] items-center rounded-full px-1.5 text-[10px] font-semibold leading-none shadow-[0_1px_2px_rgba(19,19,22,.08)]', alert ? 'bg-alert text-white' : 'bg-white text-ink')}>
+    <span className={cx('inline-flex h-[18px] items-center rounded-full px-1.5 text-[10px] font-semibold leading-none shadow-[0_1px_2px_rgba(0,0,0,.08)]', alert ? 'bg-alert text-white' : 'bg-white text-ink')}>
       {children}
     </span>
   )

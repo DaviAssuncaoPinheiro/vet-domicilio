@@ -1,34 +1,18 @@
-import { UploadSimple } from '@phosphor-icons/react'
-import { Button, Reveal } from '../components/ui'
-import { useOps } from '../store'
-import { fmt } from '../data/mock'
+import { Reveal } from '../components/ui'
 import ChannelStrip from './reservas/ChannelStrip'
 import Inbox from './reservas/Inbox'
-import BookingsTable from './reservas/BookingsTable'
 
 export default function Reservas() {
-  const now = useOps((s) => s.now)
-  const showToast = useOps((s) => s.showToast)
   return (
     <div className="flex flex-col gap-4 md:gap-5">
       <Reveal>
-        <div className="flex flex-col gap-4 px-1 pt-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.025em] text-ink">Reservas</h1>
-            <p className="mt-1 text-[14px] text-ink-3">Importadas automaticamente de 5 canais</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex h-10 items-center gap-2.5 rounded-full bg-surface px-4 text-[13px] text-ink-2 shadow-pill">
-              <span className="live-dot text-ok" />
-              Última sincronização <span className="font-mono font-medium text-ink tnum">{fmt(now - 1)}</span>
-            </span>
-            <Button variant="light" icon={UploadSimple} onClick={() => showToast('Planilha conferida · nenhuma duplicata')}>Importar planilha</Button>
-          </div>
+        <div className="px-1 pt-2">
+          <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.025em] text-ink">Reservas</h1>
+          <p className="mt-1 text-[14px] text-ink-3">Tudo que chega, num lugar só</p>
         </div>
       </Reveal>
       <ChannelStrip />
       <Inbox />
-      <BookingsTable />
     </div>
   )
 }

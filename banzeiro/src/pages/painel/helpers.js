@@ -1,10 +1,14 @@
-import { DEPARTURES, VEHICLES, fmt } from '../../data/mock'
+import { DEPARTURES, VEHICLES } from '../../data/mock'
 import { depStats, depPhase } from '../../store'
 
 export const DAY_START = 6 * 60
 export const DAY_END = 20 * 60
 
-export const PHASE_TONE = { done: 'muted', live: 'now', boarding: 'ok', scheduled: 'ink' }
+export const PHASE_TONE = { done: 'muted', live: 'ink', boarding: 'ok', scheduled: 'muted' }
+export const PHASE = { done: 'Encerrada', live: 'Em rota', boarding: 'Embarcando', scheduled: 'Agendada' }
+
+// Horário sem zero à esquerda: 7:30, 10:05
+export const t = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`
 
 // Bloqueios de agenda (manutenção, revisão)
 export const UNAVAILABLE = [
@@ -47,4 +51,4 @@ export function countdown(mins) {
   return m ? `${h}h ${String(m).padStart(2, '0')}` : `${h}h`
 }
 
-export const range = (d) => `${fmt(d.start)} às ${fmt(d.end)}`
+export const range = (d) => `${t(d.start)} às ${t(d.end)}`

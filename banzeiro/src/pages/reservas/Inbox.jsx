@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, Check, Checks, WarningCircle, PaperPlaneTilt, FileXls, Tray, Warning } from '@phosphor-icons/react'
-import { Card, CardHeader, Segmented, Button, IconButton, CountUp, CountryCode, Reveal, useMedia, cx, ease } from '../../components/ui'
+import { Card, CardHeader, Segmented, Button, IconButton, CountryCode, Reveal, useMedia, cx, ease } from '../../components/ui'
 import { CHANNELS, fmt } from '../../data/mock'
 import { useOps } from '../../store'
 import { ICONS } from './ChannelStrip'
@@ -11,7 +11,7 @@ import { INBOX, CONFIRMED_BASE } from './inbox-data'
 const FILTERS = [
   { value: 'all', label: 'Todas' },
   { value: 'new', label: 'Novas' },
-  { value: 'pending', label: 'Com pendência' },
+  { value: 'pending', label: 'Pendentes' },
 ]
 
 const preview = (it) => it.segs.map((s) => s.t).join('').slice(0, 90)
@@ -43,7 +43,7 @@ const ListRow = forwardRef(function ListRow({ it, active, read, onOpen }, ref) {
             <span className="ml-auto shrink-0 font-mono text-[11.5px] text-ink-3 tnum">{fmt(it.time)}</span>
           </span>
           <span className="mt-0.5 flex items-center gap-2">
-            <span className="line-clamp-1 flex-1 text-[12.5px] text-ink-3">{it.subject ? `${it.subject} · ` : ''}{preview(it)}</span>
+            <span className="line-clamp-1 flex-1 text-[12.5px] text-ink-3">{preview(it)}</span>
             {unread && <span className="size-2 shrink-0 rounded-full bg-now" aria-label="Não lida" />}
           </span>
         </span>
@@ -61,7 +61,7 @@ function Seg({ s, fields, shown, hot }) {
   return (
     <span
       data-f={s.f}
-      className={cx('rounded-[6px] px-[3px] py-[1px] transition-[background,box-shadow] duration-150', on && 'bg-now-tint/70', isHot && on && '!bg-now-tint ring-1 ring-now/40')}
+      className={cx('rounded-[6px] px-[3px] py-[1px] transition-[background,box-shadow] duration-150', on && 'bg-gold-tint', isHot && on && '!bg-gold-light/70 ring-1 ring-gold')}
     >
       {s.t}
     </span>
@@ -73,8 +73,7 @@ function Message({ it, fields, shown, hot, setHot, replySent }) {
   const paxHot = hot && (hot.key === 'pax' || hot.spans?.includes('pax'))
   return (
     <div className="flex flex-col gap-3 self-start rounded-[22px] bg-sunken p-4" onPointerLeave={() => setHot(null)}>
-      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Mensagem original</p>
-      <div className="max-w-[92%] self-start">
+            <div className="max-w-[92%] self-start">
         <div className="rounded-[20px] rounded-tl-[6px] bg-surface px-4 py-3 text-[14px] leading-[1.6] text-ink shadow-pill">
           {it.subject && <p className="mb-1.5 text-[12px] font-semibold text-ink-3">{it.subject}</p>}
           <span
@@ -92,15 +91,15 @@ function Message({ it, fields, shown, hot, setHot, replySent }) {
         <div className="max-w-[92%] self-start overflow-hidden rounded-[18px] bg-surface shadow-pill">
           <div className="flex items-center gap-2 border-b border-line px-4 py-2.5 text-[12.5px] font-medium text-ink-2">
             <FileXls size={17} className="text-ok" /> <span className="truncate">{it.sheet.file}</span>
-            <span className="ml-auto font-mono text-[11px] text-ink-3">{rows.length} linhas</span>
+            <span className="ml-auto text-[11.5px] text-ink-3 tnum">{rows.length} nomes</span>
           </div>
           <table className="w-full text-left text-[12.5px]">
             <thead>
-              <tr className="text-[10.5px] uppercase tracking-[0.06em] text-ink-3">{it.sheet.cols.map((c) => <th key={c} className="px-4 py-1.5 font-semibold">{c}</th>)}</tr>
+              <tr className="text-[11.5px] text-ink-3">{it.sheet.cols.map((c) => <th key={c} className="px-4 py-1.5 font-semibold">{c}</th>)}</tr>
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={i} className={cx('transition-colors duration-150', paxHot && shown > 3 ? 'bg-now-tint' : 'odd:bg-frame/60')}>
+                <tr key={i} className={cx('transition-colors duration-150', paxHot && shown > 3 ? 'bg-gold-tint' : 'odd:bg-frame/60')}>
                   <td className="px-4 py-1.5 font-medium text-ink">{r[0]}</td>
                   <td className="px-4 py-1.5"><CountryCode code={r[1]} /></td>
                   <td className="px-4 py-1.5 font-mono text-[11.5px] text-ink-2">{r[2]}</td>
@@ -138,9 +137,9 @@ function Field({ f, i, n, hot, setHot, shown, replySent }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease, delay: n * 0.06 }}
       onPointerEnter={() => setHot(f)}
-      className={cx('rounded-[14px] px-3 py-2.5 transition-colors duration-150', isHot ? 'bg-now-tint' : on ? 'bg-sunken/70' : 'bg-sunken/40')}
+      className={cx('rounded-[14px] px-3 py-2.5 transition-colors duration-150', isHot ? 'bg-gold-tint' : on ? 'bg-sunken/70' : 'bg-sunken/40')}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">{f.label}</p>
+      <p className="text-[12px] text-ink-3">{f.label}</p>
       {empty ? (
         <p className={cx('mt-0.5 text-[13.5px]', waiting ? 'text-ink-2' : 'text-ink-3')}>{waiting ? 'Pedido enviado' : 'Pendente'}</p>
       ) : f.names ? (
@@ -153,7 +152,7 @@ function Field({ f, i, n, hot, setHot, shown, replySent }) {
           {f.more > 0 && <span className="font-mono text-[12px] text-ink-3">+{f.more}</span>}
         </div>
       ) : (
-        <p className={cx('mt-0.5 text-[14px] font-medium text-ink', f.mono && 'font-mono tnum')}>
+        <p className={cx('mt-0.5 text-[14px] font-medium text-ink', f.key === 'dep' && 'font-mono tnum')}>
           {f.value}
           {f.sub && <span className="ml-2 font-sans text-[12.5px] font-normal text-ink-3">{f.sub}</span>}
         </p>
@@ -170,15 +169,15 @@ function BookingCard({ it, fields, shown, hot, setHot, asked, merged, onAsk, onM
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between px-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Reserva montada</p>
+        <p className="text-[13px] font-semibold text-ink">Reserva</p>
         <span className="font-mono text-[12px] text-ink-3 tnum">{merged ? it.dup : it.code}</span>
       </div>
 
       {it.dup && (
         <div className={cx('flex items-center gap-3 rounded-[14px] px-3 py-2.5', merged ? 'bg-ok-tint' : 'bg-sunken')}>
-          {merged ? <Check size={18} weight="bold" className="shrink-0 text-ok" /> : <Warning size={18} className="shrink-0 text-land" />}
-          <p className="flex-1 text-[13px] font-medium text-ink">{merged ? `Unificada com ${it.dup}` : `Possível duplicada de ${it.dup}`}</p>
-          {dupOpen && <Button size="sm" variant="light" onClick={onMerge}>Unificar</Button>}
+          {merged ? <Check size={18} weight="bold" className="shrink-0 text-ok" /> : <Warning size={18} className="shrink-0 text-gold-deep" />}
+          <p className="flex-1 text-[13px] font-medium text-ink">{merged ? `Juntada com ${it.dup}` : `Já existe ${it.dup}`}</p>
+          {dupOpen && <Button size="sm" variant="light" onClick={onMerge}>Juntar</Button>}
         </div>
       )}
 
@@ -192,15 +191,15 @@ function BookingCard({ it, fields, shown, hot, setHot, asked, merged, onAsk, onM
 
       {it.missing && (
         <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease, delay: fields.length * 0.06 }}
-          className={cx('flex items-center gap-3 rounded-[14px] px-3 py-2.5', asked ? 'bg-sunken' : 'bg-land-tint')}>
-          {asked ? <Check size={18} weight="bold" className="shrink-0 text-ok" /> : <WarningCircle size={18} weight="fill" className="shrink-0 text-land" />}
-          <p className="flex-1 text-[13px] font-medium text-ink">{asked ? 'Aguardando resposta' : `Falta: ${it.missing.label}`}</p>
+          className={cx('flex items-center gap-3 rounded-[14px] px-3 py-2.5', asked ? 'bg-sunken' : 'bg-gold-tint')}>
+          {asked ? <Check size={18} weight="bold" className="shrink-0 text-ok" /> : <WarningCircle size={18} weight="fill" className="shrink-0 text-gold-deep" />}
+          <p className="flex-1 text-[13px] font-medium text-ink">{asked ? 'Pedido enviado' : `Falta ${it.missing.label}`}</p>
           {missingOpen && <Button size="sm" variant="light" icon={PaperPlaneTilt} onClick={onAsk}>{it.missing.btn}</Button>}
         </motion.div>
       )}
 
       <div className="sticky bottom-0 z-10 -mx-1 mt-1 flex flex-wrap items-center gap-2 bg-surface px-1 py-3">
-        <Button size="lg" disabled={!canConfirm} onClick={onConfirm} icon={Check} className="flex-1 sm:flex-none">Confirmar reserva</Button>
+        <Button size="lg" disabled={!canConfirm} onClick={onConfirm} icon={Check} className="flex-1 sm:flex-none">Confirmar</Button>
         <Link to="/voucher/EA-51877" className="inline-flex h-12 items-center gap-2 rounded-full px-4 text-[13px] font-medium text-ink-2 transition-colors hover:bg-sunken hover:text-ink">
           <PaperPlaneTilt size={16} /> Enviar voucher
         </Link>
@@ -279,10 +278,10 @@ export default function Inbox() {
     <Reveal i={2}>
       <Card className="overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 pb-3 pt-5 md:px-7 md:pt-6">
-          <CardHeader title="Caixa de entrada única" sub="Todo pedido, de qualquer canal, vira reserva sem digitar" className="min-w-0" />
+          <CardHeader title="Caixa de entrada" className="min-w-0" />
           <div className="flex items-center gap-2">
             <span className="inline-flex h-9 items-center gap-2 rounded-full bg-ok-tint px-3.5 text-[12.5px] font-medium text-ok">
-              <Checks size={16} /> Confirmadas hoje <CountUp value={CONFIRMED_BASE + st.done.length} className="font-mono font-semibold" />
+              <Checks size={16} /> <span className="font-semibold tnum">{CONFIRMED_BASE + st.done.length}</span> confirmadas hoje
             </span>
           </div>
         </div>
@@ -290,7 +289,7 @@ export default function Inbox() {
           <div className="flex min-h-0 flex-col lg:border-r lg:border-line">
             <div className="flex items-center justify-between gap-2 overflow-x-auto px-4 py-3 no-scrollbar">
               <Segmented size="sm" options={FILTERS} value={filter} onChange={setFilter} />
-              <span className="shrink-0 font-mono text-[11.5px] text-ink-3 tnum">{unread} novas</span>
+              <span className="shrink-0 text-[12px] text-ink-3 tnum">{unread} novas</span>
             </div>
             <ul className="flex-1 space-y-0.5 overflow-y-auto px-2 pb-3">
               <AnimatePresence initial={false} mode="popLayout">

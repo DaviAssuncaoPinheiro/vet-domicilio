@@ -162,7 +162,8 @@ function Summary({ shifts }) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-1 text-[13px] text-ink-3">Idiomas</span>
         {ok.map((l) => <span key={l} className={cx(tag, 'bg-sunken text-ink-2')}>{l}</span>)}
-        {missing.map((l) => <span key={l} className={cx(tag, 'bg-alert-tint text-alert')}>Falta {l}</span>)}
+        {missing.length > 0 && <span className="ml-2 mr-1 text-[13px] text-ink-3">Falta</span>}
+        {missing.map((l) => <span key={l} className={cx(tag, 'bg-alert-tint text-alert')}>{l}</span>)}
       </div>
       <div className="ml-auto flex items-center gap-2 text-[13px]">
         {total === 0 ? <span className="flex items-center gap-1.5 text-ink-3"><Check size={14} weight="bold" className="text-ok" />Sem conflitos</span>

@@ -49,7 +49,7 @@ export function computeLayout(vehicle, s, orient) {
   const vestL = extrasEnd + s * 0.4
   const vestH = s * 0.55
   const L = boat ? vestL + vestH + s * 0.45 : extrasEnd + s * 0.55
-  const aft = boat ? s * 1.0 : s * 0.15
+  const aft = boat ? s * 0.55 : s * 0.15
   const padL = s * 0.35
   const padB = s * 0.35
   const D = padL + L + aft + s * 0.2
@@ -191,7 +191,7 @@ function Seat({ seat, p, st, s, orient, selected, hovered, grouped, pulse, onEnt
   const small = s < 40
   const queued = state === 'boarded' && st?.synced === false
   const sweepFrom = v ? 'inset(100% 0 0 0 round 10px)' : 'inset(0 100% 0 0 round 10px)'
-  const label = !p ? `Assento ${seat.label}, livre` : `Assento ${seat.label}, ${p.name}, ${state === 'boarded' ? 'a bordo' : state === 'noshow' ? 'ausente' : 'aguardando'}`
+  const label = !p ? `Assento ${seat.label}, livre` : `Assento ${seat.label}, ${p.name}, ${state === 'boarded' ? 'embarcado' : state === 'noshow' ? 'faltou' : 'aguardando'}`
 
   return (
     <div className="absolute" style={{ left: seat.left, top: seat.top, width: seat.width, height: seat.height, zIndex: selected || hovered ? 5 : 1 }}>
@@ -207,11 +207,11 @@ function Seat({ seat, p, st, s, orient, selected, hovered, grouped, pulse, onEnt
         onClick={onClick}
         className={cx(
           'group absolute inset-0 overflow-hidden rounded-[10px] transition-[box-shadow,transform,background-color] duration-150 enabled:active:scale-95 disabled:cursor-default',
-          state === 'free' && 'bg-sunken text-ink-4',
-          state === 'waiting' && 'bg-boat-tint text-boat',
+          state === 'free' && 'border border-dashed border-ink-4 text-ink-4',
+          state === 'waiting' && 'border-[1.5px] border-ink-3 bg-sunken text-ink-2',
           state === 'boarded' && 'bg-ok text-white',
           state === 'noshow' && 'hatch text-ink-3',
-          selected ? 'scale-[1.04] ring-2 ring-now ring-offset-2 ring-offset-surface' : hovered ? 'ring-2 ring-now/35' : '',
+          selected ? 'scale-[1.04] ring-2 ring-ink ring-offset-2 ring-offset-surface' : hovered ? 'ring-2 ring-ink/20' : '',
           grouped && !selected && !hovered && 'outline-1 outline-offset-2 outline-dashed outline-ink-4',
         )}
       >
@@ -241,7 +241,7 @@ function Seat({ seat, p, st, s, orient, selected, hovered, grouped, pulse, onEnt
       </button>
 
       {queued && (
-        <span title="Na fila para sincronizar" className="pointer-events-none absolute -right-1.5 -top-1.5 grid size-[15px] place-items-center rounded-full bg-land text-white ring-2 ring-surface">
+        <span title="Salvo no celular" className="pointer-events-none absolute -right-1.5 -top-1.5 grid size-[15px] place-items-center rounded-full bg-gold text-negro ring-2 ring-surface">
           <Clock size={9} weight="bold" />
         </span>
       )}
@@ -286,9 +286,6 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
           </filter>
         </defs>
 
-        {decor.wake.map((d, i) => (
-          <path key={i} d={d} fill="none" stroke="var(--color-boat)" strokeOpacity={i < 2 ? 0.22 : 0.12} strokeWidth={1.5} strokeLinecap="round" />
-        ))}
         {decor.motors.map((m, i) => <rect key={i} x={m.left} y={m.top} width={m.width} height={m.height} rx={5} fill="var(--color-negro)" />)}
         {decor.wheels.map((w, i) => <rect key={i} x={w.left} y={w.top} width={w.width} height={w.height} rx={3} fill="var(--color-negro)" />)}
         {decor.mirrors.map((m, i) => <rect key={i} x={m.left} y={m.top} width={m.width} height={m.height} rx={3} fill="var(--color-surface)" stroke="var(--color-line)" />)}
@@ -300,8 +297,7 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
         <g clipPath={`url(#deck-${vehicle.id}-${orient})`}>
           {decor.planks.map((d, i) => <path key={i} d={d} stroke="var(--color-line)" strokeWidth={1} />)}
         </g>
-        {decor.anchor && <circle cx={decor.anchor[0]} cy={decor.anchor[1]} r={s * 0.13} fill="var(--color-sunken)" stroke="var(--color-line)" />}
-        {decor.glass && <path d={decor.glass} fill="var(--color-now-tint)" stroke="var(--color-now)" strokeOpacity={0.25} />}
+        {decor.glass && <path d={decor.glass} fill="var(--color-sunken)" stroke="var(--color-ink)" strokeOpacity={0.12} />}
         {decor.wheelRing && <circle cx={decor.wheelRing.c[0]} cy={decor.wheelRing.c[1]} r={decor.wheelRing.r} fill="none" stroke="var(--color-ink-3)" strokeWidth={2} />}
         {decor.door && <rect x={decor.door.left} y={decor.door.top} width={decor.door.width} height={decor.door.height} rx={4} fill="var(--color-frame)" stroke="var(--color-line)" strokeDasharray="3 3" />}
       </svg>
@@ -330,12 +326,11 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
 
       {vest && (
         <div
-          title={`Coletes · ${vehicle.capacity + 2}`}
-          className={cx('absolute flex items-center justify-center gap-1 rounded-[8px] bg-land-tint text-land', !v && 'flex-col')}
+          title="Coletes"
+          className={cx('absolute flex items-center justify-center gap-1 rounded-[8px] bg-gold-tint text-gold-deep')}
           style={{ left: vest.left, top: vest.top, width: vest.width, height: vest.height }}
         >
           <Lifebuoy size={s < 40 ? 11 : 13} weight="bold" />
-          <span className={cx('font-mono font-semibold tnum text-ink-2', s < 40 ? 'text-[9.5px]' : 'text-[10.5px]')}>{vehicle.capacity + 2}</span>
         </div>
       )}
 
@@ -374,9 +369,8 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
           >
             <div className="flex -translate-x-1/2 -translate-y-full items-center gap-2 whitespace-nowrap rounded-full bg-negro py-1.5 pl-3 pr-2 text-[12px] text-white shadow-dark">
               <span className="font-medium">{hovered.name}</span>
-              <span className="font-mono text-[10.5px] text-white/55">{hovered.country}</span>
               <span className="rounded-[5px] bg-white/10 px-1 font-mono text-[10.5px] font-semibold">{hovered.lang}</span>
-              <span className="font-mono text-[10.5px] text-white/55">{hovered.booking}</span>
+              <span className="font-mono text-[10.5px] text-white/55">{hovered.seat}</span>
             </div>
           </motion.div>
         )}
@@ -385,25 +379,25 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
   )
 }
 
-export function Legend({ online, queued, className }) {
+export function Legend({ queued, noshow, className }) {
   const items = [
-    { k: 'free', label: 'Livre', sw: 'bg-sunken ring-1 ring-inset ring-ink/5' },
-    { k: 'waiting', label: 'Aguardando', sw: 'bg-boat-tint ring-1 ring-inset ring-boat/25' },
-    { k: 'boarded', label: 'A bordo', sw: 'bg-ok' },
-    { k: 'noshow', label: 'Ausente', sw: 'hatch' },
+    { k: 'free', label: 'Livre', sw: 'border border-dashed border-ink-4' },
+    { k: 'waiting', label: 'Aguardando', sw: 'border-[1.5px] border-ink-3 bg-sunken' },
+    { k: 'boarded', label: 'Embarcado', sw: 'bg-ok' },
   ]
+  if (noshow > 0) items.push({ k: 'noshow', label: 'Faltou', sw: 'hatch' })
   return (
-    <div className={cx('inline-flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-full bg-surface px-3.5 py-2 shadow-pill sm:gap-x-4 sm:px-4', className)}>
+    <div className={cx('inline-flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 text-[12px] text-ink-3', className)}>
       {items.map((i) => (
-        <span key={i.k} className="inline-flex items-center gap-1.5 text-[12px] text-ink-2">
+        <span key={i.k} className="inline-flex items-center gap-1.5">
           <span className={cx('size-[11px] rounded-[4px]', i.sw)} />
           {i.label}
         </span>
       ))}
-      {(!online || queued > 0) && (
-        <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-2">
-          <span className="grid size-[13px] place-items-center rounded-full bg-land text-white"><Clock size={8} weight="bold" /></span>
-          Na fila
+      {queued > 0 && (
+        <span className="inline-flex items-center gap-1.5">
+          <span className="grid size-[13px] place-items-center rounded-full bg-gold text-negro"><Clock size={8} weight="bold" /></span>
+          Salvo no celular
         </span>
       )}
     </div>

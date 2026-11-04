@@ -10,13 +10,13 @@ export const INBOX = [
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Encontro das Águas', sub: 'Lancha · 4h30' },
       { key: 'date', label: 'Data', value: 'Sex, 6 nov' },
-      { key: 'dep', label: 'Saída sugerida', value: '08:30', mono: true, sub: 'Lancha Boto', seats: '6 lugares livres', spans: ['date', 'pax'] },
+      { key: 'dep', label: 'Saída', value: '08:30', mono: true, sub: 'Lancha Boto', seats: '6 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '3 passageiros', names: [{ n: 'Valentina Ruiz', c: 'AR' }], more: 2 },
       { key: 'lang', label: 'Idioma', value: 'Espanhol' },
       { key: 'hotel', label: 'Hotel', value: 'Hotel Tropical' },
       { key: 'contact', label: 'Contato', value: '+54 341 555 0142', mono: true },
     ],
-    missing: { label: 'nome dos acompanhantes', btn: 'Pedir nomes', reply: 'Hola Valentina, para confirmar necesitamos el nombre completo de tus 2 acompañantes. Gracias.' },
+    missing: { label: 'o nome dos acompanhantes', btn: 'Pedir nomes', reply: 'Hola Valentina, para confirmar necesitamos el nombre completo de tus 2 acompañantes. Gracias.' },
   },
   {
     id: 'i2', channel: 'whatsapp', sender: 'Rafael Monteiro', time: 601, unread: true, code: 'EA-51903',
@@ -24,7 +24,7 @@ export const INBOX = [
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Pôr do sol no Rio Negro', sub: 'Lancha · 2h' },
       { key: 'date', label: 'Data', value: 'Qui, 5 nov' },
-      { key: 'dep', label: 'Saída sugerida', value: '16:30', mono: true, sub: 'Lancha Tucunaré', seats: '9 lugares livres', spans: ['date', 'pax'] },
+      { key: 'dep', label: 'Saída', value: '16:30', mono: true, sub: 'Lancha Tucunaré', seats: '9 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '2 passageiros', names: [{ n: 'Rafael Monteiro', c: 'BR' }, { n: 'Juliana Pires', c: 'BR' }] },
       { key: 'lang', label: 'Idioma', value: 'Português' },
       { key: 'hotel', label: 'Hotel', value: 'Novotel Manaus' },
@@ -37,7 +37,7 @@ export const INBOX = [
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Encontro das Águas', sub: 'Lancha · 4h30' },
       { key: 'date', label: 'Data', value: 'Hoje, 4 nov' },
-      { key: 'dep', label: 'Saída sugerida', value: '10:30', mono: true, sub: 'Lancha Jaraqui', seats: '0 lugares livres', spans: ['date', 'tour'] },
+      { key: 'dep', label: 'Saída', value: '10:30', mono: true, sub: 'Lancha Jaraqui', seats: '0 lugares livres', spans: ['date', 'tour'] },
       { key: 'pax', label: 'Passageiros', value: '2 passageiros', names: [{ n: 'Sofía Fernández', c: 'AR' }, { n: 'Mateo González', c: 'AR' }] },
       { key: 'lang', label: 'Idioma', value: 'Espanhol' },
       { key: 'hotel', label: 'Hotel', value: 'Juma Ópera' },
@@ -52,13 +52,13 @@ export const INBOX = [
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Arquipélago de Anavilhanas', sub: 'Lancha · 9h30' },
       { key: 'date', label: 'Data', value: 'Sáb, 7 nov' },
-      { key: 'dep', label: 'Saída sugerida', value: '07:30', mono: true, sub: 'Lancha Pirarucu', seats: '8 lugares livres', spans: ['date', 'pax'] },
+      { key: 'dep', label: 'Saída', value: '07:30', mono: true, sub: 'Lancha Pirarucu', seats: '8 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '6 passageiros', names: [{ n: 'Lukas Schneider', c: 'DE' }, { n: 'Hannah Weber', c: 'DE' }], more: 4 },
       { key: 'lang', label: 'Idioma', value: 'Alemão' },
       { key: 'hotel', label: 'Hotel', value: null },
       { key: 'contact', label: 'Contato', value: 'reservas@rionegroviagens.com' },
     ],
-    missing: { label: 'hotel de embarque', btn: 'Pedir hotel', reply: 'Bom dia, qual é o hotel de embarque do grupo? Com isso emitimos os vouchers hoje. Obrigada.' },
+    missing: { label: 'o hotel de embarque', btn: 'Pedir hotel', reply: 'Bom dia, qual é o hotel de embarque do grupo? Com isso emitimos os vouchers hoje. Obrigada.' },
   },
   {
     id: 'i5', channel: 'ota', sender: 'Plataforma · OTA 88213', subject: 'Booking confirmed', time: 571, unread: false, code: 'EA-51906',
@@ -66,7 +66,7 @@ export const INBOX = [
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Encontro das Águas', sub: 'Lancha · 4h30' },
       { key: 'date', label: 'Data', value: 'Qui, 5 nov' },
-      { key: 'dep', label: 'Saída sugerida', value: '08:30', mono: true, sub: 'Lancha Boto', seats: '14 lugares livres', spans: ['date', 'pax'] },
+      { key: 'dep', label: 'Saída', value: '08:30', mono: true, sub: 'Lancha Boto', seats: '14 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '2 passageiros', names: [{ n: 'Emily Carter', c: 'US' }, { n: 'Jacob Miller', c: 'US' }] },
       { key: 'lang', label: 'Idioma', value: 'Inglês' },
       { key: 'hotel', label: 'Hotel', value: 'Hotel Tropical' },
@@ -79,7 +79,7 @@ export const INBOX = [
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Manaus histórica', sub: 'Terrestre · 3h30' },
       { key: 'date', label: 'Data', value: 'Sex, 6 nov' },
-      { key: 'dep', label: 'Saída sugerida', value: '09:00', mono: true, sub: 'Van 01', seats: '4 lugares livres', spans: ['date', 'pax'] },
+      { key: 'dep', label: 'Saída', value: '09:00', mono: true, sub: 'Van 01', seats: '4 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '4 passageiros', names: [{ n: 'Oliver Hughes', c: 'GB' }, { n: 'Charlotte Evans', c: 'GB' }], more: 2 },
       { key: 'lang', label: 'Idioma', value: 'Inglês' },
       { key: 'hotel', label: 'Hotel', value: 'Juma Ópera · 412' },
@@ -92,7 +92,7 @@ export const INBOX = [
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Pôr do sol no Rio Negro', sub: 'Lancha · 2h' },
       { key: 'date', label: 'Data', value: 'Sex, 6 nov' },
-      { key: 'dep', label: 'Saída sugerida', value: '16:30', mono: true, sub: 'Lancha Tucunaré', seats: '7 lugares livres', spans: ['date', 'pax'] },
+      { key: 'dep', label: 'Saída', value: '16:30', mono: true, sub: 'Lancha Tucunaré', seats: '7 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '2 passageiros', names: [{ n: 'Camille Laurent', c: 'FR' }, { n: 'Hugo Moreau', c: 'FR' }] },
       { key: 'lang', label: 'Idioma', value: 'Francês' },
       { key: 'hotel', label: 'Hotel', value: 'Hotel Villa Amazônia' },
@@ -105,12 +105,12 @@ export const INBOX = [
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Arquipélago de Anavilhanas', sub: 'Lancha · 9h30' },
       { key: 'date', label: 'Data', value: 'Qui, 5 nov' },
-      { key: 'dep', label: 'Saída sugerida', value: '07:30', mono: true, sub: 'Lancha Pirarucu', seats: '3 lugares livres', spans: ['date', 'pax'] },
+      { key: 'dep', label: 'Saída', value: '07:30', mono: true, sub: 'Lancha Pirarucu', seats: '3 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '2 passageiros', names: [{ n: 'Daniel Kim', c: 'US' }], more: 1 },
       { key: 'lang', label: 'Idioma', value: 'Inglês' },
       { key: 'hotel', label: 'Hotel', value: null },
       { key: 'contact', label: 'Contato', value: 'Mesmo número do WhatsApp' },
     ],
-    missing: { label: 'hotel e nome do acompanhante', btn: 'Pedir dados', reply: 'Hi Daniel, yes there is space. Could you share your hotel and your companion\'s full name so we can confirm?' },
+    missing: { label: 'o hotel e o nome do acompanhante', btn: 'Pedir dados', reply: 'Hi Daniel, yes there is space. Could you share your hotel and your companion\'s full name so we can confirm?' },
   },
 ]
