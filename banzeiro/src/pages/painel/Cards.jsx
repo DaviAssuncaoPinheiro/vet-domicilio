@@ -149,7 +149,7 @@ export function Proximas({ now, status }) {
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center gap-1.5 text-[13px] font-semibold text-ink">
                         <KindDot kind={tour.kind} className="!size-[6px] shrink-0" />
-                        <span className="truncate">{tour.short}</span>
+                        <span className="truncate">{d.route ?? tour.short}</span>
                       </p>
                       <p className="mt-0.5 truncate text-[12px] text-ink-3">
                         {v.name} · <span className={cx('tnum', over && 'font-semibold text-alert')}>{st.total}/{v.capacity}</span>
@@ -173,7 +173,7 @@ export function Proximas({ now, status }) {
 
 /* ---------------------------------------------------------- Pendências */
 
-const SEV_DOT = { high: 'bg-alert', medium: 'bg-land', low: 'bg-ink-4' }
+const SEV_DOT = { high: 'bg-alert', medium: 'bg-gold', low: 'bg-ink-4' }
 
 export function Pendencias({ now }) {
   const all = useOps((s) => s.divergences)
@@ -300,7 +300,7 @@ const BASE_FEED = [
   { id: 'e5', at: 8 * 60 + 36, who: 'Raimundo Sá', text: 'zarpou na Lancha Boto' },
 ]
 
-export function Atividade({ now, status }) {
+export function Atividade({ now }) {
   const divergences = useOps((s) => s.divergences)
   const personOf = (name) => GUIDES.find((g) => g.name === name) ?? (name === USER.name ? { initials: USER.initials, hue: 'var(--color-gold)' } : null)
 
@@ -315,7 +315,7 @@ export function Atividade({ now, status }) {
   const feed = [...solved, ...liveDeps, ...BASE_FEED].sort((a, b) => b.at - a.at).slice(0, 4)
 
   return (
-    <Card className="flex h-full flex-col p-4 md:p-5">
+    <Card className="p-4 md:p-5">
       <CardHeader className="px-1" title="Atividade" right={<span className="live-dot !size-[6px] mr-1 text-ok" aria-label="Ao vivo" />} />
       <ul className="mt-3 flex flex-col">
         <AnimatePresence initial={false}>

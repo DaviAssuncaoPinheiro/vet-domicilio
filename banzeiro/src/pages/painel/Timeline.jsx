@@ -262,8 +262,8 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
             <>
               <span className="block truncate text-[12.5px] font-semibold leading-[1.2] text-ink">{tour.short}</span>
               <span className="mt-[3px] flex items-center gap-2 overflow-hidden whitespace-nowrap text-[11px] text-ink-2/75">
-                <span className="shrink-0 font-mono tnum">{range(d)}</span>
-                {over && <span className="font-semibold text-alert tnum">{st.total}/{vehicle.capacity}</span>}
+                <span className="shrink-0 font-mono tnum">{over ? t(d.start) : range(d)}</span>
+                {over && <span className="shrink-0 font-semibold text-alert tnum">{st.total}/{vehicle.capacity}</span>}
               </span>
             </>
           )}
