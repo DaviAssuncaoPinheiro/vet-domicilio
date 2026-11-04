@@ -139,8 +139,9 @@ function makePassengers() {
     const n = d.booked
     // grupos: pessoas viajam juntas
     let group = 0
+    const pool = [...PEOPLE].sort(() => r() - 0.5)
     for (let i = 0; i < n; i++) {
-      const p = PEOPLE[Math.floor(r() * PEOPLE.length)]
+      const p = pool[i % pool.length]
       if (i % 3 === 0) group++
       const ch = channelKeys[Math.min(channelKeys.length - 1, Math.floor(Math.pow(r(), 1.3) * channelKeys.length))]
       out.push({

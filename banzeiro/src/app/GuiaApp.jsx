@@ -41,7 +41,7 @@ export default function GuiaApp() {
           </Reveal>
           <Reveal i={2} className="mt-8 flex flex-wrap gap-2.5">
             <Button variant="dark" size="lg" icon={ArrowLeft} onClick={() => nav('/')}>Voltar ao painel</Button>
-            <Button variant="light" size="lg" icon={Ticket} onClick={() => nav('/voucher/EA-51861')}>Ver voucher</Button>
+            <Button variant="light" size="lg" icon={Ticket} onClick={() => nav('/voucher/EA-51877')}>Ver voucher</Button>
           </Reveal>
           <Reveal i={3}>
             <ol className="mt-12 border-t border-line">

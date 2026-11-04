@@ -23,7 +23,7 @@ function Corners() {
 }
 
 export default function Voucher() {
-  const { code = 'EA-51861' } = useParams()
+  const { code = 'EA-51877' } = useParams()
   const [lang, setLang] = useState('PT')
   const [note, setNote] = useState(null)
   const [walletDone, setWalletDone] = useState(false)

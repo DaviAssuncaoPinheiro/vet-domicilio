@@ -54,7 +54,7 @@ function Rail() {
       </div>
       <div className="mt-3 flex flex-col items-center gap-2">
         <NavLink to="/guia"><IconButton dark label="App do guia"><DeviceMobile size={18} /></IconButton></NavLink>
-        <NavLink to="/voucher/EA-51861"><IconButton label="Voucher do passageiro"><Ticket size={18} /></IconButton></NavLink>
+        <NavLink to="/voucher/EA-51877"><IconButton label="Voucher do passageiro"><Ticket size={18} /></IconButton></NavLink>
       </div>
       <div className="mt-auto">
         <IconButton label="Configurações"><Gear size={18} /></IconButton>
