@@ -37,8 +37,8 @@ export default function Painel() {
           <Reveal i={3}><NowCard now={now} status={status} /></Reveal>
           <Reveal i={4}><Proximas now={now} status={status} /></Reveal>
         </div>
-        <Reveal i={5} className="min-w-0 md:col-span-6 xl:col-span-4"><Divergencias now={now} /></Reveal>
-        <Reveal i={6} className="min-w-0 md:col-span-12 xl:col-span-4"><Atividade now={now} status={status} /></Reveal>
+        <Reveal i={5} className="h-full min-w-0 md:col-span-6 xl:col-span-4"><Divergencias now={now} /></Reveal>
+        <Reveal i={6} className="h-full min-w-0 md:col-span-12 xl:col-span-4"><Atividade now={now} status={status} /></Reveal>
       </div>
     </div>
   )
