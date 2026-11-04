@@ -1,10 +1,10 @@
-import { PASSENGERS, TOURS, VEHICLES, CHANNELS, KIND, depById, tourOf, vehicleOf } from '../../data/mock'
+import { PASSENGERS, CHANNELS, depById, tourOf } from '../../data/mock'
 
 export const SITUATIONS = {
-  board: { label: 'A bordo', color: '#22A06B', tone: 'ok' },
-  wait: { label: 'Aguardando', color: '#3D6DF5', tone: 'now' },
-  absent: { label: 'Ausente', color: '#B9B9C2', tone: 'muted' },
-  alert: { label: 'Divergência', color: '#EE6849', tone: 'alert' },
+  board: { label: 'A bordo', tone: 'ok' },
+  wait: { label: 'Aguardando', tone: 'now' },
+  absent: { label: 'Ausente', tone: 'muted' },
+  alert: { label: 'Divergência', tone: 'alert' },
 }
 
 // Quais passageiros pertencem a cada divergência aberta (determinístico)
@@ -31,33 +31,6 @@ export function situationOf(p, status, divMap) {
 }
 
 const CH_ORDER = Object.keys(CHANNELS)
-const TOUR_ORDER = ['t3', 't2', 't4', 't1', 't5', 't6', 't7']
-const SIT_ORDER = ['board', 'wait', 'absent', 'alert']
-
-export function buildGraph(status, divergences) {
-  const divMap = divergentIds(divergences)
-  const nodes = new Map()
-  const links = new Map()
-  const addNode = (id, name, col, color, order) => { if (!nodes.has(id)) nodes.set(id, { id, name, col, color, order, value: 0 }) }
-  const addLink = (s, t) => {
-    const k = `${s}>${t}`
-    if (!links.has(k)) links.set(k, { source: s, target: t, value: 0 })
-    links.get(k).value += 1
-  }
-  PASSENGERS.forEach((p) => {
-    const dep = depById(p.depId)
-    const tour = tourOf(dep)
-    const veh = vehicleOf(dep)
-    const sit = situationOf(p, status, divMap)
-    const c = `c:${p.channel}`, t = `t:${tour.id}`, v = `v:${veh.id}`, s = `s:${sit}`
-    addNode(c, CHANNELS[p.channel].label, 0, CHANNELS[p.channel].color, CH_ORDER.indexOf(p.channel))
-    addNode(t, tour.short, 1, KIND[tour.kind].hex, TOUR_ORDER.indexOf(tour.id))
-    addNode(v, veh.name, 2, '#43434B', VEHICLES.findIndex((x) => x.id === veh.id))
-    addNode(s, SITUATIONS[sit].label, 3, SITUATIONS[sit].color, SIT_ORDER.indexOf(sit))
-    addLink(c, t); addLink(t, v); addLink(v, s)
-  })
-  return { nodes: [...nodes.values()], links: [...links.values()], total: PASSENGERS.length, alertCount: [...divMap.keys()].length }
-}
 
 export function buildBookings(status, divergences) {
   const divMap = divergentIds(divergences)

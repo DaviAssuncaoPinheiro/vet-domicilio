@@ -53,3 +53,6 @@ export function conflictsOf(shifts) {
   })
   return { open, lang, overlap, off }
 }
+
+export const fmtT = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`
+export const dayShort = (d) => WEEK[d].short

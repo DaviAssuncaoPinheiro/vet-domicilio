@@ -5,8 +5,8 @@ import { Card, CountUp, Reveal, ease } from '../../components/ui'
 import { CHANNELS } from '../../data/mock'
 import { channelStats } from './data'
 
-const ICONS = { site: Globe, whatsapp: WhatsappLogo, agencia: Handshake, ota: AppWindow, hotel: Bed }
-const W = 76, H = 26
+export const ICONS = { site: Globe, whatsapp: WhatsappLogo, agencia: Handshake, ota: AppWindow, hotel: Bed }
+const W = 56, H = 22
 
 function Spark({ series, color }) {
   const reduce = useReducedMotion()
@@ -18,7 +18,7 @@ function Spark({ series, color }) {
   return (
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden className="shrink-0 overflow-visible">
       <motion.path d={d} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.7, ease, delay: 0.2 }} />
-      <motion.circle cx={x(last)} cy={y(series[last])} r={2.6} fill={color} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} />
+      <motion.circle cx={x(last)} cy={y(series[last])} r={2.4} fill={color} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} />
     </svg>
   )
 }
@@ -26,33 +26,28 @@ function Spark({ series, color }) {
 export default function ChannelStrip() {
   const stats = channelStats()
   return (
-    <div className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2 no-scrollbar md:grid md:grid-cols-3 md:overflow-visible md:pb-0 xl:grid-cols-5">
-      {stats.map((s, i) => {
-        const ch = CHANNELS[s.key]
-        const Icon = ICONS[s.key]
-        return (
-          <Reveal key={s.key} i={i} className="min-w-[188px] shrink-0 snap-start md:min-w-0">
-            <Card className="flex h-full flex-col justify-between gap-5 p-4">
-              <div className="flex items-center justify-between">
-                <span className="grid size-9 place-items-center rounded-full bg-sunken text-ink-2"><Icon size={18} /></span>
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-3">
-                  <span className="live-dot !size-[6px] text-ok" /> Conectado
+    <Reveal i={1}>
+      <Card className="overflow-hidden">
+        <div className="flex overflow-x-auto no-scrollbar md:grid md:grid-cols-5">
+          {stats.map((s) => {
+            const ch = CHANNELS[s.key]
+            const Icon = ICONS[s.key]
+            return (
+              <div key={s.key} className="flex min-w-[196px] shrink-0 items-center gap-3 border-l border-line px-4 py-3.5 first:border-l-0 md:min-w-0">
+                <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-sunken text-ink-2">
+                  <Icon size={17} />
+                  <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-ok ring-2 ring-surface" />
                 </span>
-              </div>
-              <div>
-                <div className="flex items-end justify-between gap-2">
-                  <div className="flex items-baseline gap-1.5">
-                    <CountUp value={s.count} className="font-mono text-[30px] font-medium leading-none tracking-[-0.03em]" />
-                    <span className="text-[12px] text-ink-3">hoje</span>
-                  </div>
-                  <Spark series={s.series} color={ch.color} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[12px] text-ink-3">{ch.label}</p>
+                  <CountUp value={s.count} className="font-mono text-[22px] font-medium leading-tight tracking-[-0.03em]" />
                 </div>
-                <p className="mt-2 truncate text-[13px] font-semibold text-ink">{ch.label}</p>
+                <Spark series={s.series} color={ch.color} />
               </div>
-            </Card>
-          </Reveal>
-        )
-      })}
-    </div>
+            )
+          })}
+        </div>
+      </Card>
+    </Reveal>
   )
 }

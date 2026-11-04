@@ -35,7 +35,7 @@ export default function GuiaApp() {
         <div className="max-w-[430px]">
           <Reveal i={0}><Logo size={44} /></Reveal>
           <Reveal i={1}>
-            <p className="mt-10 text-[12.5px] font-medium text-ink-3">Banzeiro · {COMPANY.name}</p>
+            <p className="mt-10 text-[12.5px] font-medium text-ink-3">{COMPANY.name}</p>
             <h1 className="mt-2 text-[46px] font-semibold leading-[1.02] tracking-[-0.04em] text-ink">App do guia</h1>
             <p className="mt-4 text-[16px] leading-[1.55] text-ink-2">Confere o embarque pelo QR Code. Funciona sem internet e sincroniza quando o sinal volta.</p>
           </Reveal>

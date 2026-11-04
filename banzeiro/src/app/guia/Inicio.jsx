@@ -175,7 +175,7 @@ export default function Inicio() {
       <Reveal i={5} className="mt-3 px-4">
         <Card className="p-4">
           <div className="flex items-center gap-3.5">
-            <span className={cx('grid size-11 shrink-0 place-items-center rounded-full transition-colors', online ? 'bg-sunken text-ink-2' : 'bg-land-tint text-[#8A5A12]')}>
+            <span className={cx('grid size-11 shrink-0 place-items-center rounded-full transition-colors', online ? 'bg-sunken text-ink-2' : 'bg-land-tint text-[#8A6420]')}>
               {online ? <WifiHigh size={19} /> : <WifiSlash size={19} />}
             </span>
             <span className="min-w-0 flex-1">

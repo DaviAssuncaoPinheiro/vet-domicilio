@@ -118,7 +118,7 @@ function Body({ t, lang, code, pax, dep, status, walletDone, setWalletDone, flas
           <div className="relative p-6 pt-4">
             <div className="relative mx-auto grid aspect-square w-full max-w-[250px] place-items-center rounded-[28px] bg-white p-9">
               <Corners />
-              <QRCodeSVG value={code} level="M" size={256} bgColor="#FFFFFF" fgColor="#16130F" className="h-full w-full" />
+              <QRCodeSVG value={code} level="M" size={256} bgColor="#FFFFFF" fgColor="#12100D" className="h-full w-full" />
               {all && <span className="absolute -bottom-2.5 left-1/2 grid size-8 -translate-x-1/2 place-items-center rounded-full bg-lime text-negro ring-4 ring-[#1b1813]"><Check size={16} weight="bold" /></span>}
             </div>
             <p className="mt-5 text-center font-mono text-[22px] font-medium tracking-[0.04em] tnum">{code}</p>

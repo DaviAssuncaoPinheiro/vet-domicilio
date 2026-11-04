@@ -121,7 +121,7 @@ export function KindDot({ kind, className }) {
 }
 
 /** Avatar com iniciais (sem fotos de banco) */
-export function Avatar({ initials, hue = '#131316', size = 32, ring, className }) {
+export function Avatar({ initials, hue = '#14120F', size = 32, ring, className }) {
   return (
     <span
       className={cx('inline-grid shrink-0 place-items-center rounded-full font-semibold text-white', ring && 'ring-2 ring-surface', className)}

@@ -1,15 +1,15 @@
 import { forwardRef } from 'react'
 import { motion } from 'framer-motion'
 import { useDraggable } from '@dnd-kit/core'
-import { cx, Time } from '../../components/ui'
+import { cx } from '../../components/ui'
 import { GUIDES, KIND, WEEK } from '../../data/mock'
-import { tourOf, missingLangs, overlaps, dayLabel } from './logic'
+import { tourOf, missingLangs, overlaps, dayLabel, fmtT } from './logic'
 
-const strong = (k) => `color-mix(in oklab, ${KIND[k].color} 62%, #131316)`
+const strong = (k) => `color-mix(in oklab, ${KIND[k].color} 62%, #14120F)`
 
 export function Chip({ children, alert }) {
   return (
-    <span className={cx('inline-flex h-[18px] items-center rounded-full px-1.5 font-mono text-[10px] font-semibold leading-none shadow-[0_1px_2px_rgba(19,19,22,.08)]', alert ? 'bg-alert text-white' : 'bg-white text-ink')}>
+    <span className={cx('inline-flex h-[18px] items-center rounded-full px-1.5 text-[10px] font-semibold leading-none shadow-[0_1px_2px_rgba(19,19,22,.08)]', alert ? 'bg-alert text-white' : 'bg-white text-ink')}>
       {children}
     </span>
   )
@@ -37,9 +37,9 @@ export const ShiftBody = forwardRef(function ShiftBody({ shift, shifts = [], lif
     >
       <span className="absolute inset-y-1.5 left-1 w-[3px] rounded-full" style={{ background: KIND[t.kind].color }} />
       <div className="flex items-center justify-between gap-1.5">
-        <Time m={shift.start} className="text-[11.5px] font-semibold" style={{ color: strong(t.kind) }} />
+        <span className="font-mono text-[11.5px] font-semibold tnum" style={{ color: strong(t.kind) }}>{fmtT(shift.start)}</span>
         <div className="flex items-center gap-1">
-          {miss.length > 0 ? <Chip alert>Sem {miss.join(' ')}</Chip> : clash ? <Chip alert>Sobrepõe</Chip> : shift.need.map((l) => <Chip key={l}>{l}</Chip>)}
+          {miss.length > 0 ? <Chip alert>Sem {miss[0]}</Chip> : clash ? <Chip alert>Sobrepõe</Chip> : <Chip>{shift.need[0]}</Chip>}
         </div>
       </div>
       <p className="truncate text-[12.5px] font-semibold leading-tight tracking-[-0.005em] text-ink">{t.short}</p>
@@ -67,10 +67,10 @@ export function TrayBody({ shift, ghost, lifted }) {
       <span className="h-8 w-[3px] shrink-0 rounded-full" style={{ background: KIND[t.kind].color }} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-semibold leading-tight text-ink">{t.short}</p>
-        <p className="mt-0.5 text-[11.5px] text-ink-3"><span className="font-medium text-ink-2">{dayLabel(shift.day)}</span> · <Time m={shift.start} /></p>
+        <p className="mt-0.5 text-[11.5px] text-ink-3"><span className="font-medium text-ink-2">{dayLabel(shift.day)}</span> · <span className="font-mono tnum">{fmtT(shift.start)}</span></p>
       </div>
       <div className="flex gap-1">
-        {shift.need.map((l) => <span key={l} className="inline-flex h-[20px] items-center rounded-md bg-sunken px-1.5 font-mono text-[10.5px] font-semibold text-ink-2">{l}</span>)}
+        <span className="inline-flex h-[20px] items-center rounded-md bg-sunken px-1.5 text-[10.5px] font-semibold text-ink-2">{shift.need[0]}</span>
       </div>
     </div>
   )

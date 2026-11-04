@@ -93,7 +93,7 @@ export default function Perfil() {
 
       <Reveal i={3} className="mt-3 px-4">
         <Card className="flex items-center gap-3.5 p-4">
-          <span className={cx('grid size-11 shrink-0 place-items-center rounded-full', online ? 'bg-ok-tint text-ok' : 'bg-land-tint text-[#8A5A12]')}>
+          <span className={cx('grid size-11 shrink-0 place-items-center rounded-full', online ? 'bg-ok-tint text-ok' : 'bg-land-tint text-[#8A6420]')}>
             {online ? <CloudCheck size={20} /> : <CloudSlash size={20} />}
           </span>
           <span className="min-w-0 flex-1">

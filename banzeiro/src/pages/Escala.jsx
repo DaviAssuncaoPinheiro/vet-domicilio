@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence, MotionConfig, useAnimationControls } from 'framer-motion'
 import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors, useDroppable, pointerWithin, rectIntersection } from '@dnd-kit/core'
-import { CaretLeft, CaretRight, MagicWand, Prohibit, X, Check } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, UserPlus, Prohibit, X, Check } from '@phosphor-icons/react'
 import { Card, Reveal, Pill, Button, IconButton, Segmented, Avatar, LangTag, Progress, StatusChip, cx, ease, useMedia } from '../components/ui'
 import { GUIDES, WEEK } from '../data/mock'
 import { useOps } from '../store'
 import { DragShift, ShiftBody, TrayBody } from './escala/Cards'
-import { isOff, missingLangs, fit, plan, conflictsOf, hoursOf, fmtH, dayLabel, firstName } from './escala/logic'
+import { isOff, missingLangs, fit, plan, conflictsOf, hoursOf, fmtH, dayLabel, dayShort, firstName } from './escala/logic'
 
 const GRID = 'grid grid-cols-[208px_repeat(7,minmax(138px,1fr))] gap-1.5'
 const FILTERS = ['Todos', 'EN', 'ES', 'FR', 'DE', 'IT', 'JA']
@@ -16,8 +16,8 @@ function Meter({ h, max }) {
   const hot = h / max >= 0.9
   return (
     <div className="flex items-center gap-2">
-      <Progress value={h} max={max} height={4} color={hot ? 'var(--color-land)' : 'var(--color-ink)'} className="!w-[72px]" />
-      <span className={cx('font-mono text-[11px] tnum', hot ? 'font-semibold text-[#9A6A12]' : 'text-ink-3')}>{fmtH(h)}/{max}h</span>
+      <Progress value={h} max={max} height={4} color={hot ? 'var(--color-solimoes)' : 'var(--color-ink)'} className="!w-[72px]" />
+      {hot && <span className="text-[11px] font-semibold tnum" style={{ color: 'color-mix(in oklab, var(--color-solimoes) 60%, var(--color-ink))' }}>{fmtH(h)}h</span>}
     </div>
   )
 }
@@ -28,8 +28,8 @@ function GuideInfo({ g, shifts, dim, compact }) {
       <Avatar initials={g.initials} hue={g.hue} size={compact ? 34 : 38} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13.5px] font-semibold leading-tight text-ink">{g.name}</p>
-        <div className="mt-1 flex items-center gap-1">{g.langs.map((l) => <LangTag key={l} code={l} className="!h-[17px] !px-1 !text-[9.5px]" />)}</div>
-        <div className="mt-1.5"><Meter h={hoursOf(shifts, g)} max={g.max} /></div>
+        <div className="mt-1 flex items-center gap-1">{g.langs.map((l) => <LangTag key={l} code={l} className="!h-[17px] !px-1 !text-[9.5px] !font-sans" />)}</div>
+        <div className="mt-2"><Meter h={hoursOf(shifts, g)} max={g.max} /></div>
       </div>
     </div>
   )
@@ -76,9 +76,9 @@ function DayHead({ d }) {
   const w = WEEK[d]
   return (
     <div className="grid place-items-center pb-1">
-      <span className={cx('flex h-[46px] w-[54px] flex-col items-center justify-center rounded-[14px] leading-none', w.today ? 'bg-now text-white shadow-[0_8px_18px_-8px_rgba(61,109,245,.7)]' : 'bg-sunken text-ink-2')}>
+      <span className={cx('flex h-[46px] w-[54px] flex-col items-center justify-center rounded-[14px] leading-none', w.today ? 'bg-now text-white shadow-dark' : 'bg-sunken text-ink-2')}>
         <span className={cx('text-[10.5px] font-semibold', w.today ? 'text-white/80' : 'text-ink-3')}>{w.short}</span>
-        <span className="mt-1 font-mono text-[15px] font-semibold tnum">{w.day}</span>
+        <span className="mt-1 text-[15px] font-semibold tnum">{w.day}</span>
       </span>
     </div>
   )
@@ -90,12 +90,12 @@ function Tray({ items, activeId, isOver, setNodeRef, onPick }) {
       <div className="flex items-center gap-3">
         <div className="shrink-0">
           <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">Sem guia</h2>
-          <p className="text-[12px] text-ink-3"><span className="font-mono tnum">{items.length}</span> {items.length === 1 ? 'saída' : 'saídas'}</p>
+          <p className="text-[12px] text-ink-3 tnum">{items.length}</p>
         </div>
         <div className="no-scrollbar -my-1 flex min-w-0 flex-1 gap-2.5 overflow-x-auto px-1 py-1">
           <AnimatePresence initial={false}>
             {items.length === 0 && (
-              <motion.span key="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="inline-flex h-12 items-center gap-2 rounded-[16px] border border-dashed border-line px-4 text-[12.5px] text-ink-3"><Check size={14} weight="bold" className="text-ok" />Tudo escalado</motion.span>
+              <motion.span key="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="inline-flex h-12 items-center gap-2 rounded-[16px] border border-dashed border-line px-4 text-[12.5px] text-ink-3"><Check size={14} weight="bold" className="text-ok" />Nenhuma</motion.span>
             )}
             {items.map((s) => <DragShift key={s.id} shift={s} shifts={[]} activeId={activeId} tray onClick={() => onPick(s)} />)}
           </AnimatePresence>
@@ -123,8 +123,8 @@ function Sheet({ shift, shifts, onClose, onChoose }) {
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-[17px] font-semibold tracking-[-0.01em]">Escolher guia</h3>
-                <p className="text-[12.5px] text-ink-3">{dayLabel(shift.day)} · {shift.need.join(' ')}</p>
+                <h3 className="text-[17px] font-semibold tracking-[-0.01em]">Quem vai</h3>
+                <p className="text-[12.5px] text-ink-3">{dayLabel(shift.day)} · {shift.need[0]}</p>
               </div>
               <IconButton label="Fechar" onClick={onClose} className="!size-9 bg-sunken"><X size={16} /></IconButton>
             </div>
@@ -136,9 +136,9 @@ function Sheet({ shift, shifts, onClose, onChoose }) {
                     <Avatar initials={g.initials} hue={g.hue} size={36} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[13.5px] font-semibold">{g.name}</p>
-                      <p className="font-mono text-[11px] text-ink-3 tnum">{fmtH(hoursOf(shifts, g))}/{g.max}h</p>
+                      <p className="text-[11px] text-ink-3 tnum">{fmtH(hoursOf(shifts, g))}h</p>
                     </div>
-                    {f === 'lang' ? <StatusChip tone="alert">Sem {miss.join(' ')}</StatusChip> : <StatusChip tone={f === 'ok' ? 'ok' : f === 'off' ? 'muted' : 'alert'}>{label[f]}</StatusChip>}
+                    {f === 'lang' ? <StatusChip tone="alert">Sem {miss[0]}</StatusChip> : <StatusChip tone={f === 'ok' ? 'ok' : f === 'off' ? 'muted' : 'alert'}>{label[f]}</StatusChip>}
                   </button>
                 )
               })}
@@ -150,70 +150,23 @@ function Sheet({ shift, shifts, onClose, onChoose }) {
   )
 }
 
-function Coverage({ shifts }) {
+function Summary({ shifts }) {
   const langs = ['EN', 'ES', 'FR', 'DE', 'IT', 'JA']
-  const rows = langs.map((l) => {
-    const dem = shifts.filter((s) => s.need.includes(l))
-    return { l, dem: dem.length, open: dem.filter((s) => !s.guideId).length, able: GUIDES.filter((g) => g.langs.includes(l)).length }
-  })
-  const max = Math.max(...rows.map((r) => r.dem))
-  return (
-    <Card className="p-5 md:p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Cobertura de idiomas</h2>
-          <p className="mt-0.5 text-[12.5px] text-ink-3">Saídas por idioma e guias aptos</p>
-        </div>
-        <div className="hidden items-center gap-3 text-[11.5px] text-ink-3 sm:flex">
-          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-ink" />Escaladas</span>
-          <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-alert" />Sem guia</span>
-        </div>
-      </div>
-      <div className="mt-5 flex flex-col gap-3.5">
-        {rows.map((r, i) => (
-          <div key={r.l} className="grid grid-cols-[34px_1fr_auto] items-center gap-x-3.5 gap-y-1.5 sm:grid-cols-[34px_1fr_72px_96px]">
-            <span className="font-mono text-[12px] font-semibold text-ink">{r.l}</span>
-            <div className="flex h-[10px] items-center gap-[3px]" style={{ width: `${(r.dem / max) * 100}%`, minWidth: 24 }}>
-              <motion.span className="h-full origin-left rounded-full bg-ink" style={{ flex: r.dem - r.open }} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, ease, delay: i * 0.05 }} />
-              {r.open > 0 && <motion.span layout className="h-full rounded-full bg-alert" style={{ flex: r.open }} />}
-            </div>
-            <span className="hidden text-right font-mono text-[12px] text-ink-2 tnum sm:block">{r.dem} {r.dem === 1 ? 'saída' : 'saídas'}</span>
-            <div className="flex items-center justify-end gap-[3px]" title={`${r.able} guias aptos`}>
-              <span className="mr-1.5 font-mono text-[12px] text-ink-3 tnum sm:hidden">{r.dem}</span>
-              {GUIDES.map((g) => <span key={g.id} className={cx('size-[9px] rounded-full', g.langs.includes(r.l) ? 'bg-ink' : 'bg-line')} />)}
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  )
-}
-
-function Conflicts({ shifts }) {
+  const missing = langs.filter((l) => shifts.some((s) => !s.guideId && s.need.includes(l)))
+  const ok = langs.filter((l) => !missing.includes(l) && shifts.some((s) => s.need.includes(l)))
   const c = conflictsOf(shifts)
-  const rows = [
-    { k: 'Sem guia', v: c.open, tone: 'text-alert' },
-    { k: 'Idioma divergente', v: c.lang, tone: 'text-alert' },
-    { k: 'Horário sobreposto', v: c.overlap, tone: 'text-alert' },
-    { k: 'Em dia de folga', v: c.off, tone: 'text-alert' },
-  ]
-  const total = c.open + c.lang + c.overlap + c.off
+  const total = c.lang + c.overlap + c.off
+  const tag = 'inline-flex h-[24px] items-center rounded-md px-2 text-[11.5px] font-semibold'
   return (
-    <Card className="p-5 md:p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Conflitos</h2>
-          <p className="mt-0.5 text-[12.5px] text-ink-3">Na semana</p>
-        </div>
-        {total === 0 ? <StatusChip tone="ok" className="!bg-ok-tint">Tudo certo</StatusChip> : <StatusChip tone="alert" className="!bg-alert-tint"><span className="font-mono">{total}</span> abertos</StatusChip>}
+    <Card className="flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4 md:px-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-[13px] text-ink-3">Idiomas</span>
+        {ok.map((l) => <span key={l} className={cx(tag, 'bg-sunken text-ink-2')}>{l}</span>)}
+        {missing.map((l) => <span key={l} className={cx(tag, 'bg-alert-tint text-alert')}>Falta {l}</span>)}
       </div>
-      <div className="mt-4 divide-y divide-line">
-        {rows.map((r) => (
-          <div key={r.k} className="flex items-center justify-between py-3">
-            <span className="text-[13px] text-ink-2">{r.k}</span>
-            <span className={cx('font-mono text-[20px] font-medium tracking-[-0.03em] tnum', r.v ? r.tone : 'text-ink-4')}>{r.v}</span>
-          </div>
-        ))}
+      <div className="ml-auto flex items-center gap-2 text-[13px]">
+        {total === 0 ? <span className="flex items-center gap-1.5 text-ink-3"><Check size={14} weight="bold" className="text-ok" />Sem conflitos</span>
+          : <span className="flex items-center gap-1.5 font-medium text-alert"><span className="size-1.5 rounded-full bg-alert" /><span className="tnum">{total}</span> {total === 1 ? 'conflito' : 'conflitos'}</span>}
       </div>
     </Card>
   )
@@ -245,7 +198,7 @@ export default function Escala() {
     const prev = { guideId: shift.guideId, day: shift.day }
     moveShift(shift.id, { guideId, day: d })
     const g = GUIDES.find((x) => x.id === guideId)
-    showToast(toastText || (g ? `Movido para ${firstName(g)} · ${dayLabel(d)}` : 'Movido para Sem guia'), { label: 'Desfazer', fn: () => moveShift(shift.id, prev) })
+    showToast(toastText || (g ? `Movido para ${firstName(g)} · ${dayShort(d)}` : 'Movido para Sem guia'), { label: 'Desfazer', fn: () => moveShift(shift.id, prev) })
   }
 
   const onEnd = ({ active: a, over }) => {
@@ -262,7 +215,7 @@ export default function Escala() {
   const suggest = () => {
     if (running) return
     const steps = plan(shifts)
-    if (!steps.length) { showToast('Tudo escalado'); return }
+    if (!steps.length) { showToast('Nada para preencher'); return }
     const before = shifts
     setRunning(true)
     steps.forEach((st, i) => {
@@ -270,7 +223,7 @@ export default function Escala() {
     })
     timers.current.push(setTimeout(() => {
       setRunning(false)
-      showToast(`${steps.length} saídas escaladas`, { label: 'Desfazer', fn: () => setShifts(before) })
+      showToast(`${steps.length} ${steps.length === 1 ? 'saída preenchida' : 'saídas preenchidas'}`, { label: 'Desfazer', fn: () => setShifts(before) })
     }, 250 + steps.length * 120 + 500))
   }
 
@@ -284,7 +237,7 @@ export default function Escala() {
             <Card className="p-5 md:p-6">
               <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
                 <div>
-                  <h1 className="text-[26px] font-semibold tracking-[-0.025em] text-ink md:text-[30px]">Escala de guias</h1>
+                  <h1 className="text-[26px] font-semibold tracking-[-0.025em] text-ink md:text-[30px]">Escala</h1>
                   <p className="mt-1 text-[13px] text-ink-3">2 a 8 de novembro</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -294,12 +247,11 @@ export default function Escala() {
                     <IconButton label="Próxima semana" className="bg-surface shadow-pill !size-10"><CaretRight size={16} weight="bold" /></IconButton>
                   </div>
                   <Segmented value={view} onChange={setView} options={[{ value: 'semana', label: 'Semana' }, { value: 'dia', label: 'Dia' }]} />
-                  <Button icon={MagicWand} onClick={suggest} disabled={running} className="max-md:w-full">Sugerir escala</Button>
+                  <Button icon={UserPlus} onClick={suggest} disabled={running} className="max-md:w-full">Preencher escala</Button>
                 </div>
               </div>
               <div className="no-scrollbar -mx-1 mt-4 flex items-center gap-2 overflow-x-auto px-1 py-1">
-                <span className="mr-1 shrink-0 text-[11px] font-semibold uppercase tracking-wide text-ink-3">Idioma</span>
-                {FILTERS.map((f) => <Pill key={f} active={lang === f} onClick={() => setLang(f)} className={cx('!h-9 !px-3.5', f !== 'Todos' && 'font-mono !text-[12px]')}>{f}</Pill>)}
+                {FILTERS.map((f) => <Pill key={f} active={lang === f} onClick={() => setLang(f)} className={cx('!h-9 !px-3.5', f !== 'Todos' && '!text-[12px]')}>{f}</Pill>)}
               </div>
             </Card>
           </Reveal>
@@ -334,7 +286,7 @@ export default function Escala() {
                       return (
                         <button key={w.idx} onClick={() => setDay(w.idx)} className={cx('relative flex h-[60px] w-[56px] shrink-0 flex-col items-center justify-center rounded-[16px] leading-none transition-colors duration-150 active:scale-[0.97]', sel ? (w.today ? 'bg-now text-white' : 'bg-negro text-white shadow-dark') : 'bg-sunken text-ink-2')}>
                           <span className={cx('text-[10.5px] font-semibold', sel ? 'text-white/70' : 'text-ink-3')}>{w.short}</span>
-                          <span className="mt-1.5 font-mono text-[16px] font-semibold tnum">{w.day}</span>
+                          <span className="mt-1.5 text-[16px] font-semibold tnum">{w.day}</span>
                           {open > 0 && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-alert" />}
                         </button>
                       )
@@ -357,10 +309,7 @@ export default function Escala() {
           </Reveal>
 
           <Reveal i={3}>
-            <div className="grid gap-3 md:gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-              <Coverage shifts={shifts} />
-              <Conflicts shifts={shifts} />
-            </div>
+            <Summary shifts={shifts} />
           </Reveal>
         </div>
 

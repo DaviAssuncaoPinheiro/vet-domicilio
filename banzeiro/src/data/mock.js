@@ -14,9 +14,9 @@ export const TODAY_LABEL = 'Quarta, 4 de novembro'
 export const BASE_NOW = 10 * 60 + 5 // 10:05
 
 export const KIND = {
-  boat: { label: 'Lancha', color: 'var(--color-boat)', tint: 'var(--color-boat-tint)', hex: '#6F66F0', tintHex: '#EDEBFE' },
-  land: { label: 'Terrestre', color: 'var(--color-land)', tint: 'var(--color-land-tint)', hex: '#EFB44F', tintHex: '#FDF2DC' },
-  transfer: { label: 'Transfer', color: 'var(--color-transfer)', tint: 'var(--color-transfer-tint)', hex: '#3DBE83', tintHex: '#E2F6EC' },
+  boat: { label: 'Lancha', color: 'var(--color-boat)', tint: 'var(--color-boat-tint)', hex: '#B08640', tintHex: '#F4EBD9' },
+  land: { label: 'Terrestre', color: 'var(--color-land)', tint: 'var(--color-land-tint)', hex: '#4F7B57', tintHex: '#E4EEE4' },
+  transfer: { label: 'Transfer', color: 'var(--color-transfer)', tint: 'var(--color-transfer-tint)', hex: '#4E6C8A', tintHex: '#E4EBF3' },
 }
 
 export const LANGS = {
@@ -30,11 +30,11 @@ export const LANGS = {
 }
 
 export const CHANNELS = {
-  site: { label: 'Site próprio', color: '#131316' },
-  whatsapp: { label: 'WhatsApp', color: '#3DBE83' },
-  agencia: { label: 'Agências parceiras', color: '#6F66F0' },
-  ota: { label: 'Plataformas online', color: '#3D6DF5' },
-  hotel: { label: 'Balcão de hotel', color: '#EFB44F' },
+  site: { label: 'Site próprio', color: '#14120F' },
+  whatsapp: { label: 'WhatsApp', color: '#2E8A5A' },
+  agencia: { label: 'Agências parceiras', color: '#B08640' },
+  ota: { label: 'Plataformas online', color: '#4E6C8A' },
+  hotel: { label: 'Balcão de hotel', color: '#8A847B' },
 }
 
 export const TOURS = [
@@ -60,14 +60,14 @@ export const VEHICLES = [
 ]
 
 export const GUIDES = [
-  { id: 'g1', name: 'Ana Clara Lins', initials: 'AL', langs: ['PT', 'EN', 'ES'], hue: '#6F66F0', hours: 34, max: 44, rating: 4.9 },
-  { id: 'g2', name: 'Raimundo Sá', initials: 'RS', langs: ['PT', 'EN'], hue: '#EE6849', hours: 40, max: 44, rating: 4.8 },
-  { id: 'g3', name: 'Jéssica Tavares', initials: 'JT', langs: ['PT', 'FR', 'EN'], hue: '#3D6DF5', hours: 28, max: 44, rating: 4.9 },
-  { id: 'g4', name: 'Marcos Baré', initials: 'MB', langs: ['PT', 'EN', 'DE'], hue: '#3DBE83', hours: 42, max: 44, rating: 5.0 },
-  { id: 'g5', name: 'Luiza Mendonça', initials: 'LM', langs: ['PT', 'ES', 'IT'], hue: '#EFB44F', hours: 22, max: 44, rating: 4.7 },
-  { id: 'g6', name: 'Thiago Kambeba', initials: 'TK', langs: ['PT', 'EN'], hue: '#16130F', hours: 30, max: 44, rating: 4.8 },
-  { id: 'g7', name: 'Helena Araújo', initials: 'HA', langs: ['PT', 'EN', 'IT'], hue: '#C2185B', hours: 36, max: 44, rating: 4.9 },
-  { id: 'g8', name: 'Kenji Moura', initials: 'KM', langs: ['PT', 'JA', 'EN'], hue: '#0E9AA7', hours: 18, max: 44, rating: 4.8 },
+  { id: 'g1', name: 'Ana Clara Lins', initials: 'AL', langs: ['PT', 'EN', 'ES'], hue: '#B08640', hours: 34, max: 44, rating: 4.9 },
+  { id: 'g2', name: 'Raimundo Sá', initials: 'RS', langs: ['PT', 'EN'], hue: '#C4533B', hours: 40, max: 44, rating: 4.8 },
+  { id: 'g3', name: 'Jéssica Tavares', initials: 'JT', langs: ['PT', 'FR', 'EN'], hue: '#4E6C8A', hours: 28, max: 44, rating: 4.9 },
+  { id: 'g4', name: 'Marcos Baré', initials: 'MB', langs: ['PT', 'EN', 'DE'], hue: '#4F7B57', hours: 42, max: 44, rating: 5.0 },
+  { id: 'g5', name: 'Luiza Mendonça', initials: 'LM', langs: ['PT', 'ES', 'IT'], hue: '#8C6A2E', hours: 22, max: 44, rating: 4.7 },
+  { id: 'g6', name: 'Thiago Kambeba', initials: 'TK', langs: ['PT', 'EN'], hue: '#12100D', hours: 30, max: 44, rating: 4.8 },
+  { id: 'g7', name: 'Helena Araújo', initials: 'HA', langs: ['PT', 'EN', 'IT'], hue: '#7A4E5C', hours: 36, max: 44, rating: 4.9 },
+  { id: 'g8', name: 'Kenji Moura', initials: 'KM', langs: ['PT', 'JA', 'EN'], hue: '#3F6E6A', hours: 18, max: 44, rating: 4.8 },
 ]
 
 // Saídas de hoje

@@ -7,8 +7,8 @@ export default function MapCard({ label }) {
           <stop offset="1" stopColor="#24201A" />
         </linearGradient>
         <linearGradient id="vm-soli" x1="0" x2="1">
-          <stop offset="0" stopColor="#E6B05C" />
-          <stop offset="1" stopColor="#F0C983" />
+          <stop offset="0" stopColor="#C9A15B" />
+          <stop offset="1" stopColor="#E2C487" />
         </linearGradient>
         <clipPath id="vm-clip"><rect width="400" height="190" /></clipPath>
       </defs>
@@ -21,12 +21,12 @@ export default function MapCard({ label }) {
         {/* linha do encontro */}
         <path d="M212 0C196 28 232 52 214 84C198 112 236 140 218 190" stroke="#F4F2EC" strokeOpacity=".5" strokeWidth="1.5" fill="none" strokeDasharray="3 5" />
         {/* margem e píer */}
-        <path d="M0 190V168C60 160 110 176 170 170C230 164 290 180 400 168V190Z" fill="#F4F4F6" />
+        <path d="M0 190V168C60 160 110 176 170 170C230 164 290 180 400 168V190Z" fill="#F5F4F1" />
         <path d="M120 172V150" stroke="#F4F2EC" strokeWidth="5" strokeLinecap="round" />
         <path d="M138 172V156" stroke="#F4F2EC" strokeWidth="5" strokeLinecap="round" opacity=".55" />
-        <circle cx="120" cy="136" r="16" fill="#DCF36B" opacity=".25" />
-        <circle cx="120" cy="136" r="9" fill="#DCF36B" />
-        <circle cx="120" cy="136" r="3.4" fill="#16130F" />
+        <circle cx="120" cy="136" r="16" fill="#D7B36B" opacity=".25" />
+        <circle cx="120" cy="136" r="9" fill="#D7B36B" />
+        <circle cx="120" cy="136" r="3.4" fill="#12100D" />
       </g>
     </svg>
   )

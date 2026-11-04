@@ -13,11 +13,20 @@ export const NAV = [
 ]
 
 export function Logo({ size = 40, dark = true }) {
+  const id = `g${size}${dark ? 'd' : 'l'}`
   return (
     <span className={cx('grid shrink-0 place-items-center rounded-full', dark ? 'bg-negro shadow-dark' : 'bg-surface shadow-pill')} style={{ width: size, height: size }}>
-      <svg viewBox="0 0 64 64" width={size * 0.62} height={size * 0.62} aria-hidden>
-        <path d="M10 38c6.5 0 6.5-5.5 13-5.5S29.5 38 36 38s6.5-5.5 13-5.5" stroke="#E6B05C" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <path d="M10 25c6.5 0 6.5-5.5 13-5.5S29.5 25 36 25s6.5-5.5 13-5.5" stroke={dark ? '#F4F2EC' : '#16130F'} strokeWidth="6" fill="none" strokeLinecap="round" />
+      <svg viewBox="0 0 48 56" width={size * 0.5} height={size * 0.58} aria-hidden>
+        <defs>
+          <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#F1DDAE" />
+            <stop offset="0.45" stopColor="#C9A15B" />
+            <stop offset="1" stopColor="#8C6A2E" />
+          </linearGradient>
+        </defs>
+        <path d="M24 2 44 9v17c0 13.5-8.6 22.8-20 28C12.6 48.8 4 39.5 4 26V9L24 2Z" fill={`url(#${id})`} />
+        <path d="M24 8.5 38.5 13.6v12.6c0 9.9-6 17-14.5 21.3V8.5Z" fill={dark ? '#12100D' : '#12100D'} opacity="0.9" />
+        <path d="M24 8.5v39l-2.6-4.3 2.6-4-2.6-4.3 2.6-4-2.6-4.3 2.6-4-2.6-4.3 2.6-4-2.6-4.3Z" fill={`url(#${id})`} />
       </svg>
     </span>
   )
@@ -29,7 +38,6 @@ function Clock() {
   return (
     <div className="hidden h-10 items-center gap-2.5 rounded-full bg-surface pl-3.5 pr-4 shadow-pill lg:flex">
       <span className={cx('live-dot', online ? 'text-ok' : 'text-land')} />
-      <span className="text-[12.5px] text-ink-3">Ao vivo</span>
       <span className="font-mono text-[13px] font-medium tnum text-ink">{fmt(now)}</span>
     </div>
   )
@@ -48,16 +56,10 @@ function Rail() {
             )}
           </NavLink>
         ))}
-        <NavLink to="/relatorios">
-          {({ isActive }) => <IconButton active={isActive} label="Relatórios"><ChartLineUp size={18} /></IconButton>}
-        </NavLink>
       </div>
-      <div className="mt-3 flex flex-col items-center gap-2">
+      <div className="mb-auto mt-3 flex flex-col items-center gap-2">
         <NavLink to="/guia"><IconButton dark label="App do guia"><DeviceMobile size={18} /></IconButton></NavLink>
         <NavLink to="/voucher/EA-51877"><IconButton label="Voucher do passageiro"><Ticket size={18} /></IconButton></NavLink>
-      </div>
-      <div className="mt-auto">
-        <IconButton label="Configurações"><Gear size={18} /></IconButton>
       </div>
     </aside>
   )
@@ -87,24 +89,18 @@ function TopBar() {
             )}
           </NavLink>
         ))}
-        <IconButton label="Buscar" className="bg-surface !text-ink-2 shadow-pill"><MagnifyingGlass size={16} /></IconButton>
       </nav>
       <div className="min-w-0 md:hidden">
-        <p className="truncate text-[13px] font-semibold leading-tight">{COMPANY.short}</p>
-        <p className="truncate text-[11.5px] text-ink-3">Operação de hoje</p>
+        <p className="truncate text-[14px] font-semibold leading-tight">{COMPANY.short}</p>
       </div>
 
       <div className="ml-auto flex items-center gap-2.5">
         <Clock />
-        <div className="hidden items-center gap-2.5 2xl:flex">
-          <AvatarStack people={GUIDES} max={3} size={36} />
-        </div>
-        <div className="hidden lg:block"><Button variant="light" icon={Plus} onClick={() => nav('/embarque')}>Nova saída</Button></div>
         <IconButton label="Notificações" className="relative bg-surface !text-ink-2 shadow-pill">
           <Bell size={17} />
           {divergences > 0 && <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-alert ring-2 ring-surface" />}
         </IconButton>
-        <Avatar initials={USER.initials} hue="#E6B05C" size={40} className="!text-negro" />
+        <Avatar initials={USER.initials} hue="#C9A15B" size={40} className="!text-negro" />
       </div>
     </header>
   )
@@ -135,7 +131,7 @@ export function OfflineBanner() {
   const online = useOps((s) => s.online)
   if (online) return null
   return (
-    <div className="flex items-center gap-2 rounded-full bg-land-tint px-3 py-1.5 text-[12px] font-medium text-[#8A5A12]">
+    <div className="flex items-center gap-2 rounded-full bg-land-tint px-3 py-1.5 text-[12px] font-medium text-[#8A6420]">
       <WifiHigh size={14} /> Sem internet. Leituras ficam salvas no aparelho.
     </div>
   )

@@ -281,8 +281,8 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
         <defs>
           <clipPath id={`deck-${vehicle.id}-${orient}`}><path d={inner} /></clipPath>
           <filter id="hull-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="14" stdDeviation="14" floodColor="#131316" floodOpacity="0.10" />
-            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="#131316" floodOpacity="0.06" />
+            <feDropShadow dx="0" dy="14" stdDeviation="14" floodColor="#14120F" floodOpacity="0.10" />
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="#14120F" floodOpacity="0.06" />
           </filter>
         </defs>
 

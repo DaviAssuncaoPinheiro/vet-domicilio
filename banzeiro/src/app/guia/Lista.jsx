@@ -183,7 +183,7 @@ export default function Lista() {
                       <ArrowCounterClockwise size={16} /> Desfazer ausência
                     </button>
                   ) : (
-                    <button onClick={() => act(() => useOps.getState().markNoShow(sel.id))} className="flex h-12 items-center justify-center rounded-full bg-alert-tint text-[14px] font-medium text-[#B4462C] active:scale-[0.98]">
+                    <button onClick={() => act(() => useOps.getState().markNoShow(sel.id))} className="flex h-12 items-center justify-center rounded-full bg-alert-tint text-[14px] font-medium text-[#A8432E] active:scale-[0.98]">
                       Marcar ausência
                     </button>
                   )}

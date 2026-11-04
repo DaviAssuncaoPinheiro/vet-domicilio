@@ -10,29 +10,23 @@ Protótipo navegável (tudo mockado) de um sistema de operação de passeios par
 5. Agenda (projeto anterior do Davi): colunas por dia, cartões violeta e âmbar com chip branco "• Concluída", cabeçalho do dia atual em azul, botão primário preto.
 
 ## Tokens (em `src/index.css`, `@theme`)
+Paleta da marca Encontro das Águas Turismo (Instagram oficial): preto profundo e dourado metálico, o escudo "EA" e o zigue-zague preto e dourado que lembra o encontro dos rios.
 | Token | Valor | Uso |
 |---|---|---|
-| canvas | #E9EAEE | fundo fora da moldura |
-| frame | #F4F4F6 | fundo da moldura do app |
+| canvas | #EBE9E5 | fundo quente fora da moldura |
+| frame | #F5F4F1 | moldura do app |
 | surface | #FFFFFF | cards |
-| sunken | #F1F1F4 | células internas, inputs |
-| line | #E6E6EB | divisórias |
-| ink | #131316 | texto principal |
-| ink-2 | #43434B | texto secundário |
-| ink-3 | #8B8B95 | rótulos, metadados |
-| ink-4 | #B9B9C2 | desabilitado |
-| negro | #16130F | Rio Negro: botões primários, cards escuros, bottom nav |
-| negro-2 | #24201A | hover / camadas no escuro |
-| solimoes | #E6B05C | Rio Solimões: acento quente |
-| lime | #DCF36B | destaque em superfícies escuras, sucesso premium |
-| boat (lancha) | #6F66F0 · tint #EDEBFE | passeios de lancha |
-| land (terrestre) | #EFB44F · tint #FDF2DC | roteiros terrestres |
-| transfer | #3DBE83 · tint #E2F6EC | transfers |
-| now (agora/hoje) | #3D6DF5 · tint #E8EEFE | coluna hoje, linha do agora, seleção |
-| alert | #EE6849 · tint #FDECE7 | divergências |
-| ok | #22A06B | embarcado |
-
-Cores de categoria são sempre as mesmas em todas as telas. Lancha = violeta, Terrestre = âmbar, Transfer = verde.
+| sunken | #F1EFEA | células, inputs |
+| ink / ink-2 / ink-3 / ink-4 | #14120F / #45403A / #8A847B / #BCB6AC | texto |
+| negro | #12100D | botões primários, cards escuros, bottom nav |
+| gold | #C9A15B (light #E8D3A5, tint #F6EEDD, deep #8C6A2E) | acento da marca |
+| lime (legado) | #D7B36B | dourado claro em superfícies escuras |
+| boat (lancha) | #B08640 · tint #F4EBD9 | passeios de lancha |
+| land (terrestre) | #4F7B57 · tint #E4EEE4 | roteiros terrestres |
+| transfer | #4E6C8A · tint #E4EBF3 | transfers |
+| now | #14120F | dia de hoje, linha do agora, seleção |
+| alert | #C4533B | pendências |
+| ok | #2E8A5A | embarcado |
 
 ## Tipografia
 - UI: **Onest Variable** (`font-sans`). Números, horários, códigos: **Geist Mono Variable** (`font-mono`, `tabular-nums`).
@@ -51,6 +45,10 @@ Cores de categoria são sempre as mesmas em todas as telas. Lancha = violeta, Te
 Phosphor (`@phosphor-icons/react`), peso `regular` 18px na UI, `fill` só no estado ativo da bottom nav. Nunca emoji.
 
 ## Copy (PT-BR)
+- Pouco texto. Título com 1 a 3 palavras, no máximo uma linha de apoio.
+- Palavras do dia a dia da operação: Embarcados, Aguardando, Faltou, Zarpa em, Pendências, Folga, Sem guia.
+- Nunca: sincronização, integração, inteligente, automaticamente, IA, "detectou".
+- Mono só para horários, assentos e códigos. Contagens em sans com números tabulares. Sem zero à esquerda.
 - Mínima, direta, sem travessão (nunca usar "—" ou "–"). Use ponto, vírgula ou "·".
 - Verbos de ação nos botões: "Conferir embarque", "Sugerir escala", "Resolver".
 - Sem jargão de IA, sem "revolucione", sem exclamações.

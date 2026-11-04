@@ -8,7 +8,7 @@ import { useOps } from '../../store'
 import { useGuia, NetPill, Sheet, Portal, DrawnMark, unlockAudio, beepOk, beepErr, haptic, SHEET_EASE } from './parts'
 
 const CUT = 260
-const CORNER_COLOR = { idle: '#FFFFFF', reading: '#DCF36B', ok: '#2FC481', error: '#EE6849' }
+const CORNER_COLOR = { idle: '#FFFFFF', reading: '#D7B36B', ok: '#2FC481', error: '#C4533B' }
 
 /* ---------- cena de câmera simulada: píer no rio, desfocado ---------- */
 function CameraScene({ torch, reduce }) {
@@ -32,7 +32,7 @@ function CameraScene({ torch, reduce }) {
         {/* lancha atracada */}
         <div className="absolute" style={{ right: '-8%', top: '45.5%', width: '62%', height: '15%', borderRadius: '55% 12% 26% 60% / 70% 30% 40% 40%', background: 'linear-gradient(180deg,#f1eee6 0%,#cfc8b8 55%,#6a6155 100%)' }} />
         <div className="absolute" style={{ right: '6%', top: '41%', width: '30%', height: '7%', borderRadius: '30% 30% 8% 8%', background: 'linear-gradient(180deg,#2a3540,#151b22)' }} />
-        <div className="absolute" style={{ right: '-8%', top: '54%', width: '62%', height: '2.2%', background: '#6F66F0', opacity: 0.35, borderRadius: 8 }} />
+        <div className="absolute" style={{ right: '-8%', top: '54%', width: '62%', height: '2.2%', background: '#B08640', opacity: 0.35, borderRadius: 8 }} />
         {/* píer de madeira em perspectiva */}
         <div className="absolute -inset-x-[30%] -bottom-[6%] h-[46%] origin-bottom" style={{ transform: 'perspective(420px) rotateX(56deg)', background: 'repeating-linear-gradient(90deg,#4a3828 0 46px,#2a1f16 46px 50px)' }} />
         <div className="absolute inset-x-0 bottom-0 h-[30%]" style={{ background: 'linear-gradient(180deg, rgba(10,8,6,0), rgba(10,8,6,.75))' }} />
@@ -216,7 +216,7 @@ export default function Scanner() {
                 transition={{ type: 'spring', stiffness: 260, damping: 24 }}
                 style={{ filter: 'blur(0.4px)' }}
               >
-                <QRCodeSVG value={`BANZEIRO|${target.booking}|${target.id}`} size={150} bgColor="#F7F5EF" fgColor="#16130F" level="M" style={{ width: '100%', height: '100%' }} />
+                <QRCodeSVG value={`BANZEIRO|${target.booking}|${target.id}`} size={150} bgColor="#F7F5EF" fgColor="#12100D" level="M" style={{ width: '100%', height: '100%' }} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -311,7 +311,7 @@ export default function Scanner() {
                 />
               ))}
               <span className="absolute inset-[42px] rounded-full bg-lime/10 blur-xl" />
-              <DrawnMark ok size={96} color="var(--color-lime)" stroke="#16130F" delay={0.35} />
+              <DrawnMark ok size={96} color="var(--color-lime)" stroke="#12100D" delay={0.35} />
             </div>
             <motion.h2 className="relative mt-4 text-[30px] font-semibold tracking-[-0.03em]" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.4, ease }}>
               {stats.noshow ? 'Embarque concluído' : 'Todos a bordo'}
@@ -391,7 +391,7 @@ export default function Scanner() {
               <Cell label={result.ok ? 'Horário' : 'Embarcou'}>{fmt(result.at)}</Cell>
             </div>
             {!result.ok && (
-              <p className="mt-3 rounded-[14px] bg-alert-tint px-3.5 py-3 text-[13px] leading-snug text-[#B4462C]">
+              <p className="mt-3 rounded-[14px] bg-alert-tint px-3.5 py-3 text-[13px] leading-snug text-[#A8432E]">
                 Este voucher já foi lido{result.via === 'manual' ? ' no embarque manual' : ''}. Confira o documento antes de deixar subir.
               </p>
             )}

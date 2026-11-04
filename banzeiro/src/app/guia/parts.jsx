@@ -20,7 +20,7 @@ export function Portal({ children }) {
 }
 
 /* ---------- helpers ---------- */
-const HUES = ['#6F66F0', '#3D6DF5', '#0E9AA7', '#3DBE83', '#E6B05C', '#EE6849', '#C2185B', '#43434B']
+const HUES = ['#B08640', '#14120F', '#0E9AA7', '#3DBE83', '#C9A15B', '#C4533B', '#7A4E5C', '#45403A']
 export function paxHue(p) {
   let h = 0
   for (let i = 0; i < p.name.length; i++) h = (h * 31 + p.name.charCodeAt(i)) >>> 0
@@ -224,7 +224,7 @@ export function NetPill({ className, glass }) {
         <motion.span
           key="off"
           {...motionProps}
-          className={cx('inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full pl-3 pr-3.5 text-[12px] font-semibold', glass ? 'bg-land/20 text-[#F6D08F] ring-1 ring-inset ring-land/30 backdrop-blur-md' : 'bg-land-tint text-[#8A5A12]', className)}
+          className={cx('inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full pl-3 pr-3.5 text-[12px] font-semibold', glass ? 'bg-land/20 text-[#E8D3A5] ring-1 ring-inset ring-land/30 backdrop-blur-md' : 'bg-land-tint text-[#8A6420]', className)}
         >
           <span className="live-dot !size-[6px] text-land" />
           <span>Sem internet · <span className="font-mono tnum">{stats.queued}</span> na fila</span>

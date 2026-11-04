@@ -1,24 +1,14 @@
-import { useState } from 'react'
 import { UploadSimple } from '@phosphor-icons/react'
 import { Button, Reveal } from '../components/ui'
 import { useOps } from '../store'
 import { fmt } from '../data/mock'
 import ChannelStrip from './reservas/ChannelStrip'
-import FlowSankey from './reservas/FlowSankey'
+import Inbox from './reservas/Inbox'
 import BookingsTable from './reservas/BookingsTable'
-import { Divergences, BeforeAfter } from './reservas/Side'
 
 export default function Reservas() {
   const now = useOps((s) => s.now)
   const showToast = useOps((s) => s.showToast)
-  const [flash, setFlash] = useState(false)
-
-  const goDivergences = () => {
-    document.getElementById('divergencias')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    setFlash(true)
-    setTimeout(() => setFlash(false), 1800)
-  }
-
   return (
     <div className="flex flex-col gap-4 md:gap-5">
       <Reveal>
@@ -36,15 +26,8 @@ export default function Reservas() {
           </div>
         </div>
       </Reveal>
-
       <ChannelStrip />
-      <FlowSankey onAlert={goDivergences} />
-
-      <div className="grid gap-4 md:gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <Reveal i={3}><Divergences flash={flash} /></Reveal>
-        <BeforeAfter />
-      </div>
-
+      <Inbox />
       <BookingsTable />
     </div>
   )

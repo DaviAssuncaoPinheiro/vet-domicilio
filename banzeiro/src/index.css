@@ -4,31 +4,35 @@
   --font-sans: "Onest Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
 
-  --color-canvas: #E9EAEE;
-  --color-frame: #F4F4F6;
+  --color-canvas: #EBE9E5;
+  --color-frame: #F5F4F1;
   --color-surface: #FFFFFF;
-  --color-sunken: #F1F1F4;
-  --color-line: #E6E6EB;
-  --color-ink: #131316;
-  --color-ink-2: #43434B;
-  --color-ink-3: #8B8B95;
-  --color-ink-4: #B9B9C2;
-  --color-negro: #16130F;
-  --color-negro-2: #24201A;
-  --color-solimoes: #E6B05C;
-  --color-lime: #DCF36B;
-  --color-boat: #6F66F0;
-  --color-boat-tint: #EDEBFE;
-  --color-land: #EFB44F;
-  --color-land-tint: #FDF2DC;
-  --color-transfer: #3DBE83;
-  --color-transfer-tint: #E2F6EC;
-  --color-now: #3D6DF5;
-  --color-now-tint: #E8EEFE;
-  --color-alert: #EE6849;
-  --color-alert-tint: #FDECE7;
-  --color-ok: #22A06B;
-  --color-ok-tint: #E1F4EA;
+  --color-sunken: #F1EFEA;
+  --color-line: #E5E2DC;
+  --color-ink: #14120F;
+  --color-ink-2: #45403A;
+  --color-ink-3: #8A847B;
+  --color-ink-4: #BCB6AC;
+  --color-negro: #12100D;
+  --color-negro-2: #221E19;
+  --color-solimoes: #C9A15B;
+  --color-lime: #D7B36B;
+  --color-boat: #B08640;
+  --color-boat-tint: #F4EBD9;
+  --color-land: #4F7B57;
+  --color-land-tint: #E4EEE4;
+  --color-transfer: #4E6C8A;
+  --color-transfer-tint: #E4EBF3;
+  --color-now: #14120F;
+  --color-now-tint: #EEEBE5;
+  --color-alert: #C4533B;
+  --color-alert-tint: #F8E8E3;
+  --color-ok: #2E8A5A;
+  --color-ok-tint: #E2F1E8;
+  --color-gold: #C9A15B;
+  --color-gold-light: #E8D3A5;
+  --color-gold-tint: #F6EEDD;
+  --color-gold-deep: #8C6A2E;
 
   --radius-frame: 32px;
   --radius-card: 24px;
@@ -86,7 +90,7 @@
 .smoke {
   background-color: var(--color-negro);
   background-image:
-    radial-gradient(120% 80% at 85% 0%, rgba(230,176,92,0.16), transparent 55%),
+    radial-gradient(120% 80% at 85% 0%, rgba(201,161,91,0.20), transparent 55%),
     radial-gradient(90% 70% at 0% 100%, rgba(255,255,255,0.07), transparent 60%),
     radial-gradient(60% 50% at 40% 40%, rgba(255,255,255,0.035), transparent 70%);
 }

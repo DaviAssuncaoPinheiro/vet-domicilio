@@ -313,7 +313,7 @@ export default function Embarque() {
   const groups = useMemo(() => groupDepartures(DEPARTURES, now), [now])
   const pick = (did) => navigate(`/embarque/${did}`)
 
-  useEffect(() => { document.title = `Embarque · ${depTitle(dep)} · Banzeiro` }, [dep.id])
+  useEffect(() => { document.title = `Embarque · ${depTitle(dep)}` }, [dep.id])
 
   return (
     <div className="flex min-w-0 flex-col gap-3 md:gap-4">

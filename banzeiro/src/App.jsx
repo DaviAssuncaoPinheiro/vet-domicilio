@@ -16,7 +16,6 @@ export default function App() {
         <Route path="embarque/:id" element={<Embarque />} />
         <Route path="escala" element={<Escala />} />
         <Route path="reservas" element={<Reservas />} />
-        <Route path="relatorios" element={<Reservas />} />
       </Route>
       <Route path="guia/*" element={<GuiaApp />} />
       <Route path="voucher/:code" element={<Voucher />} />

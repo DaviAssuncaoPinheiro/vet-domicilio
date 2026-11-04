@@ -220,7 +220,7 @@ export function Proximas({ now, status }) {
 
 const SEV = {
   high: { label: 'Alta', dot: 'bg-alert', chip: 'bg-alert-tint text-alert' },
-  medium: { label: 'Média', dot: 'bg-land', chip: 'bg-land-tint text-[#9A6A16]' },
+  medium: { label: 'Média', dot: 'bg-land', chip: 'bg-land-tint text-[#8C6A2E]' },
   low: { label: 'Baixa', dot: 'bg-ink-4', chip: 'bg-sunken text-ink-3' },
 }
 
@@ -353,7 +353,7 @@ const FEED_ICON = { sync: ArrowsClockwise, alert: Warning, scan: QrCode, depart:
 
 export function Atividade({ now, status }) {
   const divergences = useOps((s) => s.divergences)
-  const personOf = (name) => GUIDES.find((g) => g.name === name) ?? (name === USER.name ? { initials: USER.initials, hue: '#E6B05C' } : null)
+  const personOf = (name) => GUIDES.find((g) => g.name === name) ?? (name === USER.name ? { initials: USER.initials, hue: '#C9A15B' } : null)
 
   // Eventos gerados ao vivo: saídas que começaram depois da abertura e divergências resolvidas
   const liveDeps = DEPARTURES.filter((d) => d.start > BASE_NOW && d.start <= now).map((d) => {
@@ -396,7 +396,7 @@ export function Atividade({ now, status }) {
                 className="relative flex gap-3 px-1 py-2.5"
               >
                 {p ? (
-                  <Avatar initials={p.initials} hue={p.hue} size={28} ring className={cx('relative mt-0.5', p.hue === '#E6B05C' && '!text-negro')} />
+                  <Avatar initials={p.initials} hue={p.hue} size={28} ring className={cx('relative mt-0.5', p.hue === '#C9A15B' && '!text-negro')} />
                 ) : (
                   <span className={cx('relative mt-0.5 grid size-7 shrink-0 place-items-center rounded-full ring-2 ring-surface', e.kind === 'alert' ? 'bg-alert-tint text-alert' : 'bg-sunken text-ink-2')}>
                     <Icon size={14} weight={e.kind === 'alert' ? 'fill' : 'regular'} />
