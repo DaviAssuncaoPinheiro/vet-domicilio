@@ -1,13 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { DeviceMobile, Scan, SteeringWheel, Timer, WifiHigh, WifiSlash } from '@phosphor-icons/react'
-import { Avatar, Button, CountUp, IconButton, KindDot, LangTag, Reveal, cx, ease, useMedia } from '../components/ui'
-import { DEPARTURES, KIND, depById, fmt, guideById, tourOf, vehicleOf } from '../data/mock'
+import { DeviceMobile, Scan, WifiHigh, WifiSlash } from '@phosphor-icons/react'
+import { Avatar, Button, CountUp, IconButton, LangTag, Reveal, cx, ease, useMedia } from '../components/ui'
+import { DEPARTURES, depById, fmt, guideById, tourOf, vehicleOf } from '../data/mock'
 import { useOps, depPhase, depStats, paxOfDep } from '../store'
 import { SeatPlan, Legend, computeLayout } from './embarque/SeatPlan'
 import {
-  BottomSheet, DepartureList, DepartureStrip, GuideColumn, GuideSheet, Manifest, PaxDetail, PhaseChip, PlanSummary, depTitle, groupDepartures, paxState,
+  BottomSheet, DepartureList, DepartureStrip, GuideColumn, GuideSheet, Manifest, PaxDetail, PhaseChip, depTitle, groupDepartures, paxState,
 } from './embarque/parts'
 
 const PANEL = 272
@@ -27,21 +27,13 @@ function useWidth(ref) {
   return w
 }
 
-const fmtDiff = (m) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)}h${String(m % 60).padStart(2, '0')}`)
+const fmtDiff = (m) => {
+  if (m < 60) return `${m} min`
+  const h = Math.floor(m / 60), r = m % 60
+  return r ? `${h} h ${r} min` : `${h} h`
+}
 
 /* ---------------- cabeçalho da saída ---------------- */
-
-function Metric({ icon: Icon, label, children, className }) {
-  return (
-    <div className={cx('flex min-w-0 items-center gap-3', className)}>
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sunken text-ink-2"><Icon size={18} /></span>
-      <div className="min-w-0">
-        <p className="text-[12px] text-ink-3">{label}</p>
-        <div className="truncate">{children}</div>
-      </div>
-    </div>
-  )
-}
 
 function Hero({ dep, now, pax, status, stats, online, guideOpen, onToggleGuide, onSimulate }) {
   const tour = tourOf(dep)
@@ -50,103 +42,83 @@ function Hero({ dep, now, pax, status, stats, online, guideOpen, onToggleGuide, 
   const phase = depPhase(dep, now)
   const setOnline = useOps((s) => s.setOnline)
   const boat = tour.kind === 'boat'
-  const place = tour.meeting.split(' · ').pop()
-  const verb = boat ? 'zarpa' : 'sai'
   const diff = dep.start - now
   const order = { boarded: 0, waiting: 1, noshow: 2 }
   const segs = [...pax].sort((a, b) => order[paxState(status[a.id])] - order[paxState(status[b.id])])
   const canSim = stats.waiting > 0 && phase !== 'done'
 
-  const timeBlock =
+  const time =
     phase === 'boarding' || phase === 'scheduled'
-      ? { label: boat ? 'Zarpa em' : 'Sai em', value: fmtDiff(Math.max(0, diff)) }
-      : phase === 'live'
-        ? { label: 'Retorno previsto', value: fmt(dep.end) }
-        : { label: 'Concluída às', value: fmt(dep.end) }
+      ? { label: 'Sai em', value: <span className="text-[20px] font-semibold tracking-[-0.02em] tnum">{fmtDiff(Math.max(0, diff))}</span> }
+      : { label: phase === 'live' ? 'Volta às' : 'Voltou às', value: <span className="font-mono text-[20px] font-medium tracking-[-0.02em]">{fmt(dep.end)}</span> }
 
   return (
     <section className="@container rounded-[24px] bg-surface p-4 shadow-soft sm:p-6">
       <div className="flex flex-col gap-4 @3xl:flex-row @3xl:items-start @3xl:justify-between">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex h-[24px] items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-semibold text-ink-2" style={{ background: KIND[tour.kind].tint }}>
-              <KindDot kind={tour.kind} className="!size-1.5" />{KIND[tour.kind].label}
+          {online ? <PhaseChip phase={phase} /> : (
+            <span className="inline-flex h-[22px] items-center gap-1.5 rounded-full bg-gold-tint px-2 text-[11px] font-semibold text-ink">
+              <span className="live-dot !size-[6px] text-gold-deep" />
+              Sem internet{stats.queued > 0 && <> · <span className="tnum">{stats.queued}</span> salvo{stats.queued > 1 ? 's' : ''} no celular</>}
             </span>
-            <PhaseChip phase={phase} />
-            <span className="font-mono text-[11.5px] text-ink-3">{dep.code}</span>
-            {!online && (
-              <span className="inline-flex h-[24px] items-center gap-1.5 rounded-full bg-land-tint px-2.5 text-[11.5px] font-semibold text-ink-2">
-                <span className="live-dot !size-[6px] text-land" />
-                Sem internet · <span className="font-mono tnum">{stats.queued}</span> na fila
-              </span>
-            )}
-          </div>
+          )}
           <h1 className="mt-3 truncate text-[26px] font-semibold leading-[1.1] tracking-[-0.025em] sm:text-[30px]">{dep.route || tour.name}</h1>
-          <p className="mt-1.5 truncate text-[13.5px] text-ink-3">
-            {vehicle.name} · {place} · {verb} <span className="font-mono tnum text-ink-2">{fmt(dep.start)}</span>
-          </p>
+          <p className="mt-1.5 truncate text-[13.5px] text-ink-3">{vehicle.name} · <span className="font-mono text-ink-2">{fmt(dep.start)}</span></p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <IconButton
             label={online ? 'Simular sem internet' : 'Reconectar'}
             onClick={() => setOnline(!online)}
-            className={cx('shadow-pill', online ? 'bg-surface !text-ink-2' : 'bg-land-tint !text-ink')}
+            className={cx('shadow-pill', online ? 'bg-surface !text-ink-2' : 'bg-gold-tint !text-ink')}
           >
             {online ? <WifiHigh size={17} /> : <WifiSlash size={17} />}
           </IconButton>
-          <Button variant="light" icon={Scan} onClick={onSimulate} disabled={!canSim}>Simular leitura</Button>
-          <Button variant={guideOpen ? 'light' : 'dark'} icon={DeviceMobile} onClick={onToggleGuide} aria-pressed={guideOpen}>
-            <span className="hidden sm:inline">{guideOpen ? 'Fechar app do guia' : 'Ver app do guia'}</span>
-            <span className="sm:hidden">App do guia</span>
-          </Button>
+          <Button variant="light" icon={Scan} onClick={onSimulate} disabled={!canSim}>Ler QR</Button>
+          <Button variant={guideOpen ? 'light' : 'dark'} icon={DeviceMobile} onClick={onToggleGuide} aria-pressed={guideOpen}>App do guia</Button>
         </div>
       </div>
 
       <div className="mt-5 flex flex-col gap-5 border-t border-line pt-5 @4xl:flex-row @4xl:items-center @4xl:gap-0">
-        <div className="min-w-0 @4xl:flex-1 @4xl:pr-6">
-          <div className="flex items-baseline gap-2">
-            <CountUp value={stats.boarded} className="font-mono text-[40px] font-medium leading-none tracking-[-0.03em]" />
-            <span className="text-[15px] text-ink-2">de <span className="font-mono tnum">{stats.total}</span> a bordo</span>
-          </div>
+        <div className="min-w-0 @4xl:flex-1 @4xl:pr-8">
+          <p className="flex items-baseline gap-2">
+            <CountUp value={stats.boarded} className="text-[44px] font-semibold leading-none tracking-[-0.035em]" />
+            <span className="text-[20px] font-medium tracking-[-0.02em] text-ink-3 tnum">de {stats.total}</span>
+            <span className="text-[14px] text-ink-2">embarcados</span>
+          </p>
           <div className="mt-3.5 flex gap-[3px]" aria-hidden>
             {segs.map((p) => {
               const s = paxState(status[p.id])
               return <span key={p.id} className={cx('h-[6px] flex-1 rounded-full transition-colors duration-300', s === 'boarded' ? 'bg-ok' : s === 'noshow' ? 'bg-ink-4' : 'bg-sunken')} />
             })}
           </div>
-          <p className="mt-2 text-[12px] text-ink-3">
-            <span className="font-mono tnum text-ink-2">{stats.waiting}</span> aguardando
-            {stats.noshow > 0 && <> · <span className="font-mono tnum text-ink-2">{stats.noshow}</span> {stats.noshow === 1 ? 'ausente' : 'ausentes'}</>}
-          </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 @4xl:flex @4xl:gap-0">
-          <Metric icon={Timer} label={timeBlock.label} className="@4xl:border-l @4xl:border-line @4xl:px-6">
-            <span className="font-mono text-[20px] font-medium tracking-[-0.02em] tnum">{timeBlock.value}</span>
-          </Metric>
-          <Metric icon={SteeringWheel} label={boat ? 'Piloto' : 'Motorista'} className="@4xl:order-3 @4xl:border-l @4xl:border-line @4xl:pl-6">
-            <span className="text-[13.5px] font-medium">{vehicle.skipper}</span>
-          </Metric>
+        <div className="grid grid-cols-2 gap-4 @4xl:flex @4xl:items-center @4xl:gap-0">
+          <div className="@4xl:border-l @4xl:border-line @4xl:px-6">
+            <p className="text-[12px] text-ink-3">{time.label}</p>
+            <div className="mt-0.5">{time.value}</div>
+          </div>
+          <div className="@4xl:order-3 @4xl:border-l @4xl:border-line @4xl:pl-6">
+            <p className="text-[12px] text-ink-3">{boat ? 'Piloto' : 'Motorista'}</p>
+            <p className="mt-1 truncate text-[14px] font-medium">{vehicle.skipper}</p>
+          </div>
           <div className="col-span-2 flex min-w-0 items-center gap-3 @4xl:order-2 @4xl:border-l @4xl:border-line @4xl:px-6">
             {guide ? (
               <>
-                <Avatar initials={guide.initials} hue={guide.hue} size={40} />
+                <Avatar initials={guide.initials} hue={guide.hue} size={38} />
                 <div className="min-w-0">
                   <p className="text-[12px] text-ink-3">Guia</p>
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-[13.5px] font-medium">{guide.name}</span>
+                  <div className="mt-0.5 flex items-center gap-2">
+                    <span className="truncate text-[14px] font-medium">{guide.name}</span>
                     <span className="flex gap-1">{guide.langs.map((l) => <LangTag key={l} code={l} />)}</span>
                   </div>
                 </div>
               </>
             ) : (
-              <>
-                <span className="grid size-10 shrink-0 place-items-center rounded-full border border-dashed border-ink-4 text-ink-4" />
-                <div>
-                  <p className="text-[12px] text-ink-3">Guia</p>
-                  <p className="text-[13.5px] text-ink-3">{tour.kind === 'transfer' ? 'Sem guia' : 'Nenhum escalado'}</p>
-                </div>
-              </>
+              <div>
+                <p className="text-[12px] text-ink-3">Guia</p>
+                <p className="mt-1 text-[14px] text-ink-3">Sem guia</p>
+              </div>
             )}
           </div>
         </div>
@@ -157,7 +129,7 @@ function Hero({ dep, now, pax, status, stats, online, guideOpen, onToggleGuide, 
 
 /* ---------------- planta ---------------- */
 
-function PlanCard({ dep, pax, status, stats, online, hoverId, setHoverId, selectedId, setSelectedId, pulse, actions, mobile }) {
+function PlanCard({ dep, pax, status, stats, hoverId, setHoverId, selectedId, setSelectedId, pulse, actions, mobile }) {
   const vehicle = vehicleOf(dep)
   const guide = guideById(dep.guideIds[0])
   const ref = useRef(null)
@@ -175,44 +147,16 @@ function PlanCard({ dep, pax, status, stats, online, hoverId, setHoverId, select
   }, [W, vehicle, mobile])
 
   const sel = pax.find((p) => p.id === selectedId)
-  const boat = vehicle.kind === 'boat'
-
-  const panel = (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={sel ? sel.id : 'summary'}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
-        transition={{ duration: 0.2, ease }}
-      >
-        {sel && !mobile ? (
-          <PaxDetail p={sel} st={status[sel.id]} onClose={() => setSelectedId(null)} actions={actions(sel.id)} />
-        ) : (
-          <PlanSummary pax={pax} status={status} stats={stats} guide={guide} />
-        )}
-      </motion.div>
-    </AnimatePresence>
-  )
+  const showPanel = sel && !mobile
 
   return (
     <section className="rounded-[24px] bg-surface p-4 shadow-soft sm:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="truncate text-[17px] font-semibold tracking-[-0.01em]">{boat ? 'Planta da embarcação' : 'Planta do veículo'}</h2>
-          <p className="mt-0.5 truncate text-[12.5px] text-ink-3">
-            {vehicle.name} · <span className="font-mono tnum">{vehicle.capacity}</span> lugares · <span className="font-mono">{vehicle.plate}</span>
-          </p>
-        </div>
-      </div>
+      <h2 className="truncate text-[17px] font-semibold tracking-[-0.01em]">{vehicle.name}</h2>
 
       <div ref={ref} className="mt-4 min-w-0">
         {plan && (
-          <div className={cx('flex', plan.side ? 'flex-row items-stretch' : 'flex-col')} style={{ gap: GAP }}>
-            <div
-              className="flex min-w-0 flex-1 flex-col items-center justify-center gap-5 rounded-[20px] bg-frame px-4 pb-4 pt-10"
-              style={{ backgroundImage: 'radial-gradient(rgba(19,19,22,0.055) 1px, transparent 1px)', backgroundSize: '14px 14px' }}
-            >
+          <div className={cx('flex', plan.side ? 'flex-row items-stretch' : 'flex-col')} style={{ gap: showPanel ? GAP : 0 }}>
+            <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-5 rounded-[20px] bg-frame px-4 pb-4 pt-9">
               <SeatPlan
                 layout={plan.layout}
                 vehicle={vehicle}
@@ -225,11 +169,23 @@ function PlanCard({ dep, pax, status, stats, online, hoverId, setHoverId, select
                 onSelect={setSelectedId}
                 pulse={pulse}
               />
-              <Legend online={online} queued={stats.queued} />
+              <Legend queued={stats.queued} noshow={stats.noshow} />
             </div>
-            <div className={cx('@container min-w-0', plan.side ? 'shrink-0 py-1' : 'px-1 pt-1')} style={plan.side ? { width: PANEL } : undefined}>
-              {panel}
-            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              {showPanel && (
+                <motion.div
+                  key={sel.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4, transition: { duration: 0.12 } }}
+                  transition={{ duration: 0.2, ease }}
+                  className={cx('@container min-w-0', plan.side ? 'shrink-0 py-1' : 'px-1 pt-1')}
+                  style={plan.side ? { width: PANEL } : undefined}
+                >
+                  <PaxDetail p={sel} st={status[sel.id]} onClose={() => setSelectedId(null)} actions={actions(sel.id)} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
@@ -280,7 +236,7 @@ function DepartureView({ dep, guideOpen, onToggleGuide }) {
     const next = pax.find((p) => paxState(status[p.id]) === 'waiting')
     if (!next) return
     board(next.id, 'qr')
-    showToast(`${next.name} a bordo · ${next.seat}`, { label: 'Desfazer', fn: () => useOps.getState().unboard(next.id) })
+    showToast(`${next.name} embarcou · ${next.seat}`, { label: 'Desfazer', fn: () => useOps.getState().unboard(next.id) })
   }
 
   const shared = { pax, status, hoverId, setHoverId, selectedId, setSelectedId }
@@ -291,7 +247,7 @@ function DepartureView({ dep, guideOpen, onToggleGuide }) {
         <Hero dep={dep} now={now} pax={pax} status={status} stats={stats} online={online} guideOpen={guideOpen} onToggleGuide={onToggleGuide} onSimulate={simulate} />
       </Reveal>
       <Reveal i={1}>
-        <PlanCard dep={dep} stats={stats} online={online} pulse={pulse} actions={actions} mobile={mobile} {...shared} />
+        <PlanCard dep={dep} stats={stats} pulse={pulse} actions={actions} mobile={mobile} {...shared} />
       </Reveal>
       <Reveal i={2}>
         <Manifest {...shared} onSelect={setSelectedId} />
@@ -317,7 +273,7 @@ export default function Embarque() {
 
   return (
     <div className="flex min-w-0 flex-col gap-3 md:gap-4">
-      <DepartureStrip groups={groups} now={now} status={status} activeId={dep.id} onPick={pick} />
+      <DepartureStrip groups={groups} status={status} activeId={dep.id} onPick={pick} />
       <div className="flex min-w-0 items-start gap-4">
         <DepartureList groups={groups} now={now} status={status} activeId={dep.id} onPick={pick} compact={guideOpen} />
         <div className="min-w-0 flex-1">
