@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion, useAnimationControls } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
-import { Boat, Flashlight, Repeat, Keyboard, Scan, ArrowUpRight, ListChecks, Warning } from '@phosphor-icons/react'
-import { StatusChip, LangTag, CountryCode, cx, ease } from '../../components/ui'
-import { COUNTRY_NAME, fmt } from '../../data/mock'
+import { Boat, Flashlight, Repeat, Keyboard, Scan, ArrowUpRight, ListChecks } from '@phosphor-icons/react'
+import { cx, ease } from '../../components/ui'
+import { fmt } from '../../data/mock'
 import { useOps } from '../../store'
 import { useGuia, NetPill, Sheet, Portal, DrawnMark, unlockAudio, beepOk, beepErr, haptic, SHEET_EASE } from './parts'
 
 const CUT = 260
-const CORNER_COLOR = { idle: '#FFFFFF', reading: '#D7B36B', ok: '#2FC481', error: '#C4533B' }
+const CORNER_COLOR = { idle: 'var(--color-surface)', reading: 'var(--color-lime)', ok: 'var(--color-ok)', error: 'var(--color-alert)' }
 
 /* ---------- cena de câmera simulada: píer no rio, desfocado ---------- */
 function CameraScene({ torch, reduce }) {
@@ -32,7 +32,7 @@ function CameraScene({ torch, reduce }) {
         {/* lancha atracada */}
         <div className="absolute" style={{ right: '-8%', top: '45.5%', width: '62%', height: '15%', borderRadius: '55% 12% 26% 60% / 70% 30% 40% 40%', background: 'linear-gradient(180deg,#f1eee6 0%,#cfc8b8 55%,#6a6155 100%)' }} />
         <div className="absolute" style={{ right: '6%', top: '41%', width: '30%', height: '7%', borderRadius: '30% 30% 8% 8%', background: 'linear-gradient(180deg,#2a3540,#151b22)' }} />
-        <div className="absolute" style={{ right: '-8%', top: '54%', width: '62%', height: '2.2%', background: '#B08640', opacity: 0.35, borderRadius: 8 }} />
+        <div className="absolute" style={{ right: '-8%', top: '54%', width: '62%', height: '2.2%', background: 'var(--color-boat)', opacity: 0.35, borderRadius: 8 }} />
         {/* píer de madeira em perspectiva */}
         <div className="absolute -inset-x-[30%] -bottom-[6%] h-[46%] origin-bottom" style={{ transform: 'perspective(420px) rotateX(56deg)', background: 'repeating-linear-gradient(90deg,#4a3828 0 46px,#2a1f16 46px 50px)' }} />
         <div className="absolute inset-x-0 bottom-0 h-[30%]" style={{ background: 'linear-gradient(180deg, rgba(10,8,6,0), rgba(10,8,6,.75))' }} />
@@ -62,15 +62,6 @@ function Corners({ color, reading }) {
       <span className={cx(base, 'bottom-0 left-0 rounded-bl-[30px] border-b-4 border-l-4')} style={s} />
       <span className={cx(base, 'bottom-0 right-0 rounded-br-[30px] border-b-4 border-r-4')} style={s} />
     </motion.div>
-  )
-}
-
-function Cell({ label, children }) {
-  return (
-    <div className="min-w-0 rounded-[14px] bg-sunken px-3 py-2.5">
-      <p className="text-[11px] font-medium text-ink-3">{label}</p>
-      <p className="mt-0.5 truncate font-mono text-[15px] font-medium tracking-[-0.02em] text-ink tnum">{children}</p>
-    </div>
   )
 }
 
@@ -159,7 +150,7 @@ export default function Scanner() {
     if (/^\d+$/.test(c)) c = `EA-${c}`
     if (/^EA\d+$/.test(c)) c = `EA-${c.slice(2)}`
     const matches = pax.filter((p) => p.booking === c)
-    if (!matches.length) { setCodeErr('Código não encontrado nesta saída'); haptic([30, 40, 30]); return }
+    if (!matches.length) { setCodeErr('Código não encontrado'); haptic([30, 40, 30]); return }
     const st = useOps.getState()
     const p = matches.find((m) => st.status[m.id]?.s !== 'boarded') ?? matches[0]
     setManual(false)
@@ -171,7 +162,7 @@ export default function Scanner() {
   }
 
   const color = CORNER_COLOR[phase]
-  const hint = { idle: 'Aponte para o QR Code do voucher', reading: 'Lendo QR Code', ok: 'Embarque confirmado', error: 'Leitura recusada' }[phase]
+  const hint = { idle: 'Aponte para o QR Code', reading: 'Lendo', ok: 'Embarcado', error: 'Já embarcou' }[phase]
   const sheetOpen = (phase === 'ok' || phase === 'error') && result
   const showDone = allDone && (phase === 'idle' || phase === 'reading')
   const queueCodes = [...new Set(waitingPax.map((p) => p.booking))]
@@ -186,7 +177,7 @@ export default function Scanner() {
           <motion.div
             key={flash.t}
             className="pointer-events-none absolute inset-0 z-20"
-            style={{ background: flash.ok ? 'rgba(34,160,107,.12)' : 'rgba(238,104,73,.12)', boxShadow: `inset 0 0 90px 10px ${flash.ok ? 'rgba(47,196,129,.55)' : 'rgba(238,104,73,.55)'}` }}
+            style={{ background: flash.ok ? 'rgba(34,160,107,.12)' : 'rgba(238,104,73,.12)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 0] }}
             transition={{ duration: 0.3, times: [0, 0.3, 1] }}
@@ -209,14 +200,14 @@ export default function Scanner() {
             {target && phase !== 'idle' && (
               <motion.div
                 key={target.id + (result?.t ?? '')}
-                className="absolute inset-[38px] grid place-items-center rounded-[18px] bg-[#F7F5EF] p-3 shadow-[0_20px_40px_-10px_rgba(0,0,0,.5)]"
+                className="absolute inset-[38px] grid place-items-center rounded-[18px] bg-frame p-3 shadow-[0_20px_40px_-10px_rgba(0,0,0,.5)]"
                 initial={reduce ? { opacity: 0 } : { opacity: 0, y: 70, rotate: -9, scale: 0.86 }}
                 animate={{ opacity: 0.92, y: 0, rotate: -3, scale: 1 }}
                 exit={{ opacity: 0, y: 30, scale: 0.94, transition: { duration: 0.22 } }}
                 transition={{ type: 'spring', stiffness: 260, damping: 24 }}
                 style={{ filter: 'blur(0.4px)' }}
               >
-                <QRCodeSVG value={`BANZEIRO|${target.booking}|${target.id}`} size={150} bgColor="#F7F5EF" fgColor="#12100D" level="M" style={{ width: '100%', height: '100%' }} />
+                <QRCodeSVG value={`BANZEIRO|${target.booking}|${target.id}`} size={150} bgColor="var(--color-frame)" fgColor="var(--color-negro)" level="M" style={{ width: '100%', height: '100%' }} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -225,7 +216,7 @@ export default function Scanner() {
           {(phase === 'idle' || phase === 'reading') && !showDone && (
             <motion.span
               className="pointer-events-none absolute inset-x-5 h-[2px] rounded-full bg-lime"
-              style={{ boxShadow: '0 0 14px 3px rgba(220,243,107,.55), 0 0 2px rgba(255,255,255,.9)' }}
+              style={{ boxShadow: '0 0 6px rgba(255,255,255,.5)' }}
               initial={{ top: '10%' }}
               animate={reduce ? { top: '50%' } : { top: ['10%', '90%'] }}
               transition={reduce ? { duration: 0 } : { duration: phase === 'reading' ? 0.45 : 1.8, ease: 'easeInOut', repeat: Infinity, repeatType: 'reverse' }}
@@ -252,8 +243,7 @@ export default function Scanner() {
           </button>
         </div>
         <span className="inline-flex h-8 items-center gap-2 rounded-full bg-negro/70 pl-3 pr-3.5 text-[12.5px] ring-1 ring-inset ring-white/10 backdrop-blur-md">
-          <span className="live-dot !size-[6px] text-lime" />
-          <span className="font-mono font-medium tnum">{stats.boarded} de {stats.total}</span>
+          <span className="font-semibold tnum">{stats.boarded} de {stats.total}</span>
           <span className="text-white/60">a bordo</span>
         </span>
         <NetPill glass />
@@ -262,11 +252,10 @@ export default function Scanner() {
       {/* dica */}
       <div className="absolute inset-x-0 z-10 text-center" style={{ top: `calc(42% + ${CUT / 2 + 22}px)` }}>
         <AnimatePresence mode="wait" initial={false}>
-          <motion.p key={hint} className="text-[14px] font-medium text-white/85" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.16 }}>
+          <motion.p key={hint} className="text-[16px] font-medium text-white/90" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.16 }}>
             {hint}
           </motion.p>
         </AnimatePresence>
-        <p className="mt-1 text-[12px] text-white/45">Toque no visor para simular a leitura</p>
       </div>
 
       {/* controles */}
@@ -301,24 +290,23 @@ export default function Scanner() {
           >
             <div className="grain pointer-events-none absolute inset-0" />
             <div className="relative grid size-[200px] place-items-center">
-              {!reduce && [0, 1, 2].map((i) => (
+              {!reduce && [0, 1].map((i) => (
                 <motion.span
                   key={i}
-                  className="absolute inset-0 rounded-full border border-lime/40"
+                  className="absolute inset-0 rounded-full border border-white/15"
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: [0.5, 1.15], opacity: [0, 0.55, 0] }}
-                  transition={{ duration: 3.6, repeat: Infinity, delay: 0.5 + i * 1.2, ease: 'easeOut' }}
+                  transition={{ duration: 3.6, repeat: Infinity, delay: 0.5 + i * 1.8, ease: 'easeOut' }}
                 />
               ))}
-              <span className="absolute inset-[42px] rounded-full bg-lime/10 blur-xl" />
-              <DrawnMark ok size={96} color="var(--color-lime)" stroke="#12100D" delay={0.35} />
+              <DrawnMark ok size={96} color="var(--color-lime)" stroke="var(--color-negro)" delay={0.35} />
             </div>
             <motion.h2 className="relative mt-4 text-[30px] font-semibold tracking-[-0.03em]" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.4, ease }}>
               {stats.noshow ? 'Embarque concluído' : 'Todos a bordo'}
             </motion.h2>
             <motion.p className="relative mt-1.5 text-[14px] text-white/60" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
-              <span className="font-mono text-white tnum">{stats.boarded} de {stats.total}</span>
-              {stats.noshow ? <> · <span className="font-mono tnum">{stats.noshow}</span> {stats.noshow === 1 ? 'ausente' : 'ausentes'}</> : null} · {vehicle.name}
+              <span className="tnum text-white">{stats.boarded} de {stats.total}</span>
+              {stats.noshow ? <span className="tnum"> · {stats.noshow} {stats.noshow === 1 ? 'faltou' : 'faltaram'}</span> : null}
             </motion.p>
             <div className="relative mt-5 flex gap-1.5" aria-hidden>
               {pax.map((p, i) => (
@@ -328,7 +316,7 @@ export default function Scanner() {
             <motion.div className="relative mt-8 w-full max-w-[300px]" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.4, ease }}>
               {released ? (
                 <div className="flex flex-col items-center gap-3">
-                  <StatusChip onDark tone="lime">Saída liberada às {fmt(released)}</StatusChip>
+                  <p className="text-[15px] text-white/80">Saída liberada às <span className="font-mono text-white">{fmt(released)}</span></p>
                   <button onClick={() => go('list')} className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white/10 text-[14px] font-medium ring-1 ring-inset ring-white/15">
                     <ListChecks size={18} /> Ver lista
                   </button>
@@ -343,7 +331,7 @@ export default function Scanner() {
                   }}
                   className="flex h-[58px] w-full items-center justify-between rounded-full bg-lime pl-6 pr-2 text-negro transition-transform active:scale-[0.98]"
                 >
-                  <span className="text-[15px] font-semibold">Liberar saída</span>
+                  <span className="text-[16px] font-semibold">Liberar saída</span>
                   <span className="grid size-[42px] place-items-center rounded-full bg-negro text-lime"><ArrowUpRight size={18} weight="bold" /></span>
                 </button>
               )}
@@ -369,37 +357,24 @@ export default function Scanner() {
           >
             {result.ok && <motion.span className="absolute left-0 top-0 h-[3px] bg-ok/70" initial={{ width: '100%' }} animate={{ width: '0%' }} transition={{ duration: 2.5, ease: 'linear' }} />}
             <div className="mx-auto mb-4 h-[5px] w-10 rounded-full bg-ink-4/50" />
-            <div className="flex items-start gap-4">
+            <div className="flex items-center gap-4">
               <DrawnMark ok={result.ok} />
               <div className="min-w-0 flex-1">
-                {result.ok ? (
-                  <StatusChip tone={result.queued ? 'land' : 'ok'} className="!h-6 !text-[11.5px]">{result.queued ? 'Embarcado · na fila' : 'Embarcado'}</StatusChip>
-                ) : (
-                  <p className="flex items-center gap-1.5 text-[13px] font-semibold text-alert"><Warning size={15} weight="fill" /> Já embarcou às <span className="font-mono tnum">{fmt(result.at)}</span></p>
-                )}
-                <h3 className="mt-1.5 truncate text-[22px] font-semibold leading-tight tracking-[-0.02em]">{result.p.name}</h3>
-                <div className="mt-1.5 flex items-center gap-1.5">
-                  <CountryCode code={result.p.country} />
-                  <LangTag code={result.p.lang} />
-                  <span className="truncate text-[12.5px] text-ink-3">{COUNTRY_NAME[result.p.country]}{result.p.child ? ' · Criança' : ''}</span>
-                </div>
+                <h3 className="truncate text-[22px] font-semibold leading-tight tracking-[-0.02em]">{result.p.name}</h3>
+                <p className={cx('mt-1 text-[15px] font-medium', result.ok ? (result.queued ? 'text-gold-deep' : 'text-ok') : 'text-alert')}>
+                  {result.ok ? (result.queued ? 'Embarcado · salvo no celular' : 'Embarcado') : <>Já embarcou às <span className="font-mono">{fmt(result.at)}</span></>}
+                </p>
+              </div>
+              <div className="shrink-0 rounded-[16px] bg-sunken px-3.5 py-2 text-center">
+                <p className="text-[11px] text-ink-3">Assento</p>
+                <p className="font-mono text-[24px] font-medium leading-tight tracking-[-0.03em]">{result.p.seat}</p>
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              <Cell label="Assento">{result.p.seat}</Cell>
-              <Cell label="Reserva">{result.p.booking}</Cell>
-              <Cell label={result.ok ? 'Horário' : 'Embarcou'}>{fmt(result.at)}</Cell>
-            </div>
-            {!result.ok && (
-              <p className="mt-3 rounded-[14px] bg-alert-tint px-3.5 py-3 text-[13px] leading-snug text-[#A8432E]">
-                Este voucher já foi lido{result.via === 'manual' ? ' no embarque manual' : ''}. Confira o documento antes de deixar subir.
-              </p>
-            )}
             <button
               onClick={readNext}
-              className={cx('mt-4 flex h-[52px] w-full items-center justify-center rounded-full text-[14.5px] font-semibold transition-transform active:scale-[0.98]', result.ok ? 'bg-negro text-white shadow-dark' : 'bg-sunken text-ink')}
+              className="mt-5 flex h-[54px] w-full items-center justify-center rounded-full bg-negro text-[15px] font-semibold text-white shadow-dark transition-transform active:scale-[0.98]"
             >
-              {result.ok ? (waitingPax.length ? 'Próximo' : 'Concluir') : 'Voltar à leitura'}
+              Próximo
             </button>
           </motion.div>
         )}
@@ -410,7 +385,6 @@ export default function Scanner() {
       <Sheet open={manual} onClose={() => setManual(false)} label="Digitar código">
         <form onSubmit={submitCode}>
           <h3 className="text-[19px] font-semibold tracking-[-0.02em]">Digitar código</h3>
-          <p className="mt-1 text-[13px] text-ink-3">Use o código da reserva impresso no voucher.</p>
           <input
             autoFocus
             value={code}
@@ -422,10 +396,10 @@ export default function Scanner() {
             spellCheck={false}
             className={cx('mt-4 h-14 w-full rounded-[16px] bg-sunken px-4 font-mono text-[20px] font-medium uppercase tracking-[0.04em] text-ink outline-none ring-2 ring-inset transition-shadow placeholder:text-ink-4 focus:ring-now/50', codeErr ? 'ring-alert/60' : 'ring-transparent')}
           />
-          <p className={cx('mt-2 h-4 text-[12px]', codeErr ? 'text-alert' : 'text-ink-3')}>{codeErr || 'Aceita só os números também'}</p>
+          <p className="mt-2 h-4 text-[13px] text-alert">{codeErr}</p>
           {queueCodes.length > 0 && (
             <>
-              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Aguardando nesta saída</p>
+              <p className="mt-2 text-[13px] text-ink-3">Aguardando</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {queueCodes.map((c) => (
                   <button type="button" key={c} onClick={() => { setCode(c); setCodeErr('') }} className={cx('h-11 rounded-full px-3.5 font-mono text-[13px] font-medium transition-colors', code.toUpperCase() === c ? 'bg-negro text-white' : 'bg-surface text-ink-2 shadow-pill')}>
@@ -436,7 +410,7 @@ export default function Scanner() {
             </>
           )}
           <button type="submit" disabled={!code.trim()} className="mt-5 flex h-[52px] w-full items-center justify-center rounded-full bg-negro text-[14.5px] font-semibold text-white shadow-dark transition-transform active:scale-[0.98] disabled:opacity-40">
-            Conferir código
+            Conferir
           </button>
         </form>
       </Sheet>

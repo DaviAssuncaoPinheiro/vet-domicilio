@@ -20,7 +20,7 @@ export function Portal({ children }) {
 }
 
 /* ---------- helpers ---------- */
-const HUES = ['#B08640', '#14120F', '#0E9AA7', '#3DBE83', '#C9A15B', '#C4533B', '#7A4E5C', '#45403A']
+const HUES = ['var(--color-boat)', 'var(--color-ink-2)', 'var(--color-transfer)', 'var(--color-land)', 'var(--color-gold-deep)', 'var(--color-alert)', 'var(--color-negro-2)', 'var(--color-ink-3)']
 export function paxHue(p) {
   let h = 0
   for (let i = 0; i < p.name.length; i++) h = (h * 31 + p.name.charCodeAt(i)) >>> 0
@@ -102,7 +102,7 @@ export function StatusBar({ light }) {
       <span className="text-[15px] font-semibold tracking-[-0.01em] tnum">{fmt(now)}</span>
       <span className="flex items-center gap-[5px]">
         <CellSignalFull size={16} weight="fill" />
-        {online ? <WifiHigh size={16} weight="bold" /> : <WifiSlash size={16} weight="bold" className="text-land" />}
+        {online ? <WifiHigh size={16} weight="bold" /> : <WifiSlash size={16} weight="bold" className={light ? 'text-gold-light' : 'text-gold-deep'} />}
         <BatteryHigh size={23} weight="fill" />
       </span>
     </div>
@@ -208,7 +208,7 @@ export function Sheet({ open, onClose, children, label }) {
   )
 }
 
-/* ---------- pílula de rede (offline / sincronizado) ---------- */
+/* ---------- pílula de rede (sem internet / enviado) ---------- */
 export function NetPill({ className, glass }) {
   const { stats, synced } = useGuia()
   const online = useOps((s) => s.online)
@@ -224,19 +224,19 @@ export function NetPill({ className, glass }) {
         <motion.span
           key="off"
           {...motionProps}
-          className={cx('inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full pl-3 pr-3.5 text-[12px] font-semibold', glass ? 'bg-land/20 text-[#E8D3A5] ring-1 ring-inset ring-land/30 backdrop-blur-md' : 'bg-land-tint text-[#8A6420]', className)}
+          className={cx('inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full pl-3 pr-3.5 text-[12px] font-semibold', glass ? 'bg-white/10 text-gold-light ring-1 ring-inset ring-white/15 backdrop-blur-md' : 'bg-gold-tint text-gold-deep', className)}
         >
-          <span className="live-dot !size-[6px] text-land" />
-          <span>Sem internet · <span className="font-mono tnum">{stats.queued}</span> na fila</span>
+          <span className="live-dot !size-[6px] text-gold" />
+          <span className="tnum">Sem internet · {stats.queued} {stats.queued === 1 ? 'salvo' : 'salvos'}</span>
         </motion.span>
       ) : synced ? (
         <motion.span
           key={`sync-${synced.id}`}
           {...motionProps}
-          className={cx('inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full pl-2.5 pr-3.5 text-[12px] font-semibold', glass ? 'bg-ok/25 text-[#9BE8C3] ring-1 ring-inset ring-ok/35 backdrop-blur-md' : 'bg-ok-tint text-ok', className)}
+          className={cx('inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full pl-2.5 pr-3.5 text-[12px] font-semibold', glass ? 'bg-ok/30 text-ok-tint ring-1 ring-inset ring-ok/40 backdrop-blur-md' : 'bg-ok-tint text-ok', className)}
         >
           <CheckCircle size={15} weight="fill" />
-          <span><span className="font-mono tnum">{synced.n}</span> {synced.n === 1 ? 'sincronizado' : 'sincronizados'}</span>
+          <span className="tnum">{synced.n} {synced.n === 1 ? 'enviado' : 'enviados'}</span>
         </motion.span>
       ) : null}
     </AnimatePresence>
@@ -277,7 +277,7 @@ export function Seg({ options, value, onChange, className }) {
           >
             {active && <motion.span layoutId={`seg-${uid}`} className="absolute inset-0 -z-10 rounded-full bg-surface shadow-pill" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
             {o.label}
-            {o.count != null && <span className={cx('font-mono text-[11.5px] tnum', active ? 'text-ink-3' : 'text-ink-4')}>{o.count}</span>}
+            {o.count != null && <span className={cx('text-[12px] tnum', active ? 'text-ink-3' : 'text-ink-4')}>{o.count}</span>}
           </button>
         )
       })}
@@ -286,7 +286,7 @@ export function Seg({ options, value, onChange, className }) {
 }
 
 /* ---------- ícone de resultado com traço desenhado ---------- */
-export function DrawnMark({ ok = true, size = 56, color, stroke = '#fff', delay = 0.1 }) {
+export function DrawnMark({ ok = true, size = 56, color, stroke = 'var(--color-surface)', delay = 0.1 }) {
   const fill = color ?? (ok ? 'var(--color-ok)' : 'var(--color-alert)')
   return (
     <motion.svg

@@ -3,7 +3,7 @@ import { Reveal, Pill, IconButton } from '../components/ui'
 import { TODAY_LABEL } from '../data/mock'
 import { useOps } from '../store'
 import Timeline from './painel/Timeline'
-import { Kpis, NowCard, Proximas, Divergencias, Atividade } from './painel/Cards'
+import { Kpis, NowCard, Proximas, Pendencias, Atividade } from './painel/Cards'
 
 export default function Painel() {
   const now = useOps((s) => s.now)
@@ -15,12 +15,12 @@ export default function Painel() {
         <header className="flex items-end justify-between gap-4 px-2 pb-1 pt-3 md:px-3 md:pt-4">
           <div className="min-w-0">
             <h1 className="text-[30px] font-semibold leading-[1.1] tracking-[-0.025em] text-ink">Hoje</h1>
-            <p className="mt-1.5 truncate text-[13px] text-ink-3">{TODAY_LABEL} · Manaus</p>
+            <p className="mt-1.5 truncate text-[13px] text-ink-3">{TODAY_LABEL}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <span className="hidden items-center gap-2 sm:flex">
               <Pill icon={CalendarBlank}>
-                <span className="font-mono tnum">04/11</span>
+                <span>4 nov</span>
                 <CaretDown size={12} weight="bold" className="-mr-1 text-ink-3" />
               </Pill>
               <Pill icon={Faders}>Filtro</Pill>
@@ -39,8 +39,8 @@ export default function Painel() {
           <Reveal i={3}><NowCard now={now} status={status} /></Reveal>
           <Reveal i={4}><Proximas now={now} status={status} /></Reveal>
         </div>
-        <Reveal i={5} className="h-full min-w-0 md:col-span-6 xl:col-span-4"><Divergencias now={now} /></Reveal>
-        <Reveal i={6} className="h-full min-w-0 md:col-span-12 xl:col-span-4"><Atividade now={now} status={status} /></Reveal>
+        <Reveal i={5} className="h-full min-w-0 md:col-span-6 xl:col-span-4"><Pendencias now={now} /></Reveal>
+        <Reveal i={6} className="min-w-0 md:col-span-12 xl:col-span-4"><Atividade now={now} status={status} /></Reveal>
       </div>
     </div>
   )

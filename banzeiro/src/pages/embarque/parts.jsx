@@ -1,23 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import {
-  ArrowCounterClockwise, Check, Clock, CloudCheck, HandTap, MagnifyingGlass, QrCode, UserMinus, X, Bed, Ticket, Translate, Broadcast,
-} from '@phosphor-icons/react'
-import { cx, ease, StatusChip, LangTag, CountryCode, Segmented, Button, IconButton, PhoneFrame, Time } from '../../components/ui'
-import { CHANNELS, COUNTRY_NAME, KIND, LANGS, fmt, tourOf, vehicleOf } from '../../data/mock'
+import { ArrowCounterClockwise, Check, Clock, HandTap, MagnifyingGlass, QrCode, X } from '@phosphor-icons/react'
+import { cx, ease, StatusChip, LangTag, Segmented, Button, IconButton, PhoneFrame } from '../../components/ui'
+import { CHANNELS, KIND, LANGS, fmt, tourOf } from '../../data/mock'
 import { depPhase, depStats } from '../../store'
 import { GuideAppEmbed } from '../../app/GuiaApp'
 
 /* ---------- helpers ---------- */
 
-const TINTS = ['bg-boat-tint', 'bg-now-tint', 'bg-transfer-tint', 'bg-land-tint', 'bg-alert-tint', 'bg-ok-tint']
-const hash = (str) => [...str].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7)
 export const initials = (name) => name.split(' ').map((w) => w[0]).slice(0, 2).join('')
 
 export function PaxAvatar({ p, size = 32, className }) {
   return (
     <span
-      className={cx('inline-grid shrink-0 place-items-center rounded-full font-semibold text-ink-2', TINTS[hash(p.booking) % TINTS.length], className)}
+      className={cx('inline-grid shrink-0 place-items-center rounded-full bg-sunken font-semibold text-ink-2', className)}
       style={{ width: size, height: size, fontSize: size * 0.36 }}
     >
       {initials(p.name)}
@@ -29,18 +25,18 @@ export const paxState = (st) => (st?.s === 'boarded' ? 'boarded' : st?.s === 'no
 
 export function PaxStatusChip({ st }) {
   const s = paxState(st)
-  if (s === 'boarded') return <StatusChip tone={st.synced === false ? 'land' : 'ok'}>{st.synced === false ? 'Na fila' : 'A bordo'}</StatusChip>
-  if (s === 'noshow') return <StatusChip tone="alert">Ausente</StatusChip>
+  if (s === 'boarded') return <StatusChip tone="ok">Embarcado</StatusChip>
+  if (s === 'noshow') return <StatusChip tone="alert">Faltou</StatusChip>
   return <StatusChip tone="muted">Aguardando</StatusChip>
 }
 
 export const depTitle = (d) => (d.route ? d.route : tourOf(d).short)
-export const PHASE_SHORT = { boarding: 'Embarque', live: 'Em curso', scheduled: 'Agendada', done: 'Concluída' }
+export const PHASE_LABEL = { boarding: 'Embarcando', live: 'Em andamento', scheduled: 'Agendada', done: 'Concluída' }
 
 export function PhaseChip({ phase }) {
-  if (phase === 'boarding') return <StatusChip tone="now" live>{PHASE_SHORT.boarding}</StatusChip>
-  if (phase === 'live') return <StatusChip tone="ok" live>{PHASE_SHORT.live}</StatusChip>
-  return <StatusChip tone="muted">{PHASE_SHORT[phase]}</StatusChip>
+  if (phase === 'boarding') return <StatusChip tone="ink" live>{PHASE_LABEL.boarding}</StatusChip>
+  if (phase === 'live') return <StatusChip tone="ok">{PHASE_LABEL.live}</StatusChip>
+  return <StatusChip tone="muted">{PHASE_LABEL[phase]}</StatusChip>
 }
 
 export function groupDepartures(deps, now) {
@@ -58,47 +54,32 @@ export function groupDepartures(deps, now) {
 /* ---------- lista de saídas ---------- */
 
 function DepartureItem({ d, now, status, active, onClick }) {
-  const v = vehicleOf(d)
   const st = depStats(d.id, status)
-  const phase = depPhase(d, now)
+  const done = depPhase(d, now) === 'done'
   return (
     <button
       onClick={onClick}
       aria-current={active ? 'true' : undefined}
       className={cx(
-        'relative flex w-full items-center gap-3 rounded-[18px] py-2.5 pl-4 pr-3 text-left transition-[background,box-shadow] duration-150 active:scale-[0.99]',
+        'relative flex h-12 w-full items-center gap-3 rounded-[16px] pl-4 pr-3 text-left transition-[background,box-shadow] duration-150 active:scale-[0.99]',
         active ? 'bg-surface shadow-pill' : 'hover:bg-surface/60',
       )}
     >
-      <span className="absolute bottom-3 left-[7px] top-3 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color, opacity: phase === 'done' && !active ? 0.45 : 1 }} />
-      <span className={cx('w-[42px] shrink-0 font-mono text-[13px] font-medium tnum', active ? 'text-ink' : 'text-ink-2')}>{fmt(d.start)}</span>
-      <span className="min-w-0 flex-1">
-        <span className={cx('block truncate text-[13.5px] font-medium', phase === 'done' && !active ? 'text-ink-2' : 'text-ink')}>{depTitle(d)}</span>
-        <span className="block truncate text-[12px] text-ink-3">{v.name}</span>
-      </span>
-      <span className="flex shrink-0 flex-col items-end gap-1">
-        <span className="font-mono text-[12px] tnum text-ink-2">
-          <span className="text-ink">{st.boarded}</span>/{st.total}
-        </span>
-        {phase === 'boarding' || phase === 'live' ? <span className={cx('live-dot !size-[6px]', phase === 'boarding' ? 'text-now' : 'text-ok')} /> : null}
-      </span>
+      <span className="absolute bottom-3.5 left-[7px] top-3.5 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color, opacity: done && !active ? 0.4 : 1 }} />
+      <span className={cx('w-[42px] shrink-0 font-mono text-[13px] tnum', active ? 'text-ink' : 'text-ink-2')}>{fmt(d.start)}</span>
+      <span className={cx('min-w-0 flex-1 truncate text-[13.5px] font-medium', done && !active ? 'text-ink-3' : 'text-ink')}>{depTitle(d)}</span>
+      <span className="shrink-0 text-[12.5px] tnum text-ink-3"><span className="text-ink">{st.boarded}</span>/{st.total}</span>
     </button>
   )
 }
 
 export function DepartureList({ groups, now, status, activeId, onPick, compact }) {
   return (
-    <aside className={cx('no-scrollbar hidden shrink-0 flex-col overflow-y-auto rounded-[28px] bg-frame p-2 shadow-soft xl:sticky xl:top-4 xl:flex xl:max-h-[calc(100dvh-2rem)]', compact ? 'xl:w-[272px]' : 'xl:w-[300px]')}>
-      <div className="px-3 pb-2 pt-3">
-        <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Saídas de hoje</h2>
-        <p className="mt-0.5 text-[12.5px] text-ink-3">Quarta, 4 de novembro</p>
-      </div>
+    <aside className={cx('no-scrollbar hidden shrink-0 flex-col overflow-y-auto rounded-[28px] bg-frame p-2 shadow-soft xl:sticky xl:top-4 xl:flex xl:max-h-[calc(100dvh-2rem)]', compact ? 'xl:w-[264px]' : 'xl:w-[288px]')}>
+      <h2 className="px-3 pb-1 pt-3 text-[17px] font-semibold tracking-[-0.01em]">Saídas de hoje</h2>
       {groups.map((g) => (
-        <div key={g.key} className="mt-2">
-          <div className="flex items-center justify-between px-3 pb-1.5 pt-1">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">{g.label}</span>
-            <span className="font-mono text-[11px] text-ink-4">{g.items.length}</span>
-          </div>
+        <div key={g.key} className="mt-3">
+          <p className="px-3 pb-1.5 text-[12px] text-ink-3">{g.label}</p>
           <div className="flex flex-col gap-0.5">
             {g.items.map((d) => <DepartureItem key={d.id} d={d} now={now} status={status} active={d.id === activeId} onClick={() => onPick(d.id)} />)}
           </div>
@@ -108,7 +89,7 @@ export function DepartureList({ groups, now, status, activeId, onPick, compact }
   )
 }
 
-export function DepartureStrip({ groups, now, status, activeId, onPick }) {
+export function DepartureStrip({ groups, status, activeId, onPick }) {
   const ref = useRef(null)
   useEffect(() => {
     const el = ref.current?.querySelector('[aria-current="true"]')
@@ -121,27 +102,22 @@ export function DepartureStrip({ groups, now, status, activeId, onPick }) {
         ...g.items.map((d) => {
           const active = d.id === activeId
           const st = depStats(d.id, status)
-          const phase = depPhase(d, now)
           return (
             <button
               key={d.id}
               onClick={() => onPick(d.id)}
               aria-current={active ? 'true' : undefined}
               className={cx(
-                'relative flex w-[176px] shrink-0 snap-start flex-col gap-1.5 overflow-hidden rounded-[20px] p-3 pl-4 text-left transition-[background,box-shadow] duration-150 active:scale-[0.98]',
+                'relative flex w-[164px] shrink-0 snap-start flex-col gap-1 overflow-hidden rounded-[18px] py-2.5 pl-4 pr-3 text-left transition-[background,box-shadow] duration-150 active:scale-[0.98]',
                 active ? 'bg-surface shadow-pill' : 'bg-frame/70 hover:bg-surface/70',
               )}
             >
               <span className="absolute bottom-3 left-[7px] top-3 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color }} />
               <span className="flex items-center justify-between">
-                <span className="font-mono text-[13px] font-medium tnum">{fmt(d.start)}</span>
-                {phase === 'boarding' || phase === 'live' ? <span className={cx('live-dot !size-[6px]', phase === 'boarding' ? 'text-now' : 'text-ok')} /> : <span className="text-[11px] text-ink-3">{PHASE_SHORT[phase]}</span>}
+                <span className="font-mono text-[13px] tnum">{fmt(d.start)}</span>
+                <span className="text-[12px] tnum text-ink-3"><span className="text-ink">{st.boarded}</span>/{st.total}</span>
               </span>
               <span className="truncate text-[13px] font-medium">{depTitle(d)}</span>
-              <span className="flex items-center justify-between text-[11.5px] text-ink-3">
-                <span className="truncate">{vehicleOf(d).name}</span>
-                <span className="font-mono tnum text-ink-2">{st.boarded}/{st.total}</span>
-              </span>
             </button>
           )
         }),
@@ -152,10 +128,10 @@ export function DepartureStrip({ groups, now, status, activeId, onPick }) {
 
 /* ---------- detalhe do passageiro ---------- */
 
-function Row({ icon: Icon, label, children }) {
+function Row({ label, children }) {
   return (
-    <div className="flex min-h-[38px] items-center justify-between gap-3 border-b border-line/70 py-1.5">
-      <span className="flex items-center gap-2 text-[12.5px] text-ink-3"><Icon size={15} />{label}</span>
+    <div className="flex min-h-[40px] items-center justify-between gap-3 border-b border-line/70 py-1.5">
+      <span className="text-[12.5px] text-ink-3">{label}</span>
       <span className="flex min-w-0 items-center gap-1.5 truncate text-right text-[13px] text-ink">{children}</span>
     </div>
   )
@@ -163,55 +139,43 @@ function Row({ icon: Icon, label, children }) {
 
 export function PaxDetail({ p, st, onClose, actions }) {
   const s = paxState(st)
+  const meta = [p.hotel, CHANNELS[p.channel].label, p.child && 'Criança'].filter(Boolean).join(' · ')
   return (
     <div className="flex flex-col">
       <div className="flex items-start gap-3">
-        <PaxAvatar p={p} size={44} />
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[17px] font-semibold tracking-[-0.01em]">{p.name}</h3>
-          <div className="mt-1 flex items-center gap-1.5 text-[12.5px] text-ink-3">
-            <CountryCode code={p.country} />
-            <span className="truncate">{COUNTRY_NAME[p.country]}</span>
-            {p.child && <span className="rounded-full bg-sunken px-1.5 text-[11px] font-medium text-ink-2">Criança</span>}
-          </div>
+          <p className="mt-0.5 truncate text-[12.5px] text-ink-3">{meta}</p>
         </div>
         {onClose && <IconButton label="Fechar" onClick={onClose} className="-mr-1 -mt-1 !size-9"><X size={16} /></IconButton>}
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-[14px] bg-sunken px-3 py-2.5">
-        <span className="flex items-center gap-2">
-          <span className="font-mono text-[20px] font-medium tracking-[-0.03em] tnum">{p.seat}</span>
-          <span className="text-[12px] text-ink-3">assento</span>
-        </span>
+      <div className="mt-4 flex items-center justify-between rounded-[14px] bg-sunken px-3.5 py-3">
+        <span className="font-mono text-[22px] font-medium tracking-[-0.03em]">{p.seat}</span>
         <PaxStatusChip st={st} />
       </div>
 
-      <div className="mt-2 grid gap-x-8 @2xl:grid-cols-2">
-        <Row icon={Translate} label="Idioma"><LangTag code={p.lang} /><span className="text-ink-2">{LANGS[p.lang].label}</span></Row>
-        <Row icon={Ticket} label="Reserva"><span className="font-mono text-[12.5px]">{p.booking}</span></Row>
-        <Row icon={Broadcast} label="Canal">
-          <span className="size-1.5 rounded-full" style={{ background: CHANNELS[p.channel].color }} />
-          <span className="truncate">{CHANNELS[p.channel].label}</span>
-        </Row>
-        <Row icon={Bed} label="Hotel"><span className="truncate">{p.hotel}</span></Row>
+      <div className="mt-1.5 grid gap-x-8 @2xl:grid-cols-2">
+        <Row label="Idioma">{LANGS[p.lang].label}</Row>
+        <Row label="Reserva"><span className="font-mono text-[12.5px]">{p.booking}</span></Row>
         {s === 'boarded' && (
           <>
-            <Row icon={st.via === 'manual' ? HandTap : QrCode} label="Embarque">
-              <Time m={st.at} className="text-[12.5px]" />
-              <span className="text-ink-3">· {st.via === 'manual' ? 'manual' : 'QR Code'}</span>
+            <Row label="Embarcou">
+              <span className="font-mono text-[12.5px]">{fmt(st.at)}</span>
+              <span className="text-ink-3">· {st.via === 'manual' ? 'manual' : 'QR'}</span>
             </Row>
-            <Row icon={st.synced === false ? Clock : CloudCheck} label="Sincronização">
-              {st.synced === false ? <span className="font-medium text-land">Na fila</span> : <span className="text-ink-2">Sincronizado</span>}
+            <Row label="Envio">
+              {st.synced === false ? <span className="text-gold-deep">Salvo no celular</span> : <span className="text-ink-2">Enviado</span>}
             </Row>
           </>
         )}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex gap-2">
         {s === 'waiting' && (
           <>
-            <Button icon={HandTap} onClick={actions.board} className="flex-1 whitespace-nowrap">Embarcar manualmente</Button>
-            <Button variant="light" icon={UserMinus} onClick={actions.noshow} className="flex-1 whitespace-nowrap">Marcar ausência</Button>
+            <Button icon={Check} onClick={actions.board} className="flex-1">Embarcar</Button>
+            <Button variant="light" onClick={actions.noshow} className="flex-1">Faltou</Button>
           </>
         )}
         {s !== 'waiting' && <Button variant="light" icon={ArrowCounterClockwise} onClick={actions.undo} className="flex-1">Desfazer</Button>}
@@ -220,50 +184,9 @@ export function PaxDetail({ p, st, onClose, actions }) {
   )
 }
 
-export function PlanSummary({ pax, status, stats, guide }) {
-  const langs = useMemo(() => {
-    const m = {}
-    pax.forEach((p) => { m[p.lang] = (m[p.lang] || 0) + 1 })
-    return Object.entries(m).sort((a, b) => b[1] - a[1])
-  }, [pax])
-  const rows = [
-    { label: 'A bordo', n: stats.boarded, sw: 'bg-ok' },
-    { label: 'Aguardando', n: stats.waiting, sw: 'bg-boat-tint ring-1 ring-inset ring-boat/25' },
-    { label: 'Ausentes', n: stats.noshow, sw: 'hatch' },
-  ]
-  return (
-    <div className="grid gap-x-10 @2xl:grid-cols-2">
-      <div className="flex flex-col">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3">Resumo</span>
-      <div className="mt-2">
-        {rows.map((r) => (
-          <div key={r.label} className="flex h-10 items-center justify-between border-b border-line/70 last:border-0">
-            <span className="flex items-center gap-2.5 text-[13px] text-ink-2"><span className={cx('size-[11px] rounded-[4px]', r.sw)} />{r.label}</span>
-            <span className="font-mono text-[15px] font-medium tnum">{r.n}</span>
-          </div>
-        ))}
-      </div>
-      </div>
-      <div className="flex flex-col">
-      <span className="mt-5 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 @2xl:mt-0">Idiomas</span>
-      <div className="mt-2.5 flex flex-wrap gap-1.5">
-        {langs.map(([code, n]) => {
-          const covered = !guide || guide.langs.includes(code)
-          return (
-            <span key={code} title={covered ? LANGS[code].label : `${LANGS[code].label} · sem guia no idioma`} className="inline-flex h-7 items-center gap-1.5 rounded-full bg-sunken pl-1 pr-2.5">
-              <LangTag code={code} className={cx('!h-5 !rounded-full', covered ? '!bg-surface' : '!bg-surface !text-ink-3')} />
-              <span className="font-mono text-[12px] tnum text-ink-2">{n}</span>
-            </span>
-          )
-        })}
-      </div>
-      <p className="mt-5 text-[12.5px] text-ink-3">Toque em um assento para ver o passageiro.</p>
-      </div>
-    </div>
-  )
-}
-
 /* ---------- lista de embarque ---------- */
+
+const COLS = '@2xl:grid-cols-[minmax(0,1fr)_64px_100px_56px_112px_56px]'
 
 export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelect }) {
   const [filter, setFilter] = useState('all')
@@ -273,32 +196,29 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
     pax.forEach((p) => { const s = paxState(status[p.id]); if (s === 'boarded') boarded++; else if (s === 'waiting') waiting++ })
     return { all: pax.length, boarded, waiting }
   }, [pax, status])
-  const bookings = new Set(pax.map((p) => p.booking)).size
-  const norm = (x) => x.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  const norm = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
   const rows = pax.filter((p) => {
     const s = paxState(status[p.id])
     if (filter === 'boarded' && s !== 'boarded') return false
     if (filter === 'waiting' && s !== 'waiting') return false
     if (!q) return true
     const n = norm(q)
-    return [p.name, p.booking, p.seat, p.hotel, p.country, p.lang].some((f) => norm(String(f)).includes(n))
+    return [p.name, p.booking, p.seat].some((f) => norm(String(f)).includes(n))
   })
-  const label = (t, n) => <span className="inline-flex items-center gap-1.5">{t}<span className="font-mono text-[11px] text-ink-3 tnum">{n}</span></span>
+  const label = (t, n) => <span className="inline-flex items-center gap-1.5">{t}<span className="text-[11.5px] tnum text-ink-3">{n}</span></span>
 
   return (
     <section className="@container rounded-[24px] bg-surface p-4 shadow-soft sm:p-5">
       <div className="flex flex-col gap-3 @2xl:flex-row @2xl:items-center @2xl:justify-between">
-        <div className="min-w-0">
-          <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Lista de embarque</h2>
-          <p className="mt-0.5 text-[12.5px] text-ink-3"><span className="font-mono tnum">{pax.length}</span> passageiros · <span className="font-mono tnum">{bookings}</span> reservas</p>
-        </div>
+        <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Passageiros</h2>
         <div className="flex flex-col gap-2 @md:flex-row @md:items-center">
-          <label className="relative flex-1 @2xl:w-[220px] @2xl:flex-none">
+          <label className="relative flex-1 @2xl:w-[200px] @2xl:flex-none">
             <MagnifyingGlass size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Nome, reserva ou assento"
+              placeholder="Buscar"
+              aria-label="Buscar passageiro"
               className="h-10 w-full rounded-full bg-sunken pl-10 pr-4 text-[13px] text-ink outline-none transition-shadow placeholder:text-ink-3 focus:bg-surface focus:shadow-pill"
             />
           </label>
@@ -309,16 +229,15 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
             className="self-start"
             options={[
               { value: 'all', label: label('Todos', counts.all) },
-              { value: 'boarded', label: label('A bordo', counts.boarded) },
+              { value: 'boarded', label: label('Embarcados', counts.boarded) },
               { value: 'waiting', label: label('Aguardando', counts.waiting) },
             ]}
           />
         </div>
       </div>
 
-      {/* cabeçalho da tabela */}
-      <div className="mt-4 hidden h-8 items-center gap-3 rounded-[10px] bg-sunken px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 @2xl:grid @2xl:grid-cols-[minmax(0,1fr)_56px_96px_52px_104px_60px] @4xl:grid-cols-[minmax(0,1fr)_56px_minmax(0,0.7fr)_96px_52px_104px_60px]">
-        <span>Passageiro</span><span>Idioma</span><span className="hidden @4xl:block">Canal</span><span>Reserva</span><span>Lugar</span><span>Status</span><span className="text-right">Hora</span>
+      <div className={cx('mt-4 hidden h-8 items-center gap-3 rounded-[10px] bg-sunken px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 @2xl:grid', COLS)}>
+        <span>Nome</span><span>Idioma</span><span>Reserva</span><span>Lugar</span><span>Status</span><span className="text-right">Hora</span>
       </div>
 
       <ul className="mt-2 flex flex-col gap-1.5 @2xl:gap-0">
@@ -329,74 +248,50 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
             const hot = hoverId === p.id
             const sel = selectedId === p.id
             return (
-              <motion.li
-                key={p.id}
-                layout="position"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.18, ease }}
-              >
+              <motion.li key={p.id} layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18, ease }}>
                 <button
                   onMouseEnter={() => setHoverId(p.id)}
                   onMouseLeave={() => setHoverId(null)}
                   onClick={() => onSelect(sel ? null : p.id)}
                   className={cx(
-                    'w-full rounded-[14px] text-left transition-[background,box-shadow] duration-150',
-                    'flex items-center gap-3 p-2.5 @2xl:grid @2xl:min-h-[52px] @2xl:grid-cols-[minmax(0,1fr)_56px_96px_52px_104px_60px] @2xl:p-0 @2xl:px-3 @4xl:grid-cols-[minmax(0,1fr)_56px_minmax(0,0.7fr)_96px_52px_104px_60px]',
-                    sel ? 'bg-now-tint/70 ring-1 ring-now/25' : hot ? 'bg-sunken' : 'bg-sunken/60 @2xl:bg-transparent',
+                    'flex w-full items-center gap-3 rounded-[14px] p-2.5 text-left transition-[background,box-shadow] duration-150 @2xl:grid @2xl:min-h-[50px] @2xl:p-0 @2xl:px-3',
+                    COLS,
+                    sel ? 'bg-sunken ring-1 ring-ink/15' : hot ? 'bg-sunken' : 'bg-sunken/60 @2xl:bg-transparent',
                   )}
                 >
-                  {/* passageiro */}
                   <span className="flex min-w-0 flex-1 items-center gap-2.5">
                     <PaxAvatar p={p} size={32} />
-                    <span className="min-w-0">
-                      <span className="flex items-center gap-1.5">
-                        <span className="truncate text-[13.5px] font-medium">{p.name}</span>
-                        <span className="hidden @2xl:inline-flex"><CountryCode code={p.country} /></span>
-                      </span>
-                      <span className="flex items-center gap-1.5 text-[11.5px] text-ink-3 @2xl:hidden">
-                        <CountryCode code={p.country} />
-                        <LangTag code={p.lang} className="!h-[18px]" />
-                        <span className="truncate">{CHANNELS[p.channel].label}</span>
-                      </span>
-                      <span className="hidden truncate text-[11.5px] text-ink-3 @2xl:block">{p.hotel}</span>
-                    </span>
+                    <span className="truncate text-[13.5px] font-medium">{p.name}</span>
+                    <LangTag code={p.lang} className="@2xl:hidden" />
                   </span>
                   <span className="hidden @2xl:block"><LangTag code={p.lang} /></span>
-                  <span className="hidden min-w-0 items-center gap-1.5 text-[12.5px] text-ink-2 @4xl:flex">
-                    <span className="size-1.5 shrink-0 rounded-full" style={{ background: CHANNELS[p.channel].color }} />
-                    <span className="truncate">{CHANNELS[p.channel].label}</span>
-                  </span>
                   <span className="hidden font-mono text-[12px] text-ink-2 @2xl:block">{p.booking}</span>
-                  {/* lugar */}
-                  <span className={cx('grid h-7 min-w-[34px] shrink-0 place-items-center justify-self-start rounded-[8px] px-1.5 font-mono text-[11.5px] font-semibold tnum',
-                    s === 'boarded' ? 'bg-ok-tint text-ok' : s === 'noshow' ? 'hatch text-ink-3' : 'bg-boat-tint text-boat')}>
+                  <span className={cx('grid h-7 min-w-[34px] shrink-0 place-items-center justify-self-start rounded-[8px] px-1.5 font-mono text-[11.5px] font-semibold',
+                    s === 'boarded' ? 'bg-ok-tint text-ok' : s === 'noshow' ? 'hatch text-ink-3' : 'border border-ink-4 text-ink-2')}>
                     {p.seat}
                   </span>
                   <span className="hidden @2xl:block"><PaxStatusChip st={st} /></span>
-                  <span className="hidden items-center justify-end gap-1 font-mono text-[12px] tnum text-ink-2 @2xl:flex">
-                    {s === 'boarded' ? (
+                  <span className="hidden items-center justify-end gap-1 font-mono text-[12px] text-ink-2 @2xl:flex">
+                    {s === 'boarded' && (
                       <>
-                        {st.synced === false ? <Clock size={12} className="text-land" weight="bold" /> : st.via === 'manual' ? <HandTap size={12} className="text-ink-3" /> : <QrCode size={12} className="text-ink-3" />}
+                        {st.synced === false && <Clock size={12} className="text-gold-deep" weight="bold" aria-label="Salvo no celular" />}
                         {fmt(st.at)}
                       </>
-                    ) : <span className="text-ink-4">··</span>}
+                    )}
                   </span>
-                  {/* mobile: status compacto */}
                   <span className="shrink-0 @2xl:hidden">
                     {s === 'boarded' ? (
-                      <span className={cx('grid size-7 place-items-center rounded-full text-white', st.synced === false ? 'bg-land' : 'bg-ok')}>
+                      <span className={cx('grid size-7 place-items-center rounded-full', st.synced === false ? 'bg-gold text-negro' : 'bg-ok text-white')}>
                         {st.synced === false ? <Clock size={13} weight="bold" /> : <Check size={13} weight="bold" />}
                       </span>
-                    ) : s === 'noshow' ? <StatusChip tone="alert">Ausente</StatusChip> : <span className="font-mono text-[11px] text-ink-4">··</span>}
+                    ) : s === 'noshow' ? <StatusChip tone="alert">Faltou</StatusChip> : <span className="block size-7" />}
                   </span>
                 </button>
               </motion.li>
             )
           })}
         </AnimatePresence>
-        {rows.length === 0 && <li className="grid h-24 place-items-center text-[13px] text-ink-3">Nenhum passageiro</li>}
+        {rows.length === 0 && <li className="grid h-24 place-items-center text-[13px] text-ink-3">Ninguém encontrado</li>}
       </ul>
     </section>
   )
@@ -467,7 +362,7 @@ export function GuideSheet({ open, depId, onClose }) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ duration: 0.32, ease: [0.2, 0.9, 0.3, 1] }}
-            className="absolute inset-x-2 bottom-2 top-2 flex flex-col items-center gap-4 overflow-y-auto rounded-[32px] bg-frame p-4 shadow-lift md:inset-x-auto md:right-4 md:top-4 md:bottom-4 md:w-[440px]"
+            className="absolute inset-x-2 bottom-2 top-2 flex flex-col items-center gap-4 overflow-y-auto rounded-[32px] bg-frame p-4 shadow-lift md:inset-x-auto md:bottom-4 md:right-4 md:top-4 md:w-[440px]"
           >
             <div className="flex w-full items-center justify-between gap-3">
               <p className="pl-2 text-[12.5px] text-ink-2">{CAPTION}</p>

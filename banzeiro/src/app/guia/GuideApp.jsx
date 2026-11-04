@@ -33,7 +33,7 @@ export default function GuideApp({ depId = 'd7', mode = 'embed' }) {
   const pax = useMemo(() => paxOfDep(dep.id), [dep.id])
   const stats = depStats(dep.id, status)
 
-  // Sincronização: guarda a fila enquanto offline e mostra "N sincronizados" por 2s ao reconectar.
+  // Ao reconectar, mostra "N enviados" por 2s.
   const [synced, setSynced] = useState(null)
   const [lastSync, setLastSync] = useState(now)
   const queuedRef = useRef(0)
