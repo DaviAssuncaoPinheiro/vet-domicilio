@@ -29,10 +29,8 @@ export default function Inicio() {
 
       <Reveal i={1} className="mt-6 px-4">
         <div className="smoke grain relative overflow-hidden rounded-[28px] p-5 text-white shadow-dark">
-          <div className="relative flex h-8 items-center justify-between gap-2">
-            <p className="truncate text-[15px] font-medium text-white/80">{vehicle.name} · <span className="font-mono">{fmt(dep.start)}</span></p>
-            <NetPill glass />
-          </div>
+          <p className="relative truncate text-[15px] font-medium text-white/80">{vehicle.name} · <span className="font-mono">{fmt(dep.start)}</span></p>
+          <div className="relative empty:hidden [&:not(:empty)]:mt-3"><NetPill glass /></div>
 
           <div className="relative mt-6 flex items-baseline gap-2.5 tnum">
             <CountUp value={stats.boarded} className="text-[72px] font-semibold leading-[0.85] tracking-[-0.05em]" />

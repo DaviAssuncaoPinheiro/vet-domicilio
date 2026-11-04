@@ -227,7 +227,7 @@ export function NetPill({ className, glass }) {
           className={cx('inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full pl-3 pr-3.5 text-[12px] font-semibold', glass ? 'bg-white/10 text-gold-light ring-1 ring-inset ring-white/15 backdrop-blur-md' : 'bg-gold-tint text-gold-deep', className)}
         >
           <span className="live-dot !size-[6px] text-gold" />
-          <span className="tnum">Sem internet · {stats.queued} {stats.queued === 1 ? 'salvo' : 'salvos'}</span>
+          <span className="tnum">Sem internet{stats.queued ? ` · ${stats.queued} ${stats.queued === 1 ? 'salvo' : 'salvos'}` : ''}</span>
         </motion.span>
       ) : synced ? (
         <motion.span

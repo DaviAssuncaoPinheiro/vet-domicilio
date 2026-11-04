@@ -361,9 +361,10 @@ export default function Scanner() {
               <DrawnMark ok={result.ok} />
               <div className="min-w-0 flex-1">
                 <h3 className="truncate text-[22px] font-semibold leading-tight tracking-[-0.02em]">{result.p.name}</h3>
-                <p className={cx('mt-1 text-[15px] font-medium', result.ok ? (result.queued ? 'text-gold-deep' : 'text-ok') : 'text-alert')}>
-                  {result.ok ? (result.queued ? 'Embarcado · salvo no celular' : 'Embarcado') : <>Já embarcou às <span className="font-mono">{fmt(result.at)}</span></>}
+                <p className={cx('mt-1 text-[15px] font-medium', result.ok ? 'text-ok' : 'text-alert')}>
+                  {result.ok ? 'Embarcado' : <>Já embarcou às <span className="font-mono">{fmt(result.at)}</span></>}
                 </p>
+                {result.ok && result.queued && <p className="text-[13px] text-gold-deep">Salvo no celular</p>}
               </div>
               <div className="shrink-0 rounded-[16px] bg-sunken px-3.5 py-2 text-center">
                 <p className="text-[11px] text-ink-3">Assento</p>

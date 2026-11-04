@@ -37,7 +37,7 @@ function Clock() {
   const online = useOps((s) => s.online)
   return (
     <div className="hidden h-10 items-center gap-2.5 rounded-full bg-surface pl-3.5 pr-4 shadow-pill lg:flex">
-      <span className={cx('live-dot', online ? 'text-ok' : 'text-land')} />
+      <span className={cx('live-dot', online ? 'text-ok' : 'text-gold')} />
       <span className="font-mono text-[13px] font-medium tnum text-ink">{fmt(now)}</span>
     </div>
   )
@@ -131,8 +131,8 @@ export function OfflineBanner() {
   const online = useOps((s) => s.online)
   if (online) return null
   return (
-    <div className="flex items-center gap-2 rounded-full bg-land-tint px-3 py-1.5 text-[12px] font-medium text-[#8A6420]">
-      <WifiHigh size={14} /> Sem internet. Leituras ficam salvas no aparelho.
+    <div className="flex items-center gap-2 rounded-full bg-gold-tint px-3 py-1.5 text-[12px] font-medium text-gold-deep">
+      <WifiHigh size={14} /> Sem internet. Salvo no celular.
     </div>
   )
 }
