@@ -100,7 +100,7 @@ export function depPhase(dep, now) {
   return 'scheduled'
 }
 
-export const PHASE_LABEL = { done: 'Concluída', live: 'Em andamento', boarding: 'Embarque aberto', scheduled: 'Agendada' }
+export const PHASE_LABEL = { done: 'Encerrada', live: 'Em rota', boarding: 'Embarcando', scheduled: 'Agendada' }
 
 export function dayTotals(status, now) {
   let pax = 0, boarded = 0, queued = 0

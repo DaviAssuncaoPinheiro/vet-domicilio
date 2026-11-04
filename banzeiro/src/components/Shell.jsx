@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { House, Boat, UsersThree, Tray, DeviceMobile, Gear, Bell, MagnifyingGlass, Plus, WifiHigh, Ticket, ChartLineUp } from '@phosphor-icons/react'
@@ -13,7 +14,7 @@ export const NAV = [
 ]
 
 export function Logo({ size = 40, dark = true }) {
-  const id = `g${size}${dark ? 'd' : 'l'}`
+  const id = 'shield' + useId().replace(/:/g, '')
   return (
     <span className={cx('grid shrink-0 place-items-center rounded-full', dark ? 'bg-negro shadow-dark' : 'bg-surface shadow-pill')} style={{ width: size, height: size }}>
       <svg viewBox="0 0 48 56" width={size * 0.5} height={size * 0.58} aria-hidden>
