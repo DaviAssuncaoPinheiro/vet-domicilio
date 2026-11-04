@@ -90,22 +90,22 @@ function Body({ t, lang, code, pax, dep, status, walletDone, setWalletDone, flas
             </div>
             <h1 className="mt-5 text-[26px] font-semibold leading-[1.1] tracking-[-0.025em]">{t.tours[tour.id] ?? tour.name}</h1>
             <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-white/60"><MapPin size={14} /> {tour.meeting}</p>
-            <div className="mt-6 flex items-end justify-between gap-3">
+            <div className="mt-6 flex flex-col items-start gap-4">
               <span className="font-mono text-[76px] font-medium leading-[0.85] tracking-[-0.05em] text-white tnum">{fmt(dep.start)}</span>
               <AnimatePresence mode="wait" initial={false}>
                 {all ? (
-                  <motion.span key="ok" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, ease }} className="mb-1 inline-flex h-9 items-center gap-2 rounded-full bg-lime px-3.5 text-[12.5px] font-semibold text-negro">
+                  <motion.span key="ok" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, ease }} className="inline-flex h-9 items-center gap-2 rounded-full bg-lime px-3.5 text-[12.5px] font-semibold text-negro">
                     <Check size={14} weight="bold" /> {t.confirmed}
                   </motion.span>
                 ) : (
-                  <motion.span key="by" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-1 inline-flex h-9 items-center gap-2 rounded-full bg-white/10 px-3.5 text-[12.5px] font-medium">
+                  <motion.span key="by" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="inline-flex h-9 items-center gap-2 rounded-full bg-white/10 px-3.5 text-[12.5px] font-medium">
                     {t.boardBy} <span className="font-mono tnum text-lime">{fmt(dep.start - 15)}</span>
                   </motion.span>
                 )}
               </AnimatePresence>
             </div>
-            {all && <p className="mt-3 text-right font-mono text-[11.5px] text-white/50 tnum">{t.confirmedAt} {fmt(at)}</p>}
-            {!all && boarded.length > 0 && <p className="mt-3 text-right font-mono text-[11.5px] text-lime tnum">{boarded.length} {t.of} {pax.length} {t.partial}</p>}
+            {all && <p className="mt-3 text-left font-mono text-[11.5px] text-white/50 tnum">{t.confirmedAt} {fmt(at)}</p>}
+            {!all && boarded.length > 0 && <p className="mt-3 text-left font-mono text-[11.5px] text-lime tnum">{boarded.length} {t.of} {pax.length} {t.partial}</p>}
           </div>
 
           {/* perfuração */}

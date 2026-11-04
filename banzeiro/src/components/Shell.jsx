@@ -99,7 +99,7 @@ function TopBar() {
         <div className="hidden items-center gap-2.5 2xl:flex">
           <AvatarStack people={GUIDES} max={3} size={36} />
         </div>
-        <Button variant="light" icon={Plus} className="hidden lg:inline-flex" onClick={() => nav('/embarque')}>Nova saída</Button>
+        <div className="hidden lg:block"><Button variant="light" icon={Plus} onClick={() => nav('/embarque')}>Nova saída</Button></div>
         <IconButton label="Notificações" className="relative bg-surface !text-ink-2 shadow-pill">
           <Bell size={17} />
           {divergences > 0 && <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-alert ring-2 ring-surface" />}
