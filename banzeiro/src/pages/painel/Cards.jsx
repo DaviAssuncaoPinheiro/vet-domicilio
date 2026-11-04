@@ -185,7 +185,7 @@ export function Proximas({ now, status }) {
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center gap-1.5 truncate text-[13px] font-semibold text-ink">
                         <KindDot kind={tour.kind} className="!size-[6px] shrink-0" />
-                        <span className="truncate">{tour.short}</span>
+                        <span className="truncate">{d.route ?? tour.short}</span>
                       </p>
                       <div className="mt-1.5 flex items-center gap-2">
                         <span className="truncate text-[11.5px] text-ink-3">{v.name}</span>

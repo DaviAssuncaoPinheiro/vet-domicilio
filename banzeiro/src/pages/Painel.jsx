@@ -18,11 +18,13 @@ export default function Painel() {
             <p className="mt-1.5 truncate text-[13px] text-ink-3">{TODAY_LABEL} · Manaus</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Pill icon={CalendarBlank} className="hidden sm:inline-flex">
-              <span className="font-mono tnum">04/11</span>
-              <CaretDown size={12} weight="bold" className="-mr-1 text-ink-3" />
-            </Pill>
-            <Pill icon={Faders} className="hidden sm:inline-flex">Filtro</Pill>
+            <span className="hidden items-center gap-2 sm:flex">
+              <Pill icon={CalendarBlank}>
+                <span className="font-mono tnum">04/11</span>
+                <CaretDown size={12} weight="bold" className="-mr-1 text-ink-3" />
+              </Pill>
+              <Pill icon={Faders}>Filtro</Pill>
+            </span>
             <IconButton label="Filtro" className="bg-surface !text-ink-2 shadow-pill sm:hidden"><Faders size={17} /></IconButton>
           </div>
         </header>

@@ -228,6 +228,7 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
   const prog = clamp01((now - d.start) / (d.end - d.start))
   const compact = width < 118
   const showChip = width >= 236
+  const showCount = width >= (showChip ? 318 : 172)
   const done = st.phase === 'done'
   const started = st.phase !== 'scheduled'
   const count = started ? `${st.boarded} de ${st.total}` : `${st.total} de ${vehicle.capacity}`
@@ -271,21 +272,28 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
       <span className="absolute inset-y-[9px] left-[6px] w-[3px] rounded-full" style={{ background: k.color }} />
 
       <span className={cx('relative flex h-full items-center gap-2 pr-2', compact ? 'pl-3.5' : 'pl-4')}>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[12.5px] font-semibold leading-[1.2] text-ink">{tour.short}</span>
-          <span className="mt-[3px] flex items-center gap-1.5 whitespace-nowrap font-mono text-[10.5px] text-ink-2/80 tnum">
-            <span>{compact ? fmt(d.start) : range(d)}</span>
-            {!compact && width > 168 && (
-              <>
-                <span className="text-ink-4">·</span>
-                <span className={cx('inline-flex items-center gap-1', over && 'font-semibold text-alert')}>
-                  <UsersThree size={11} weight="bold" className="opacity-70" />
-                  {count}
-                </span>
-              </>
-            )}
+        {compact ? (
+          <span className="min-w-0 flex-1 overflow-hidden">
+            <span className="block truncate font-mono text-[11.5px] font-semibold leading-[1.2] text-ink tnum">{fmt(d.start)}</span>
+            <span className={cx('mt-[3px] block truncate font-mono text-[10.5px] tnum', over ? 'font-semibold text-alert' : 'text-ink-2/80')}>{started ? st.boarded : st.total}/{vehicle.capacity}</span>
           </span>
-        </span>
+        ) : (
+          <span className="min-w-0 flex-1 overflow-hidden">
+            <span className="block truncate text-[12.5px] font-semibold leading-[1.2] text-ink">{tour.short}</span>
+            <span className="mt-[3px] flex items-center gap-1.5 overflow-hidden whitespace-nowrap font-mono text-[10.5px] text-ink-2/80 tnum">
+              <span className="shrink-0">{range(d)}</span>
+              {showCount && (
+                <>
+                  <span className="text-ink-4">·</span>
+                  <span className={cx('inline-flex items-center gap-1', over && 'font-semibold text-alert')}>
+                    <UsersThree size={11} weight="bold" className="opacity-70" />
+                    {count}
+                  </span>
+                </>
+              )}
+            </span>
+          </span>
+        )}
         {showChip && (
           <StatusChip tone={PHASE_TONE[st.phase]} live={st.phase === 'live' || st.phase === 'boarding'} className="shrink-0">
             {PHASE_LABEL[st.phase]}

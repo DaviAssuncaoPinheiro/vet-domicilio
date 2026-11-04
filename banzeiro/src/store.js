@@ -13,7 +13,27 @@ export const useOps = create((set, get) => ({
   toast: null,
   lastScan: null, // { paxId, ok, reason, t }
 
-  tick: () => set((s) => ({ now: Math.min(s.now + 1, 23 * 60) })),
+  tick: () => set((s) => {
+    const now = Math.min(s.now + 1, 23 * 60)
+    // Embarque automático das demais saídas conforme o relógio avança (a d7 fica para a demonstração)
+    let status = s.status
+    DEPARTURES.forEach((d) => {
+      if (d.id === 'd7' || now < d.start - 45) return
+      const pax = PASSENGERS.filter((p) => p.depId === d.id)
+      const t = Math.min(1, (now - (d.start - 45)) / 45)
+      const target = now >= d.start ? pax.length : Math.round(pax.length * 0.94 * (1 - Math.pow(1 - t, 2)))
+      let boarded = pax.filter((p) => status[p.id]?.s === 'boarded').length
+      for (const p of pax) {
+        if (boarded >= target) break
+        if (status[p.id]?.s === 'waiting') {
+          if (status === s.status) status = { ...s.status }
+          status[p.id] = { s: 'boarded', at: now, via: 'qr', synced: s.online }
+          boarded++
+        }
+      }
+    })
+    return status === s.status ? { now } : { now, status }
+  }),
 
   setOnline: (online) => set((s) => {
     if (!online) return { online }
