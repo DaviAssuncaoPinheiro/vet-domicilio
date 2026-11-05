@@ -30,20 +30,20 @@ export const LANGS = {
 }
 
 export const CHANNELS = {
-  site: { label: 'Site próprio', color: '#14120F' },
   whatsapp: { label: 'WhatsApp', color: '#2E8A5A' },
-  agencia: { label: 'Agências parceiras', color: '#B08640' },
-  ota: { label: 'Plataformas online', color: '#4E6C8A' },
-  hotel: { label: 'Balcão de hotel', color: '#8A847B' },
+  agencia: { label: 'Agências', color: '#B08640' },
+  site: { label: 'Site', color: '#14120F' },
+  ota: { label: 'Plataformas', color: '#4E6C8A' },
+  hotel: { label: 'Hotéis', color: '#8A847B' },
 }
 
 export const TOURS = [
   { id: 't1', name: 'Encontro das Águas', short: 'Encontro das Águas', kind: 'boat', duration: 270, meeting: 'Porto da Ceasa · Píer 2', includes: ['Encontro dos rios', 'Botos', 'Vitória-régia'] },
   { id: 't2', name: 'Encontro das Águas e Lago Janauari', short: 'Águas + Janauari', kind: 'boat', duration: 450, meeting: 'Porto da Ceasa · Píer 2', includes: ['Encontro dos rios', 'Lago Janauari', 'Almoço regional'] },
-  { id: 't3', name: 'Arquipélago de Anavilhanas', short: 'Anavilhanas', kind: 'boat', duration: 570, meeting: 'Marina do Davi', includes: ['Arquipélago', 'Praia fluvial', 'Almoço'] },
+  { id: 't3', name: 'Interação com os botos', short: 'Botos', kind: 'boat', duration: 330, meeting: 'Marina do Davi', includes: ['Botos', 'Comunidade ribeirinha', 'Almoço'] },
   { id: 't4', name: 'Pôr do sol no Rio Negro', short: 'Pôr do sol', kind: 'boat', duration: 120, meeting: 'Marina do Davi', includes: ['Pôr do sol', 'Petiscos'] },
   { id: 't5', name: 'Manaus histórica', short: 'City tour', kind: 'land', duration: 210, meeting: 'Saída dos hotéis', includes: ['Teatro Amazonas', 'Mercado Adolpho Lisboa', 'Palácio Rio Negro'] },
-  { id: 't6', name: 'Cachoeiras de Presidente Figueiredo', short: 'Pres. Figueiredo', kind: 'land', duration: 690, meeting: 'Saída dos hotéis', includes: ['Cachoeira da Iracema', 'Caverna do Maroaga'] },
+  { id: 't6', name: 'Novo Airão bate e volta', short: 'Novo Airão', kind: 'land', duration: 690, meeting: 'Saída dos hotéis', includes: ['Águas cristalinas', 'Botos de Novo Airão'] },
   { id: 't7', name: 'Transfer aeroporto', short: 'Transfer', kind: 'transfer', duration: 50, meeting: 'Aeroporto Eduardo Gomes', includes: [] },
 ]
 
