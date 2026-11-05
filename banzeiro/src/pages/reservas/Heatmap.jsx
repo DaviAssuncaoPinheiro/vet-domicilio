@@ -76,9 +76,9 @@ export default function Heatmap({ extra, flash, onOpen }) {
           sub="Claro é vago, dourado enchendo, preto lotado"
         />
 
-        <div className="-mx-5 mt-5 overflow-x-auto px-5 no-scrollbar md:mx-0 md:px-0">
-          <div ref={box} className="relative grid min-w-[500px] grid-cols-[124px_repeat(7,minmax(44px,1fr))] items-center gap-x-2 gap-y-2 md:min-w-0 md:grid-cols-[196px_repeat(7,minmax(0,1fr))] md:gap-x-3 md:gap-y-3">
-            <span className="sticky left-0 z-20 self-stretch bg-surface" aria-hidden />
+        <div className="-mx-5 mt-5 overflow-x-auto no-scrollbar md:mx-0">
+          <div ref={box} className="relative grid min-w-[540px] grid-cols-[144px_repeat(7,minmax(44px,1fr))] pr-5 md:pr-0 items-center gap-x-2 gap-y-2 md:min-w-0 md:grid-cols-[196px_repeat(7,minmax(0,1fr))] md:gap-x-3 md:gap-y-3">
+            <span className="sticky left-0 z-40 self-stretch bg-surface max-md:-my-1 max-md:py-1 max-md:pl-5 max-md:shadow-[10px_0_12px_-10px_rgba(20,18,15,0.18)]" aria-hidden />
             {DAYS.map((d) => (
               <div key={d.idx} className="flex justify-center">
                 <span className={cx('flex w-full max-w-[104px] flex-col items-center rounded-[16px] pb-3 pt-2.5', d.idx === TODAY && 'bg-sunken', d.idx < TODAY && 'opacity-50')}>
@@ -112,7 +112,7 @@ export default function Heatmap({ extra, flash, onOpen }) {
 function RowFragment({ row, ri, extra, flash, reduce, entered, onOpen, onTip }) {
   return (
     <>
-      <div className="sticky left-0 z-20 flex min-w-0 flex-col justify-center self-stretch bg-surface pr-2">
+      <div className="sticky left-0 z-40 flex min-w-0 flex-col justify-center self-stretch bg-surface pr-2 max-md:-my-1 max-md:py-1 max-md:pl-5 max-md:shadow-[10px_0_12px_-10px_rgba(20,18,15,0.18)]">
         <span className="truncate text-[14px] font-medium text-ink md:text-[15px]">{row.label}</span>
         <span className="text-[13px] text-ink-3 tnum">{tm(row.start)}</span>
       </div>

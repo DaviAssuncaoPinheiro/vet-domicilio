@@ -28,15 +28,11 @@ export function TopButtons({ onBell, alert }) {
 
 export function HeroNumber({ now, status }) {
   const navigate = useNavigate()
-  const live = DEPARTURES.filter((d) => viewStats(d, status, now).phase === 'live').length
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="min-w-0">
         <div className="flex items-center gap-3">
           <span className="text-[60px] font-semibold leading-[0.95] tracking-[-0.04em] text-ink md:text-[66px]">{DEPARTURES.length}</span>
-          <span className="inline-flex h-7 items-center gap-1 rounded-full bg-surface px-3 text-[14px] text-ink-2">
-            <span className="font-semibold text-ink tnum">{live}</span> em rota
-          </span>
         </div>
         <p className="mt-2 text-[16px] text-ink">Saídas hoje</p>
       </div>
