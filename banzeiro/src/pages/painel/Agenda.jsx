@@ -125,7 +125,7 @@ export default function Agenda({ now, status, query }) {
               {groups.length === 0 && <p className="py-10 text-center text-[15px] text-ink-3">{query ? 'Nada encontrado' : 'Sem saídas'}</p>}
               {groups.map(([h, its]) => (
                 <div key={h} data-now={day === TODAY && h === scrollHour ? '1' : undefined} className="flex gap-3 border-t border-line pt-3 first:border-t-0">
-                  <span className="w-[46px] shrink-0 pt-1 text-[16px] font-semibold text-ink tnum">{h}:00</span>
+                  <span className="w-[40px] shrink-0 pt-1 text-[15px] font-semibold text-ink tnum md:w-[46px] md:text-[16px]">{h}:00</span>
                   <div className="flex min-w-0 flex-1 flex-col gap-2">
                     {its.map((it) => (
                       <EventCard key={it.id} it={it} onOpen={day === TODAY ? () => navigate(`/embarque/${it.id}`) : undefined} />
