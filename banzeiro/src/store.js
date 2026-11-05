@@ -37,11 +37,11 @@ export const useOps = create((set, get) => ({
 
   setOnline: (online) => set((s) => {
     if (!online) return { online }
-    // ao reconectar, sincroniza a fila
+    // ao reconectar, envia a fila
     const status = { ...s.status }
     let n = 0
     Object.keys(status).forEach((k) => { if (status[k].s === 'boarded' && status[k].synced === false) { status[k] = { ...status[k], synced: true }; n++ } })
-    return { online, status, toast: n ? { id: Date.now(), text: `${n} ${n === 1 ? 'leitura sincronizada' : 'leituras sincronizadas'}` } : s.toast }
+    return { online, status, toast: n ? { id: Date.now(), text: `${n} ${n === 1 ? 'leitura enviada' : 'leituras enviadas'}` } : s.toast }
   }),
 
   board: (paxId, via = 'qr') => {

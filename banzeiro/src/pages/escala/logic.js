@@ -31,9 +31,9 @@ export function plan(shifts) {
   const pending = work.filter((s) => !s.guideId).sort((a, b) => a.day - b.day || a.start - b.start)
   const out = []
   pending.forEach((s) => {
-    const ranked = GUIDES.filter((g) => !isOff(g.id, s.day) && !overlaps(work, s, g.id))
-      .map((g) => ({ g, miss: missingLangs(g, s).length, h: hoursOf(work, g) }))
-      .sort((a, b) => a.miss - b.miss || a.h - b.h)
+    const ranked = GUIDES.filter((g) => !isOff(g.id, s.day) && !overlaps(work, s, g.id) && !missingLangs(g, s).length)
+      .map((g) => ({ g, h: hoursOf(work, g) }))
+      .sort((a, b) => a.h - b.h)
     if (!ranked.length) return
     s.guideId = ranked[0].g.id
     out.push({ id: s.id, guideId: s.guideId })

@@ -214,7 +214,8 @@ export default function Escala() {
   const suggest = () => {
     if (running) return
     const steps = plan(shifts)
-    if (!steps.length) { showToast('Nada para preencher'); return }
+    const left = shifts.filter((x) => !x.guideId).length - steps.length
+    if (!steps.length) { showToast(left ? `${left} ${left === 1 ? 'saída precisa' : 'saídas precisam'} de guia com o idioma` : 'Nada para preencher'); return }
     const before = shifts
     setRunning(true)
     steps.forEach((st, i) => {
@@ -222,7 +223,8 @@ export default function Escala() {
     })
     timers.current.push(setTimeout(() => {
       setRunning(false)
-      showToast(`${steps.length} ${steps.length === 1 ? 'saída preenchida' : 'saídas preenchidas'}`, { label: 'Desfazer', fn: () => setShifts(before) })
+      const msg = `${steps.length} ${steps.length === 1 ? 'saída preenchida' : 'saídas preenchidas'}` + (left ? ` · ${left} sem guia com o idioma` : '')
+      showToast(msg, { label: 'Desfazer', fn: () => setShifts(before) })
     }, 250 + steps.length * 120 + 500))
   }
 
