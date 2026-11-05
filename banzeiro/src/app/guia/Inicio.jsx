@@ -1,6 +1,6 @@
-import { ArrowUpRight, Boat, WifiHigh, WifiSlash } from '@phosphor-icons/react'
-import { Avatar, Card, CountUp, Progress, Reveal, cx } from '../../components/ui'
-import { DEPARTURES, fmt, tourOf, vehicleOf } from '../../data/mock'
+import { ArrowUpRight, Bell, Boat, CaretRight, UsersThree, WifiHigh, WifiSlash } from '@phosphor-icons/react'
+import { Card, CountUp, Progress, Reveal, cx } from '../../components/ui'
+import { DEPARTURES, TODAY_LABEL, fmt, tourOf, vehicleOf } from '../../data/mock'
 import { useOps } from '../../store'
 import { useGuia, Screen, NetPill, Switch, durLabel } from './parts'
 
@@ -8,6 +8,10 @@ function greeting(now) {
   if (now < 12 * 60) return 'Bom dia'
   if (now < 18 * 60) return 'Boa tarde'
   return 'Boa noite'
+}
+
+function RowIcon({ children, tone = 'bg-sunken text-ink-2' }) {
+  return <span className={cx('grid size-9 shrink-0 place-items-center rounded-[11px] transition-colors', tone)}>{children}</span>
 }
 
 export default function Inicio() {
@@ -23,11 +27,16 @@ export default function Inicio() {
   return (
     <Screen>
       <Reveal i={0} className="flex items-center gap-3 px-5 pt-2">
-        <Avatar initials={guide.initials} hue={guide.hue} size={44} />
-        <h1 className="truncate text-[24px] font-semibold tracking-[-0.025em]">{greeting(now)}, {guide.name.split(' ')[0]}</h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-[24px] font-semibold leading-tight tracking-[-0.025em]">{greeting(now)}, {guide.name.split(' ')[0]}</h1>
+          <p className="mt-0.5 truncate text-[13.5px] text-ink-3">{TODAY_LABEL}</p>
+        </div>
+        <button aria-label="Avisos" className="grid size-11 shrink-0 place-items-center rounded-full bg-surface text-ink shadow-pill transition-transform active:scale-95">
+          <Bell size={19} />
+        </button>
       </Reveal>
 
-      <Reveal i={1} className="mt-6 px-4">
+      <Reveal i={1} className="mt-5 px-4">
         <div className="smoke grain relative overflow-hidden rounded-[28px] p-5 text-white shadow-dark">
           <p className="relative truncate text-[15px] font-medium text-white/80">{vehicle.name} · <span className="font-mono">{fmt(dep.start)}</span></p>
           <div className="relative empty:hidden [&:not(:empty)]:mt-3"><NetPill glass /></div>
@@ -54,29 +63,36 @@ export default function Inicio() {
         </div>
       </Reveal>
 
-      {next && (
-        <Reveal i={2} className="mt-3 px-4">
-          <Card className="flex h-[68px] items-center gap-3.5 px-4">
-            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sunken text-ink-2"><Boat size={19} /></span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[12.5px] text-ink-3">Próxima saída</span>
-              <span className="block truncate text-[15px] font-medium">{vehicleOf(next).name}</span>
-            </span>
-            <span className="font-mono text-[17px] font-medium text-ink">{fmt(next.start)}</span>
-          </Card>
-        </Reveal>
-      )}
+      <Reveal i={2} className="mt-3 px-4">
+        <Card className="px-2 py-1.5">
+          <button onClick={() => go('list', { filter: 'waiting' })} className="flex min-h-[56px] w-full items-center gap-3 rounded-[16px] px-2.5 text-left transition-colors active:bg-sunken">
+            <RowIcon><UsersThree size={18} /></RowIcon>
+            <span className="flex-1 text-[15px] font-medium">Aguardando</span>
+            <span className="text-[16px] font-semibold tnum">{stats.waiting}</span>
+            <CaretRight size={15} className="text-ink-4" />
+          </button>
 
-      <Reveal i={3} className="mt-3 px-4">
-        <Card className="flex items-center gap-3.5 p-4">
-          <span className={cx('grid size-11 shrink-0 place-items-center rounded-full transition-colors', online ? 'bg-sunken text-ink-2' : 'bg-gold-tint text-gold-deep')}>
-            {online ? <WifiHigh size={20} /> : <WifiSlash size={20} />}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[16px] font-semibold tracking-[-0.01em]">Sem internet</span>
-            {!online && <span className="block text-[13px] leading-snug text-ink-3">Salvo no celular, envia quando voltar o sinal</span>}
-          </span>
-          <Switch checked={!online} onChange={(v) => setOnline(!v)} label="Sem internet" />
+          {next && (
+            <div className="flex min-h-[56px] items-center gap-3 border-t border-line px-2.5">
+              <RowIcon><Boat size={18} /></RowIcon>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-medium">Próxima saída</span>
+                <span className="block truncate text-[12.5px] text-ink-3">{vehicleOf(next).name}</span>
+              </span>
+              <span className="pr-[19px] font-mono text-[16px] font-medium">{fmt(next.start)}</span>
+            </div>
+          )}
+
+          <div className="flex min-h-[56px] items-center gap-3 border-t border-line px-2.5 py-1.5">
+            <RowIcon tone={online ? 'bg-sunken text-ink-2' : 'bg-gold-tint text-gold-deep'}>
+              {online ? <WifiHigh size={18} /> : <WifiSlash size={18} />}
+            </RowIcon>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-medium">Sem internet</span>
+              {!online && <span className="block text-[12.5px] leading-snug text-ink-3">Salvo no celular, envia quando voltar o sinal</span>}
+            </span>
+            <Switch checked={!online} onChange={(v) => setOnline(!v)} label="Sem internet" />
+          </div>
         </Card>
       </Reveal>
     </Screen>

@@ -2,13 +2,14 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Wrench } from '@phosphor-icons/react'
-import { Card, CardHeader, StatusChip, KindDot, Avatar, cx, ease, useMedia } from '../../components/ui'
+import { Wrench, Boat, Van, Car } from '@phosphor-icons/react'
+import { CardHeader, StatusChip, KindDot, Avatar, cx, ease, useMedia } from '../../components/ui'
 import { DEPARTURES, VEHICLES, KIND, tourOf, guideById, vehicleOf } from '../../data/mock'
 import { viewStats, vehicleUse, DAY_START, DAY_END, PHASE, PHASE_TONE, UNAVAILABLE, clamp01, range, t } from './helpers'
 
 const HOURS = Array.from({ length: (DAY_END - DAY_START) / 60 }, (_, i) => DAY_START / 60 + i)
-const HEAD_H = 62
+const HEAD_H = 68
+export const KIND_ICON = { boat: Boat, land: Van, transfer: Car }
 
 export default function Timeline({ now, status }) {
   const mobile = useMedia('(max-width: 767px)')
@@ -64,14 +65,14 @@ export default function Timeline({ now, status }) {
   const showNow = now >= DAY_START && now <= DAY_END
 
   return (
-    <Card className="p-4 md:p-5">
+    <section className="rounded-[24px] bg-frame p-4 shadow-soft md:p-5">
       <CardHeader
         className="px-1"
         title="Linha do dia"
         right={
           <div className="hidden items-center gap-4 pr-1 md:flex">
             {Object.entries(KIND).map(([k, v]) => (
-              <span key={k} className="inline-flex items-center gap-1.5 text-[12px] text-ink-3">
+              <span key={k} className="inline-flex items-center gap-1.5 text-[12px] text-ink-2">
                 <KindDot kind={k} className="!size-[7px]" />
                 {v.label}
               </span>
@@ -89,7 +90,7 @@ export default function Timeline({ now, status }) {
           <div className="relative" style={{ width: leftW + gridW }}>
             {/* Cabeçalho de horas */}
             <div className="relative flex" style={{ height: HEAD_H }}>
-              <div className="sticky left-0 z-20 shrink-0 bg-surface" style={{ width: leftW }} />
+              <div className="sticky left-0 z-20 shrink-0 bg-frame" style={{ width: leftW }} />
               {HOURS.map((h) => {
                 const isNow = h === nowHour
                 const past = h < nowHour
@@ -97,8 +98,8 @@ export default function Timeline({ now, status }) {
                   <div key={h} className="shrink-0 px-[3px]" style={{ width: hourW }}>
                     <div
                       className={cx(
-                        'flex h-[34px] items-center justify-center rounded-[11px] font-mono text-[11.5px] font-medium tnum transition-colors duration-500',
-                        isNow ? 'bg-now text-white shadow-dark' : past ? 'bg-frame text-ink-4' : 'bg-frame text-ink-2',
+                        'flex h-[40px] items-center justify-center rounded-[12px] font-mono text-[12.5px] tnum transition-colors duration-500',
+                        isNow ? 'bg-now font-semibold text-white shadow-dark' : past ? 'bg-surface/50 font-medium text-ink-4' : 'bg-surface font-semibold text-ink shadow-pill',
                       )}
                     >
                       {h}:00
@@ -115,15 +116,15 @@ export default function Timeline({ now, status }) {
               const use = vehicleUse(v.id)
               return (
                 <div key={v.id} className="relative flex" style={{ height: rowH }}>
-                  <div className="sticky left-0 z-20 shrink-0 bg-surface py-[3px] pr-[3px]" style={{ width: leftW }}>
-                    <div className="flex h-full flex-col justify-center rounded-[14px] bg-frame px-3">
+                  <div className="sticky left-0 z-20 shrink-0 bg-frame py-[3px] pr-[3px]" style={{ width: leftW }}>
+                    <div className="flex h-full flex-col justify-center rounded-[14px] bg-surface px-3 shadow-pill">
                       <div className="flex min-w-0 items-center gap-2">
                         <KindDot kind={v.kind} className="!size-[7px] shrink-0" />
                         <span className="truncate text-[12.5px] font-semibold leading-tight text-ink md:text-[13px]">{v.name}</span>
                       </div>
                       <div className="mt-2 flex items-center gap-2">
                         <span className="shrink-0 text-[11px] text-ink-3 tnum">{v.capacity} lugares</span>
-                        <div className="hidden h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-line md:block">
+                        <div className="hidden h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-sunken md:block">
                           <motion.div
                             className="h-full rounded-full"
                             style={{ background: KIND[v.kind].color }}
@@ -140,7 +141,7 @@ export default function Timeline({ now, status }) {
                     <div className="absolute inset-0 flex">
                       {HOURS.map((h) => (
                         <div key={h} className="shrink-0 p-[3px]" style={{ width: hourW }}>
-                          <div className={cx('h-full rounded-[12px] transition-colors duration-500', h === nowHour ? 'bg-now-tint' : 'bg-frame/70')} />
+                          <div className={cx('h-full rounded-[12px]', h < nowHour ? 'bg-surface/45' : 'bg-surface/80')} />
                         </div>
                       ))}
                     </div>
@@ -181,16 +182,16 @@ export default function Timeline({ now, status }) {
               <motion.div
                 aria-hidden
                 className="pointer-events-none absolute bottom-0 z-10"
-                style={{ top: 40, left: leftW }}
+                style={{ top: 44, left: leftW }}
                 initial={false}
                 animate={{ x: x(now) }}
                 transition={{ duration: reduce ? 0 : 1.4, ease: 'linear' }}
               >
-                <div className="absolute bottom-2 left-0 top-[22px] -translate-x-1/2 border-l-[1.5px] border-dashed border-now/70" />
+                <div className="absolute bottom-2 left-0 top-[22px] -translate-x-1/2 border-l-[1.5px] border-dashed border-now" />
                 <div className="absolute left-0 top-0 grid h-[22px] -translate-x-1/2 place-items-center rounded-full bg-now px-2 font-mono text-[11px] font-semibold text-white tnum shadow-dark">
                   {t(now)}
                 </div>
-                <div className="absolute bottom-0 left-0 size-2 -translate-x-1/2 rounded-full bg-now ring-[3px] ring-now-tint" />
+                <div className="absolute bottom-0 left-0 size-2 -translate-x-1/2 rounded-full bg-now ring-[3px] ring-surface" />
               </motion.div>
             )}
           </div>
@@ -198,14 +199,14 @@ export default function Timeline({ now, status }) {
 
         {/* Bordas de rolagem */}
         <div
-          className={cx('pointer-events-none absolute inset-y-0 z-30 w-6 bg-gradient-to-r from-ink/[0.05] to-transparent transition-opacity duration-200', edge.l ? 'opacity-100' : 'opacity-0')}
+          className={cx('pointer-events-none absolute inset-y-0 z-30 w-6 bg-gradient-to-r from-ink/[0.06] to-transparent transition-opacity duration-200', edge.l ? 'opacity-100' : 'opacity-0')}
           style={{ left: leftW }}
         />
-        <div className={cx('pointer-events-none absolute inset-y-0 right-0 z-30 w-10 bg-gradient-to-l from-surface to-transparent transition-opacity duration-200', edge.r ? 'opacity-100' : 'opacity-0')} />
+        <div className={cx('pointer-events-none absolute inset-y-0 right-0 z-30 w-10 bg-gradient-to-l from-frame to-transparent transition-opacity duration-200', edge.r ? 'opacity-100' : 'opacity-0')} />
       </div>
 
       <Tip tip={tip} now={now} status={status} />
-    </Card>
+    </section>
   )
 }
 
@@ -213,6 +214,7 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
   const tour = tourOf(d)
   const vehicle = vehicleOf(d)
   const k = KIND[tour.kind]
+  const Icon = KIND_ICON[tour.kind]
   const st = viewStats(d, status, now)
   const s = Math.max(d.start, DAY_START)
   const e = Math.min(d.end, DAY_END)
@@ -221,10 +223,14 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
   const h = Math.min(50, rowH - 14)
   const prog = clamp01((now - d.start) / (d.end - d.start))
   const compact = width < 118
-  const active = st.phase === 'live' || st.phase === 'boarding'
-  const showChip = active && width >= 236
+  const showIcon = width >= 84
+  const showChip = width >= 250
+  const solid = st.phase !== 'scheduled'
   const done = st.phase === 'done'
-  const over = st.phase === 'scheduled' && st.total > vehicle.capacity
+  const live = st.phase === 'live' || st.phase === 'boarding'
+  const over = !solid && st.total > vehicle.capacity
+  const dark = tour.kind === 'boat' // ouro pede texto negro
+  const fg = solid ? (dark ? 'text-negro' : 'text-white') : 'text-ink'
 
   return (
     <motion.button
@@ -240,28 +246,45 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
       whileHover={reduce ? undefined : { y: -2 }}
       whileTap={{ scale: 0.985 }}
       transition={{ duration: 0.38, ease, delay: reduce ? 0 : 0.12 + i * 0.03, y: { type: 'spring', stiffness: 520, damping: 32 } }}
-      className="group absolute z-[5] overflow-hidden rounded-[14px] text-left shadow-[0_1px_2px_rgba(20,18,15,.06)] transition-shadow duration-200 hover:z-[6] hover:shadow-lift"
-      style={{ left, width, top: (rowH - h) / 2, height: h, background: k.tint }}
-    >
-      {prog > 0 && prog < 1 && (
-        <motion.span
-          className="absolute inset-y-0 left-0"
-          style={{ background: `color-mix(in oklab, ${k.color} 16%, transparent)` }}
-          initial={false}
-          animate={{ width: `${prog * 100}%` }}
-          transition={{ duration: reduce ? 0 : 1.4, ease: 'linear' }}
-        />
+      className={cx(
+        'group absolute z-[5] overflow-hidden rounded-[14px] text-left transition-shadow duration-200 hover:z-[6] hover:shadow-lift',
+        solid ? 'shadow-[0_6px_16px_-10px_rgba(20,18,15,.55)]' : 'backdrop-blur-[2px]',
+        fg,
       )}
-      <span className="absolute inset-y-[9px] left-[6px] w-[3px] rounded-full" style={{ background: k.color }} />
+      style={{
+        left, width, top: (rowH - h) / 2, height: h,
+        background: solid ? k.color : `color-mix(in oklab, ${k.tint} 82%, transparent)`,
+        boxShadow: solid ? undefined : `inset 0 0 0 1px color-mix(in oklab, ${k.color} 55%, transparent)`,
+      }}
+    >
+      {/* Progresso do passeio em curso */}
+      {live && prog > 0 && (
+        <span className={cx('absolute inset-x-3 bottom-[5px] h-[2px] overflow-hidden rounded-full', dark ? 'bg-negro/15' : 'bg-white/25')}>
+          <motion.span
+            className={cx('block h-full rounded-full', dark ? 'bg-negro/60' : 'bg-white/85')}
+            initial={false}
+            animate={{ width: `${prog * 100}%` }}
+            transition={{ duration: reduce ? 0 : 1.4, ease: 'linear' }}
+          />
+        </span>
+      )}
 
-      <span className={cx('relative flex h-full items-center gap-2 pr-2', compact ? 'pl-3.5' : 'pl-4')}>
+      <span className={cx('relative flex h-full items-center gap-2.5 pr-2', showIcon ? 'pl-2' : 'pl-3')}>
+        {showIcon && (
+          <span
+            className={cx('grid size-[30px] shrink-0 place-items-center rounded-full', solid ? (dark ? 'bg-white/30' : 'bg-white/20') : 'bg-surface/80')}
+            style={solid ? undefined : { color: k.color }}
+          >
+            <Icon size={15} weight={solid ? 'fill' : 'regular'} />
+          </span>
+        )}
         <span className="min-w-0 flex-1 overflow-hidden">
           {compact ? (
-            <span className="block truncate font-mono text-[11.5px] font-semibold text-ink tnum">{t(d.start)}</span>
+            <span className="block truncate font-mono text-[11.5px] font-semibold tnum">{t(d.start)}</span>
           ) : (
             <>
-              <span className="block truncate text-[12.5px] font-semibold leading-[1.2] text-ink">{tour.short}</span>
-              <span className="mt-[3px] flex items-center gap-2 overflow-hidden whitespace-nowrap text-[11px] text-ink-2/75">
+              <span className="block truncate text-[12.5px] font-semibold leading-[1.2]">{tour.short}</span>
+              <span className="mt-[3px] flex items-center gap-2 overflow-hidden whitespace-nowrap text-[11px] opacity-75">
                 <span className="shrink-0 font-mono tnum">{over ? t(d.start) : range(d)}</span>
                 {over && <span className="shrink-0 font-semibold text-alert tnum">{st.total}/{vehicle.capacity}</span>}
               </span>
@@ -269,7 +292,7 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
           )}
         </span>
         {showChip && (
-          <StatusChip tone={PHASE_TONE[st.phase]} live className="shrink-0">
+          <StatusChip tone={PHASE_TONE[st.phase]} live={live} className="shrink-0 !text-ink">
             {PHASE[st.phase]}
           </StatusChip>
         )}
