@@ -1,11 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { DeviceMobile, Scan, WifiHigh, WifiSlash } from '@phosphor-icons/react'
+import { DeviceMobile, Scan, SteeringWheel, Timer, User, UsersThree, WifiHigh, WifiSlash } from '@phosphor-icons/react'
 import { Avatar, Button, CountUp, IconButton, LangTag, Reveal, cx, ease, useMedia } from '../components/ui'
 import { DEPARTURES, depById, fmt, guideById, tourOf, vehicleOf } from '../data/mock'
 import { useOps, depPhase, depStats, paxOfDep } from '../store'
-import { SeatPlan, Legend, computeLayout } from './embarque/SeatPlan'
+import { SeatPlan, CapacityLine, computeLayout, orderByBooking } from './embarque/SeatPlan'
 import {
   BottomSheet, DepartureList, DepartureStrip, GuideColumn, GuideSheet, Manifest, PaxDetail, PhaseChip, depTitle, groupDepartures, paxState,
 } from './embarque/parts'
@@ -25,6 +25,18 @@ function useWidth(ref) {
     return () => ro.disconnect()
   }, [])
   return w
+}
+
+function Metric({ icon: Icon, label, children, className }) {
+  return (
+    <div className={cx('flex min-w-0 items-center gap-3', className)}>
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sunken text-ink-2"><Icon size={18} /></span>
+      <div className="min-w-0">
+        <p className="text-[12px] text-ink-3">{label}</p>
+        <div className="mt-0.5 truncate">{children}</div>
+      </div>
+    </div>
+  )
 }
 
 const fmtDiff = (m) => {
@@ -49,8 +61,8 @@ function Hero({ dep, now, pax, status, stats, online, guideOpen, onToggleGuide, 
 
   const time =
     phase === 'boarding' || phase === 'scheduled'
-      ? { label: 'Sai em', value: <span className="text-[20px] font-semibold tracking-[-0.02em] tnum">{fmtDiff(Math.max(0, diff))}</span> }
-      : { label: phase === 'live' ? 'Volta às' : 'Voltou às', value: <span className="font-mono text-[20px] font-medium tracking-[-0.02em]">{fmt(dep.end)}</span> }
+      ? { label: 'Sai em', value: <span className="text-[16px] font-semibold tnum">{fmtDiff(Math.max(0, diff))}</span> }
+      : { label: phase === 'live' ? 'Volta às' : 'Voltou às', value: <span className="font-mono text-[16px] font-medium">{fmt(dep.end)}</span> }
 
   return (
     <section className="@container rounded-[24px] bg-surface p-4 shadow-soft sm:p-6">
@@ -78,48 +90,34 @@ function Hero({ dep, now, pax, status, stats, online, guideOpen, onToggleGuide, 
         </div>
       </div>
 
-      <div className="mt-5 flex flex-col gap-5 border-t border-line pt-5 @4xl:flex-row @4xl:items-center @4xl:gap-0">
-        <div className="min-w-0 @4xl:flex-1 @4xl:pr-8">
-          <p className="flex items-baseline gap-2">
-            <CountUp value={stats.boarded} className="text-[44px] font-semibold leading-none tracking-[-0.035em]" />
-            <span className="text-[20px] font-medium tracking-[-0.02em] text-ink-3 tnum">de {stats.total}</span>
-            <span className="text-[14px] text-ink-2">embarcados</span>
-          </p>
-          <div className="mt-3.5 flex gap-[3px]" aria-hidden>
+      <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-line pt-5 @4xl:flex @4xl:items-center @4xl:gap-0">
+        <div className="col-span-2 min-w-0 @4xl:flex-1 @4xl:pr-6">
+          <Metric icon={UsersThree} label="Embarcados">
+            <span className="text-[22px] font-semibold tracking-[-0.02em] tnum">
+              <CountUp value={stats.boarded} /> <span className="text-ink-3">de {stats.total}</span>
+            </span>
+          </Metric>
+          <div className="mt-3 flex gap-[3px]" aria-hidden>
             {segs.map((p) => {
               const s = paxState(status[p.id])
-              return <span key={p.id} className={cx('h-[6px] flex-1 rounded-full transition-colors duration-300', s === 'boarded' ? 'bg-ok' : s === 'noshow' ? 'bg-ink-4' : 'bg-sunken')} />
+              return <span key={p.id} className={cx('h-[5px] flex-1 rounded-full transition-colors duration-300', s === 'boarded' ? 'bg-ok' : s === 'noshow' ? 'bg-ink-4' : 'bg-sunken')} />
             })}
           </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-4 @4xl:flex @4xl:items-center @4xl:gap-0">
-          <div className="@4xl:border-l @4xl:border-line @4xl:px-6">
-            <p className="text-[12px] text-ink-3">{time.label}</p>
-            <div className="mt-0.5">{time.value}</div>
-          </div>
-          <div className="@4xl:order-3 @4xl:border-l @4xl:border-line @4xl:pl-6">
-            <p className="text-[12px] text-ink-3">{boat ? 'Piloto' : 'Motorista'}</p>
-            <p className="mt-1 truncate text-[14px] font-medium">{vehicle.skipper}</p>
-          </div>
-          <div className="col-span-2 flex min-w-0 items-center gap-3 @4xl:order-2 @4xl:border-l @4xl:border-line @4xl:px-6">
+        <Metric icon={Timer} label={time.label} className="@4xl:border-l @4xl:border-line @4xl:px-6">{time.value}</Metric>
+        <Metric icon={SteeringWheel} label={boat ? 'Piloto' : 'Motorista'} className="@4xl:order-3 @4xl:border-l @4xl:border-line @4xl:pl-6">
+          <span className="text-[14px] font-medium">{vehicle.skipper}</span>
+        </Metric>
+        <div className="col-span-2 flex min-w-0 items-center gap-3 @4xl:order-2 @4xl:border-l @4xl:border-line @4xl:px-6">
+          {guide ? <Avatar initials={guide.initials} hue={guide.hue} size={40} /> : <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sunken text-ink-3"><User size={18} /></span>}
+          <div className="min-w-0">
+            <p className="text-[12px] text-ink-3">Guia</p>
             {guide ? (
-              <>
-                <Avatar initials={guide.initials} hue={guide.hue} size={38} />
-                <div className="min-w-0">
-                  <p className="text-[12px] text-ink-3">Guia</p>
-                  <div className="mt-0.5 flex items-center gap-2">
-                    <span className="truncate text-[14px] font-medium">{guide.name}</span>
-                    <span className="flex gap-1">{guide.langs.map((l) => <LangTag key={l} code={l} />)}</span>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div>
-                <p className="text-[12px] text-ink-3">Guia</p>
-                <p className="mt-1 text-[14px] text-ink-3">Sem guia</p>
+              <div className="mt-0.5 flex items-center gap-2">
+                <span className="truncate text-[14px] font-medium">{guide.name}</span>
+                <span className="flex gap-1">{guide.langs.map((l) => <LangTag key={l} code={l} />)}</span>
               </div>
-            )}
+            ) : <p className="mt-0.5 text-[14px] text-ink-3">Sem guia</p>}
           </div>
         </div>
       </div>
@@ -169,7 +167,7 @@ function PlanCard({ dep, pax, status, stats, hoverId, setHoverId, selectedId, se
                 onSelect={setSelectedId}
                 pulse={pulse}
               />
-              <Legend queued={stats.queued} noshow={stats.noshow} />
+              <CapacityLine capacity={vehicle.capacity} stats={stats} boat={vehicle.kind === 'boat'} />
             </div>
             <AnimatePresence mode="wait" initial={false}>
               {showPanel && (
@@ -182,7 +180,7 @@ function PlanCard({ dep, pax, status, stats, hoverId, setHoverId, selectedId, se
                   className={cx('@container min-w-0', plan.side ? 'shrink-0 py-1' : 'px-1 pt-1')}
                   style={plan.side ? { width: PANEL } : undefined}
                 >
-                  <PaxDetail p={sel} st={status[sel.id]} onClose={() => setSelectedId(null)} actions={actions(sel.id)} />
+                  <PaxDetail p={sel} st={status[sel.id]} groupSize={pax.filter((x) => x.booking === sel.booking).length} onClose={() => setSelectedId(null)} actions={actions(sel.id)} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -192,7 +190,7 @@ function PlanCard({ dep, pax, status, stats, hoverId, setHoverId, selectedId, se
 
       {mobile && (
         <BottomSheet open={!!sel} onClose={() => setSelectedId(null)}>
-          {sel && <PaxDetail p={sel} st={status[sel.id]} onClose={() => setSelectedId(null)} actions={actions(sel.id)} />}
+          {sel && <PaxDetail p={sel} st={status[sel.id]} groupSize={pax.filter((x) => x.booking === sel.booking).length} onClose={() => setSelectedId(null)} actions={actions(sel.id)} />}
         </BottomSheet>
       )}
     </section>
@@ -233,10 +231,10 @@ function DepartureView({ dep, guideOpen, onToggleGuide }) {
   })
 
   const simulate = () => {
-    const next = pax.find((p) => paxState(status[p.id]) === 'waiting')
+    const next = orderByBooking(pax, status).find((p) => paxState(status[p.id]) === 'waiting')
     if (!next) return
     board(next.id, 'qr')
-    showToast(`${next.name} embarcou · ${next.seat}`, { label: 'Desfazer', fn: () => useOps.getState().unboard(next.id) })
+    showToast(`${next.name} embarcou`, { label: 'Desfazer', fn: () => useOps.getState().unboard(next.id) })
   }
 
   const shared = { pax, status, hoverId, setHoverId, selectedId, setSelectedId }

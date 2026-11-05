@@ -62,13 +62,13 @@ function DepartureItem({ d, now, status, active, onClick }) {
       aria-current={active ? 'true' : undefined}
       className={cx(
         'relative flex h-12 w-full items-center gap-3 rounded-[16px] pl-4 pr-3 text-left transition-[background,box-shadow] duration-150 active:scale-[0.99]',
-        active ? 'bg-surface shadow-pill' : 'hover:bg-surface/60',
+        active ? 'bg-gold text-negro shadow-[0_8px_20px_-12px_rgba(20,18,15,.45)]' : 'hover:bg-surface/60',
       )}
     >
-      <span className="absolute bottom-3.5 left-[7px] top-3.5 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color, opacity: done && !active ? 0.4 : 1 }} />
-      <span className={cx('w-[42px] shrink-0 font-mono text-[13px] tnum', active ? 'text-ink' : 'text-ink-2')}>{fmt(d.start)}</span>
-      <span className={cx('min-w-0 flex-1 truncate text-[13.5px] font-medium', done && !active ? 'text-ink-3' : 'text-ink')}>{depTitle(d)}</span>
-      <span className="shrink-0 text-[12.5px] tnum text-ink-3"><span className="text-ink">{st.boarded}</span>/{st.total}</span>
+      {!active && <span className="absolute bottom-3.5 left-[7px] top-3.5 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color, opacity: done ? 0.4 : 1 }} />}
+      <span className={cx('w-[42px] shrink-0 font-mono text-[13px] tnum', active ? 'text-negro' : 'text-ink-2')}>{fmt(d.start)}</span>
+      <span className={cx('min-w-0 flex-1 truncate text-[13.5px] font-medium', done && !active ? 'text-ink-3' : active ? 'text-negro' : 'text-ink')}>{depTitle(d)}</span>
+      <span className={cx('shrink-0 text-[12.5px] tnum', active ? 'text-negro/70' : 'text-ink-3')}><span className={active ? 'text-negro' : 'text-ink'}>{st.boarded}</span>/{st.total}</span>
     </button>
   )
 }
@@ -109,13 +109,13 @@ export function DepartureStrip({ groups, status, activeId, onPick }) {
               aria-current={active ? 'true' : undefined}
               className={cx(
                 'relative flex w-[164px] shrink-0 snap-start flex-col gap-1 overflow-hidden rounded-[18px] py-2.5 pl-4 pr-3 text-left transition-[background,box-shadow] duration-150 active:scale-[0.98]',
-                active ? 'bg-surface shadow-pill' : 'bg-frame/70 hover:bg-surface/70',
+                active ? 'bg-gold text-negro' : 'bg-frame/70 hover:bg-surface/70',
               )}
             >
-              <span className="absolute bottom-3 left-[7px] top-3 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color }} />
+              {!active && <span className="absolute bottom-3 left-[7px] top-3 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color }} />}
               <span className="flex items-center justify-between">
                 <span className="font-mono text-[13px] tnum">{fmt(d.start)}</span>
-                <span className="text-[12px] tnum text-ink-3"><span className="text-ink">{st.boarded}</span>/{st.total}</span>
+                <span className={cx('text-[12px] tnum', active ? 'text-negro/70' : 'text-ink-3')}><span className={active ? 'text-negro' : 'text-ink'}>{st.boarded}</span>/{st.total}</span>
               </span>
               <span className="truncate text-[13px] font-medium">{depTitle(d)}</span>
             </button>
@@ -137,7 +137,7 @@ function Row({ label, children }) {
   )
 }
 
-export function PaxDetail({ p, st, onClose, actions }) {
+export function PaxDetail({ p, st, groupSize = 1, onClose, actions }) {
   const s = paxState(st)
   const meta = [p.hotel, CHANNELS[p.channel].label, p.child && 'Criança'].filter(Boolean).join(' · ')
   return (
@@ -151,13 +151,15 @@ export function PaxDetail({ p, st, onClose, actions }) {
       </div>
 
       <div className="mt-4 flex items-center justify-between rounded-[14px] bg-sunken px-3.5 py-3">
-        <span className="font-mono text-[22px] font-medium tracking-[-0.03em]">{p.seat}</span>
+        <span className="flex items-baseline gap-1.5">
+          <span className="font-mono text-[15px] font-medium">{p.booking}</span>
+          <span className="text-[12.5px] text-ink-3 tnum">· {groupSize} {groupSize === 1 ? 'pessoa' : 'pessoas'}</span>
+        </span>
         <PaxStatusChip st={st} />
       </div>
 
       <div className="mt-1.5 grid gap-x-8 @2xl:grid-cols-2">
         <Row label="Idioma">{LANGS[p.lang].label}</Row>
-        <Row label="Reserva"><span className="font-mono text-[12.5px]">{p.booking}</span></Row>
         {s === 'boarded' && (
           <>
             <Row label="Embarcou">
@@ -186,7 +188,7 @@ export function PaxDetail({ p, st, onClose, actions }) {
 
 /* ---------- lista de embarque ---------- */
 
-const COLS = '@2xl:grid-cols-[minmax(0,1fr)_64px_100px_56px_112px_56px]'
+const COLS = '@2xl:grid-cols-[minmax(0,1fr)_64px_128px_112px_56px]'
 
 export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelect }) {
   const [filter, setFilter] = useState('all')
@@ -203,8 +205,9 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
     if (filter === 'waiting' && s !== 'waiting') return false
     if (!q) return true
     const n = norm(q)
-    return [p.name, p.booking, p.seat].some((f) => norm(String(f)).includes(n))
+    return [p.name, p.booking].some((f) => norm(String(f)).includes(n))
   })
+  const size = useMemo(() => { const m = {}; pax.forEach((p) => { m[p.booking] = (m[p.booking] || 0) + 1 }); return m }, [pax])
   const label = (t, n) => <span className="inline-flex items-center gap-1.5">{t}<span className="text-[11.5px] tnum text-ink-3">{n}</span></span>
 
   return (
@@ -237,13 +240,16 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
       </div>
 
       <div className={cx('mt-4 hidden h-8 items-center gap-3 rounded-[10px] bg-sunken px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 @2xl:grid', COLS)}>
-        <span>Nome</span><span>Idioma</span><span>Reserva</span><span>Lugar</span><span>Status</span><span className="text-right">Hora</span>
+        <span>Nome</span><span>Idioma</span><span>Reserva</span><span>Status</span><span className="text-right">Hora</span>
       </div>
 
       <ul className="mt-2 flex flex-col gap-1.5 @2xl:gap-0">
         <AnimatePresence initial={false}>
-          {rows.map((p) => {
+          {rows.map((p, ri) => {
             const st = status[p.id]
+            const prevSame = rows[ri - 1]?.booking === p.booking
+            const nextSame = rows[ri + 1]?.booking === p.booking
+            const inGroup = prevSame || nextSame
             const s = paxState(st)
             const hot = hoverId === p.id
             const sel = selectedId === p.id
@@ -254,21 +260,23 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
                   onMouseLeave={() => setHoverId(null)}
                   onClick={() => onSelect(sel ? null : p.id)}
                   className={cx(
-                    'flex w-full items-center gap-3 rounded-[14px] p-2.5 text-left transition-[background,box-shadow] duration-150 @2xl:grid @2xl:min-h-[50px] @2xl:p-0 @2xl:px-3',
+                    'relative flex w-full items-center gap-3 rounded-[14px] p-2.5 pl-4 text-left transition-[background,box-shadow] duration-150 @2xl:grid @2xl:min-h-[50px] @2xl:p-0 @2xl:px-3',
                     COLS,
                     sel ? 'bg-sunken ring-1 ring-ink/15' : hot ? 'bg-sunken' : 'bg-sunken/60 @2xl:bg-transparent',
                   )}
                 >
+                  {inGroup && (
+                    <span aria-hidden className={cx('absolute left-1.5 w-[2px] rounded-full bg-ink/15', prevSame ? 'top-0 @2xl:top-0' : 'top-3', nextSame ? 'bottom-0' : 'bottom-3')} />
+                  )}
                   <span className="flex min-w-0 flex-1 items-center gap-2.5">
                     <PaxAvatar p={p} size={32} />
                     <span className="truncate text-[13.5px] font-medium">{p.name}</span>
                     <LangTag code={p.lang} className="@2xl:hidden" />
                   </span>
                   <span className="hidden @2xl:block"><LangTag code={p.lang} /></span>
-                  <span className="hidden font-mono text-[12px] text-ink-2 @2xl:block">{p.booking}</span>
-                  <span className={cx('grid h-7 min-w-[34px] shrink-0 place-items-center justify-self-start rounded-[8px] px-1.5 font-mono text-[11.5px] font-semibold',
-                    s === 'boarded' ? 'bg-ok-tint text-ok' : s === 'noshow' ? 'hatch text-ink-3' : 'border border-ink-4 text-ink-2')}>
-                    {p.seat}
+                  <span className="hidden text-[12px] text-ink-2 @2xl:block">
+                    <span className="font-mono">{p.booking}</span>
+                    {size[p.booking] > 1 && <span className="text-ink-3 tnum"> · {size[p.booking]}</span>}
                   </span>
                   <span className="hidden @2xl:block"><PaxStatusChip st={st} /></span>
                   <span className="hidden items-center justify-end gap-1 font-mono text-[12px] text-ink-2 @2xl:flex">

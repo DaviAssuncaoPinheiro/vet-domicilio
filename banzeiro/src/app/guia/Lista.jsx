@@ -83,7 +83,7 @@ export default function Lista() {
           onChange={setListFilter}
           options={[
             { value: 'all', label: 'Todos', count: stats.total },
-            { value: 'boarded', label: 'Embarcados', count: stats.boarded },
+            { value: 'boarded', label: 'A bordo', count: stats.boarded },
             { value: 'waiting', label: 'Aguardando', count: stats.waiting },
           ]}
         />

@@ -35,13 +35,12 @@ export default function Painel() {
       <Reveal i={2} className="min-w-0"><Timeline now={now} status={status} /></Reveal>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-12 md:gap-4">
-        <div className="flex min-w-0 flex-col gap-3 md:col-span-6 md:gap-4 xl:col-span-4">
-          <Reveal i={3}><NowCard now={now} status={status} /></Reveal>
-          <Reveal i={4}><Proximas now={now} status={status} /></Reveal>
-        </div>
+        <Reveal i={3} className="order-first h-full min-w-0 md:col-span-12 xl:order-last xl:col-span-4"><NowCard now={now} status={status} /></Reveal>
+        <Reveal i={4} className="h-full min-w-0 md:col-span-6 xl:col-span-4"><Proximas now={now} status={status} /></Reveal>
         <Reveal i={5} className="h-full min-w-0 md:col-span-6 xl:col-span-4"><Pendencias now={now} /></Reveal>
-        <Reveal i={6} className="min-w-0 md:col-span-12 xl:col-span-4"><Atividade now={now} status={status} /></Reveal>
       </div>
+
+      <Reveal i={6} className="min-w-0"><Atividade now={now} /></Reveal>
     </div>
   )
 }

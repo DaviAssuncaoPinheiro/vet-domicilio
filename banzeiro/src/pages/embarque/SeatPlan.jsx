@@ -179,38 +179,58 @@ export function computeLayout(vehicle, s, orient) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Assento                                                             */
+/* Lugares: sem assento marcado. Passageiros ocupam os lugares na      */
+/* ordem de embarque, agrupados por reserva.                           */
 /* ------------------------------------------------------------------ */
 
-function Seat({ seat, p, st, s, orient, selected, hovered, grouped, pulse, onEnter, onLeave, onClick }) {
+export function orderByBooking(pax, status) {
+  const groups = new Map()
+  pax.forEach((p, i) => {
+    if (!groups.has(p.booking)) groups.set(p.booking, { first: i, items: [] })
+    groups.get(p.booking).items.push({ p, i })
+  })
+  const at = (p) => (status[p.id]?.s === 'boarded' ? status[p.id].at : Infinity)
+  const rank = (p) => (status[p.id]?.s === 'boarded' ? 0 : status[p.id]?.s === 'noshow' ? 2 : 1)
+  const cmp = (x, y) => (x === y ? 0 : x < y ? -1 : 1)
+  return [...groups.values()]
+    .map((g) => ({ ...g, t: Math.min(...g.items.map((x) => at(x.p))) }))
+    .sort((a, b) => cmp(a.t, b.t) || a.first - b.first)
+    .flatMap((g) => g.items.sort((a, b) => rank(a.p) - rank(b.p) || cmp(at(a.p), at(b.p)) || a.i - b.i).map((x) => x.p))
+}
+
+function Place({ place, p, st, s, orient, selected, hovered, grouped, pulse, onEnter, onLeave, onClick }) {
   const reduce = useReducedMotion()
   const mounted = useRef(false)
   useEffect(() => { mounted.current = true }, [])
-  const state = !p ? 'free' : st?.s === 'boarded' ? 'boarded' : st?.s === 'noshow' ? 'noshow' : 'waiting'
+  const state = st?.s === 'boarded' ? 'boarded' : st?.s === 'noshow' ? 'noshow' : 'waiting'
   const v = orient === 'v'
   const small = s < 40
   const queued = state === 'boarded' && st?.synced === false
   const sweepFrom = v ? 'inset(100% 0 0 0 round 10px)' : 'inset(0 100% 0 0 round 10px)'
-  const label = !p ? `Assento ${seat.label}, livre` : `Assento ${seat.label}, ${p.name}, ${state === 'boarded' ? 'embarcado' : state === 'noshow' ? 'faltou' : 'aguardando'}`
+  const ini = p.name.split(' ').map((w) => w[0]).slice(0, 2).join('')
 
   return (
-    <div className="absolute" style={{ left: seat.left, top: seat.top, width: seat.width, height: seat.height, zIndex: selected || hovered ? 5 : 1 }}>
+    <motion.div
+      className="absolute"
+      initial={false}
+      animate={{ left: place.left, top: place.top }}
+      transition={reduce ? { duration: 0 } : { duration: 0.35, ease }}
+      style={{ width: place.width, height: place.height, zIndex: selected || hovered ? 5 : 2 }}
+    >
       <button
         type="button"
-        aria-label={label}
+        aria-label={`${p.name}, ${state === 'boarded' ? 'embarcado' : state === 'noshow' ? 'faltou' : 'aguardando'}`}
         aria-pressed={selected}
-        disabled={!p}
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
         onFocus={onEnter}
         onBlur={onLeave}
         onClick={onClick}
         className={cx(
-          'group absolute inset-0 overflow-hidden rounded-[10px] transition-[box-shadow,transform,background-color] duration-150 enabled:active:scale-95 disabled:cursor-default',
-          state === 'free' && 'border border-dashed border-ink-4 text-ink-4',
-          state === 'waiting' && 'border-[1.5px] border-ink-3 bg-sunken text-ink-2',
+          'absolute inset-0 overflow-hidden rounded-[10px] transition-[box-shadow,transform,background-color] duration-150 active:scale-95',
+          state === 'waiting' && 'border-[1.5px] border-ink-4 bg-sunken text-ink-3',
           state === 'boarded' && 'bg-ok text-white',
-          state === 'noshow' && 'hatch text-ink-3',
+          state === 'noshow' && 'hatch text-ink-4',
           selected ? 'scale-[1.04] ring-2 ring-ink ring-offset-2 ring-offset-surface' : hovered ? 'ring-2 ring-ink/20' : '',
           grouped && !selected && !hovered && 'outline-1 outline-offset-2 outline-dashed outline-ink-4',
         )}
@@ -225,17 +245,9 @@ function Seat({ seat, p, st, s, orient, selected, hovered, grouped, pulse, onEnt
             transition={{ duration: 0.25, ease }}
           />
         )}
-        {/* encosto */}
-        <span
-          aria-hidden
-          className={cx('absolute rounded-[3px]', state === 'boarded' ? 'bg-white/20' : 'bg-ink/[0.07]')}
-          style={v ? { left: 4, right: 4, bottom: 3, height: Math.round(s * 0.16) } : { top: 4, bottom: 4, left: 3, width: Math.round(s * 0.16) }}
-        />
-        <span className={cx('relative grid h-full w-full place-items-center', v ? 'pb-[5px]' : 'pl-[5px]')}>
-          {state === 'boarded' ? (
-            <Check size={small ? 13 : 16} weight="bold" />
-          ) : (
-            <span className={cx('font-mono font-semibold tnum leading-none', small ? 'text-[10px]' : 'text-[11px]', state === 'noshow' && 'line-through decoration-ink-4')}>{seat.label}</span>
+        <span className="relative grid h-full w-full place-items-center">
+          {state === 'boarded' ? <Check size={small ? 13 : 16} weight="bold" /> : (
+            <span className={cx('font-semibold leading-none', small ? 'text-[10px]' : 'text-[11px]')}>{ini}</span>
           )}
         </span>
       </button>
@@ -259,7 +271,7 @@ function Seat({ seat, p, st, s, orient, selected, hovered, grouped, pulse, onEnt
           />
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
 
@@ -268,12 +280,26 @@ function Seat({ seat, p, st, s, orient, selected, hovered, grouped, pulse, onEnt
 /* ------------------------------------------------------------------ */
 
 export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHoverId, selectedId, onSelect, pulse }) {
-  const { width, height, seats, outer, inner, decor, console: cons, guideSpot, vest, boat, orient, s } = layout
-  const bySeat = useMemo(() => Object.fromEntries(pax.map((p) => [p.seat, p])), [pax])
+  const { width, height, seats: places, outer, inner, decor, console: cons, guideSpot, vest, boat, orient, s } = layout
+  const ordered = useMemo(() => orderByBooking(pax, status).slice(0, places.length), [pax, status, places.length])
+  const placeOf = useMemo(() => Object.fromEntries(ordered.map((p, i) => [p.id, places[i]])), [ordered, places])
   const hovered = pax.find((p) => p.id === hoverId)
-  const hoverSeat = hovered && seats.find((x) => x.label === hovered.seat)
+  const hoverPlace = hovered && placeOf[hovered.id]
   const skipperInitials = vehicle.skipper.split(' ').map((w) => w[0]).slice(0, 2).join('')
-  const v = orient === 'v'
+
+  // ligações entre lugares vizinhos da mesma reserva
+  const links = useMemo(() => {
+    const out = []
+    const c = (r) => [r.left + r.width / 2, r.top + r.height / 2]
+    ordered.forEach((p, i) => {
+      for (let j = i + 1; j < ordered.length && ordered[j].booking === p.booking; j++) {
+        const [x1, y1] = c(places[i]), [x2, y2] = c(places[j])
+        const dx = Math.abs(x1 - x2), dy = Math.abs(y1 - y2)
+        if ((dx < 1 && dy <= s * 1.9) || (dy < 1 && dx <= s * 1.9)) out.push({ key: `${p.id}-${ordered[j].id}`, x1, y1, x2, y2 })
+      }
+    })
+    return out
+  }, [ordered, places, s])
 
   return (
     <div className="relative" style={{ width, height }}>
@@ -281,8 +307,8 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
         <defs>
           <clipPath id={`deck-${vehicle.id}-${orient}`}><path d={inner} /></clipPath>
           <filter id="hull-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="14" stdDeviation="14" floodColor="#14120F" floodOpacity="0.10" />
-            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="#14120F" floodOpacity="0.06" />
+            <feDropShadow dx="0" dy="14" stdDeviation="14" style={{ floodColor: 'var(--color-ink)', floodOpacity: 0.1 }} />
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" style={{ floodColor: 'var(--color-ink)', floodOpacity: 0.06 }} />
           </filter>
         </defs>
 
@@ -300,15 +326,23 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
         {decor.glass && <path d={decor.glass} fill="var(--color-sunken)" stroke="var(--color-ink)" strokeOpacity={0.12} />}
         {decor.wheelRing && <circle cx={decor.wheelRing.c[0]} cy={decor.wheelRing.c[1]} r={decor.wheelRing.r} fill="none" stroke="var(--color-ink-3)" strokeWidth={2} />}
         {decor.door && <rect x={decor.door.left} y={decor.door.top} width={decor.door.width} height={decor.door.height} rx={4} fill="var(--color-frame)" stroke="var(--color-line)" strokeDasharray="3 3" />}
+
+        {/* lugares vazios */}
+        {places.map((r, i) => (
+          <rect key={i} x={r.left + 0.5} y={r.top + 0.5} width={r.width - 1} height={r.height - 1} rx={10} fill="none" stroke="var(--color-ink-4)" strokeDasharray="3 3" />
+        ))}
+        {/* mesma reserva */}
+        {links.map((l) => (
+          <line key={l.key} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke="var(--color-ink)" strokeOpacity={0.12} strokeWidth={Math.round(s * 0.2)} strokeLinecap="round" />
+        ))}
       </svg>
 
-      {/* console do piloto / motorista */}
       <div
         title={`${vehicle.skipper} · ${boat ? 'Piloto' : 'Motorista'}`}
         className="absolute grid place-items-center rounded-[10px] bg-negro text-white shadow-dark"
         style={{ left: cons.left, top: cons.top, width: cons.width, height: cons.height }}
       >
-        <span className={cx('font-mono font-semibold tracking-wide', s < 40 ? 'text-[9.5px]' : 'text-[10.5px]')}>{skipperInitials}</span>
+        <span className={cx('font-semibold tracking-wide', s < 40 ? 'text-[9.5px]' : 'text-[10.5px]')}>{skipperInitials}</span>
       </div>
 
       {guideSpot && guide && (
@@ -326,37 +360,34 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
 
       {vest && (
         <div
-          title="Coletes"
-          className={cx('absolute flex items-center justify-center gap-1 rounded-[8px] bg-gold-tint text-gold-deep')}
+          title={`${vehicle.capacity} coletes`}
+          className="absolute flex items-center justify-center rounded-[8px] bg-gold-tint text-gold-deep"
           style={{ left: vest.left, top: vest.top, width: vest.width, height: vest.height }}
         >
           <Lifebuoy size={s < 40 ? 11 : 13} weight="bold" />
         </div>
       )}
 
-      {seats.map((seat) => {
-        const p = bySeat[seat.label]
-        return (
-          <Seat
-            key={seat.label}
-            seat={seat}
-            p={p}
-            st={p && status[p.id]}
-            s={s}
-            orient={orient}
-            selected={!!p && p.id === selectedId}
-            hovered={!!p && p.id === hoverId}
-            grouped={!!p && !!hovered && hovered.id !== p.id && hovered.booking === p.booking}
-            pulse={p && pulse?.paxId === p.id ? pulse : null}
-            onEnter={() => p && setHoverId(p.id)}
-            onLeave={() => setHoverId(null)}
-            onClick={() => p && onSelect(p.id === selectedId ? null : p.id)}
-          />
-        )
-      })}
+      {ordered.map((p) => (
+        <Place
+          key={p.id}
+          place={placeOf[p.id]}
+          p={p}
+          st={status[p.id]}
+          s={s}
+          orient={orient}
+          selected={p.id === selectedId}
+          hovered={p.id === hoverId}
+          grouped={!!hovered && hovered.id !== p.id && hovered.booking === p.booking}
+          pulse={pulse?.paxId === p.id ? pulse : null}
+          onEnter={() => setHoverId(p.id)}
+          onLeave={() => setHoverId(null)}
+          onClick={() => onSelect(p.id === selectedId ? null : p.id)}
+        />
+      ))}
 
       <AnimatePresence>
-        {hovered && hoverSeat && (
+        {hovered && hoverPlace && (
           <motion.div
             key={hovered.id}
             role="tooltip"
@@ -365,12 +396,12 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
             exit={{ opacity: 0, transition: { duration: 0.08 } }}
             transition={{ duration: 0.14, ease }}
             className="pointer-events-none absolute z-30"
-            style={{ left: Math.min(Math.max(hoverSeat.left + hoverSeat.width / 2, 90), width - 90), top: hoverSeat.top - 10 }}
+            style={{ left: Math.min(Math.max(hoverPlace.left + hoverPlace.width / 2, 100), width - 100), top: hoverPlace.top - 10 }}
           >
             <div className="flex -translate-x-1/2 -translate-y-full items-center gap-2 whitespace-nowrap rounded-full bg-negro py-1.5 pl-3 pr-2 text-[12px] text-white shadow-dark">
               <span className="font-medium">{hovered.name}</span>
+              <span className="font-mono text-[10.5px] text-white/55">{hovered.booking}</span>
               <span className="rounded-[5px] bg-white/10 px-1 font-mono text-[10.5px] font-semibold">{hovered.lang}</span>
-              <span className="font-mono text-[10.5px] text-white/55">{hovered.seat}</span>
             </div>
           </motion.div>
         )}
@@ -379,27 +410,19 @@ export function SeatPlan({ layout, vehicle, guide, pax, status, hoverId, setHove
   )
 }
 
-export function Legend({ queued, noshow, className }) {
-  const items = [
-    { k: 'free', label: 'Livre', sw: 'border border-dashed border-ink-4' },
-    { k: 'waiting', label: 'Aguardando', sw: 'border-[1.5px] border-ink-3 bg-sunken' },
-    { k: 'boarded', label: 'Embarcado', sw: 'bg-ok' },
-  ]
-  if (noshow > 0) items.push({ k: 'noshow', label: 'Faltou', sw: 'hatch' })
+/** Linha de capacidade com legenda embutida */
+export function CapacityLine({ capacity, stats, boat, className }) {
+  const sep = <span className="text-ink-4">·</span>
   return (
-    <div className={cx('inline-flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 text-[12px] text-ink-3', className)}>
-      {items.map((i) => (
-        <span key={i.k} className="inline-flex items-center gap-1.5">
-          <span className={cx('size-[11px] rounded-[4px]', i.sw)} />
-          {i.label}
-        </span>
-      ))}
-      {queued > 0 && (
-        <span className="inline-flex items-center gap-1.5">
-          <span className="grid size-[13px] place-items-center rounded-full bg-gold text-negro"><Clock size={8} weight="bold" /></span>
-          Salvo no celular
-        </span>
-      )}
-    </div>
+    <p className={cx('flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 text-[12.5px] text-ink-3 tnum', className)}>
+      <span>{capacity} lugares</span>
+      {sep}
+      <span className="inline-flex items-center gap-1.5"><span className="size-[10px] rounded-[3px] bg-ok" />{stats.boarded} embarcados</span>
+      {sep}
+      <span className="inline-flex items-center gap-1.5"><span className="size-[10px] rounded-[3px] border-[1.5px] border-ink-4 bg-sunken" />{stats.waiting} aguardando</span>
+      {stats.noshow > 0 && <>{sep}<span className="inline-flex items-center gap-1.5"><span className="hatch size-[10px] rounded-[3px]" />{stats.noshow} {stats.noshow === 1 ? 'faltou' : 'faltaram'}</span></>}
+      {boat && <>{sep}<span>{capacity} coletes</span></>}
+      {stats.queued > 0 && <>{sep}<span className="inline-flex items-center gap-1.5"><span className="grid size-[12px] place-items-center rounded-full bg-gold text-negro"><Clock size={7} weight="bold" /></span>{stats.queued} no celular</span></>}
+    </p>
   )
 }
