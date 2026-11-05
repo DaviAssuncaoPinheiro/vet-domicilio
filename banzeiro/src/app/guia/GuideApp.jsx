@@ -8,8 +8,9 @@ import Inicio from './Inicio'
 import Scanner from './Scanner'
 import Lista from './Lista'
 import Perfil from './Perfil'
+import Saidas from './Saidas'
 
-const SCREENS = { home: Inicio, scan: Scanner, list: Lista, me: Perfil }
+const SCREENS = { home: Inicio, scan: Scanner, list: Lista, deps: Saidas, me: Perfil }
 
 /**
  * App do guia. mode 'embed' preenche o pai (dentro do PhoneFrame),
@@ -21,6 +22,8 @@ export default function GuideApp({ depId = 'd7', mode = 'embed' }) {
   const [listFilter, setListFilter] = useState('all')
   const [released, setReleased] = useState(null)
   const [portalEl, setPortalEl] = useState(null)
+  const [query, setQuery] = useState('')
+  const [scanSignal, setScanSignal] = useState(0)
 
   const status = useOps((s) => s.status)
   const online = useOps((s) => s.online)
@@ -69,7 +72,7 @@ export default function GuideApp({ depId = 'd7', mode = 'embed' }) {
     setTab(t)
   }
 
-  const ctx = { dep, tour, vehicle, guide, pax, stats, now, online, tab, go, listFilter, setListFilter, synced, lastSync, released, setReleased, mode, portalEl }
+  const ctx = { dep, tour, vehicle, guide, pax, stats, now, online, tab, go, listFilter, setListFilter, synced, lastSync, released, setReleased, mode, portalEl, query, setQuery, scanSignal }
   const Current = SCREENS[tab]
   const dark = tab === 'scan'
 
@@ -94,7 +97,7 @@ export default function GuideApp({ depId = 'd7', mode = 'embed' }) {
 
         {!dark && <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 h-28 bg-gradient-to-t from-frame via-frame/80 to-frame/0" />}
         <StatusBar light={dark} />
-        <BottomNav tab={tab} onChange={(t) => go(t)} />
+        <BottomNav tab={tab} dark={dark} onChange={(t) => go(t)} onScan={() => (tab === 'scan' ? setScanSignal((n) => n + 1) : go('scan'))} />
         <div ref={setPortalEl} className="pointer-events-none absolute inset-0 z-50 [&>*]:pointer-events-auto" />
         {mode === 'embed' && <div className={cx('pointer-events-none absolute bottom-[7px] left-1/2 z-[60] h-[5px] w-[124px] -translate-x-1/2 rounded-full', dark ? 'bg-white/70' : 'bg-ink/80')} />}
       </div>

@@ -23,7 +23,7 @@ export function PaxAvatar({ p, size = 52, className }) {
 
 export const paxState = (st) => (st?.s === 'boarded' ? 'boarded' : st?.s === 'noshow' ? 'noshow' : 'waiting')
 
-export function StatusIcon({ st, size = 24 }) {
+export function StatusIcon({ st, size = 24, onSurface }) {
   const s = paxState(st)
   const ic = Math.round(size * 0.55)
   if (s === 'boarded')
@@ -34,7 +34,7 @@ export function StatusIcon({ st, size = 24 }) {
     )
   if (s === 'noshow')
     return <span title="Faltou" className="grid shrink-0 place-items-center rounded-full bg-alert-tint text-alert" style={{ width: size, height: size }}><X size={ic} weight="bold" /></span>
-  return <span title="Aguardando" className="grid shrink-0 place-items-center rounded-full bg-surface text-ink-3" style={{ width: size, height: size }}><Clock size={ic} weight="bold" /></span>
+  return <span title="Aguardando" className={cx('grid shrink-0 place-items-center rounded-full text-ink-3', onSurface ? 'bg-sunken' : 'bg-surface')} style={{ width: size, height: size }}><Clock size={ic} weight="bold" /></span>
 }
 
 export const statusText = (st) => {
@@ -112,7 +112,7 @@ export function DepartureStrip({ groups, status, activeId, onPick }) {
             onClick={() => onPick(d.id)}
             aria-current={active ? 'true' : undefined}
             className={cx(
-              'flex w-[150px] shrink-0 snap-start flex-col rounded-[20px] px-4 py-3 text-left transition-[background] duration-150 active:scale-[0.98]',
+              'flex w-[168px] shrink-0 snap-start flex-col rounded-[20px] px-4 py-3 text-left transition-[background] duration-150 active:scale-[0.98]',
               active ? 'bg-gold text-negro' : 'bg-surface',
             )}
           >
@@ -148,7 +148,7 @@ export function PaxDetail({ p, st, groupSize = 1, onClose, actions }) {
       </div>
 
       <div className="mt-4 flex items-center gap-2.5">
-        <StatusIcon st={st} size={24} />
+        <StatusIcon st={st} size={24} onSurface />
         <span className="text-[15px] font-medium">
           {s === 'boarded' ? <>Embarcou às <span className="tnum">{fmt(st.at)}</span>{st.via === 'manual' ? ', manual' : ', pelo QR'}</> : s === 'noshow' ? 'Faltou' : 'Aguardando'}
         </span>
@@ -168,10 +168,10 @@ export function PaxDetail({ p, st, groupSize = 1, onClose, actions }) {
         {s === 'waiting' && (
           <>
             <Button size="lg" onClick={actions.board} className="flex-1">Embarcar</Button>
-            <Button size="lg" variant="light" onClick={actions.noshow} className="flex-1 !shadow-none bg-sunken hover:!bg-line">Faltou</Button>
+            <Button size="lg" variant="light" onClick={actions.noshow} className="flex-1 !shadow-none !bg-sunken hover:!bg-line">Faltou</Button>
           </>
         )}
-        {s !== 'waiting' && <Button size="lg" variant="light" icon={ArrowCounterClockwise} onClick={actions.undo} className="flex-1 !shadow-none bg-sunken hover:!bg-line">Desfazer</Button>}
+        {s !== 'waiting' && <Button size="lg" variant="light" icon={ArrowCounterClockwise} onClick={actions.undo} className="flex-1 !shadow-none !bg-sunken hover:!bg-line">Desfazer</Button>}
       </div>
     </div>
   )

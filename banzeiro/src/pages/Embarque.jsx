@@ -83,7 +83,7 @@ function Hero({ dep, now, pax, status, stats, online, guideOpen, onToggleGuide, 
           >
             {online ? <WifiHigh size={18} /> : <WifiSlash size={18} />}
           </IconButton>
-          <Button variant="light" size="lg" icon={Scan} onClick={onSimulate} disabled={!canSim} className="!h-11 !shadow-none bg-sunken hover:!bg-line">Ler QR</Button>
+          <Button variant="light" size="lg" icon={Scan} onClick={onSimulate} disabled={!canSim} className="!h-11 !shadow-none !bg-sunken hover:!bg-line">Ler QR</Button>
           <Button size="lg" icon={DeviceMobile} onClick={onToggleGuide} aria-pressed={guideOpen} className="!h-11">App do guia</Button>
         </div>
       </div>
@@ -111,10 +111,10 @@ function Hero({ dep, now, pax, status, stats, online, guideOpen, onToggleGuide, 
           <p className="mt-2 text-[16px] text-ink">Embarcados de <span className="tnum">{stats.total}</span></p>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-6 gap-y-4 @4xl:flex @4xl:items-center @4xl:gap-0 @4xl:divide-x @4xl:divide-line">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 @4xl:flex @4xl:items-center @4xl:gap-0">
           <Stat label={time.label} className="@4xl:px-7"><span className="tnum">{time.value}</span></Stat>
-          <Stat label={boat ? 'Piloto' : 'Motorista'} className="@4xl:order-3 @4xl:pl-7">{vehicle.skipper}</Stat>
-          <Stat label="Guia" className="col-span-2 @4xl:order-2 @4xl:px-7">
+          <Stat label={boat ? 'Piloto' : 'Motorista'} className="@4xl:order-3 @4xl:border-l @4xl:border-line @4xl:pl-7">{vehicle.skipper}</Stat>
+          <Stat label="Guia" className="col-span-2 @4xl:order-2 @4xl:border-l @4xl:border-line @4xl:px-7">
             {guide ? (
               <span className="flex items-center gap-2">
                 <span className="truncate">{guide.name}</span>
@@ -151,8 +151,8 @@ function PlanCard({ dep, pax, status, stats, hoverId, setHoverId, selectedId, se
   const showPanel = sel && !mobile
 
   return (
-    <section className="rounded-[24px] bg-surface p-4 shadow-soft sm:p-5">
-      <h2 className="truncate text-[17px] font-semibold tracking-[-0.01em]">{vehicle.name}</h2>
+    <section className="rounded-[28px] bg-surface p-5 shadow-soft sm:p-6">
+      <h2 className="truncate text-[21px] font-semibold tracking-[-0.02em]">{vehicle.name}</h2>
 
       <div ref={ref} className="mt-4 min-w-0">
         {plan && (

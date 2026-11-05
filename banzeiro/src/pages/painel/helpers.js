@@ -52,3 +52,13 @@ export function countdown(mins) {
 }
 
 export const range = (d) => `${t(d.start)} a ${t(d.end)}`
+
+export const norm = (s) => (s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+export const firstName = (name) => (name ?? '').split(' ')[0]
+export const initialsOf = (name) => name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase()
+
+export const WEEKDAY_FULL = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+
+// Títulos curtos das pendências para os cards
+export const SHORT_TITLE = { x1: '2 sem lugar', x2: 'Reserva duplicada', x3: 'Nome diferente', x4: 'Saída sem guia' }
+export const SHORT_ACTION = { overbook: 'Mover', duplicate: 'Unificar', name: 'Confirmar', language: 'Escalar' }

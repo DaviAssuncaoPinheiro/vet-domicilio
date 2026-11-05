@@ -1,7 +1,7 @@
 import { createContext, useContext, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { House, Scan, ListChecks, UserCircle, CellSignalFull, WifiHigh, WifiSlash, BatteryHigh, CheckCircle } from '@phosphor-icons/react'
+import { House, Scan, UsersThree, Boat, UserCircle, CellSignalFull, WifiHigh, WifiSlash, BatteryHigh, Check } from '@phosphor-icons/react'
 import { cx, ease } from '../../components/ui'
 import { fmt } from '../../data/mock'
 import { useOps } from '../../store'
@@ -109,61 +109,55 @@ export function StatusBar({ light }) {
   )
 }
 
-/* ---------- bottom nav flutuante ---------- */
+/* ---------- barra inferior: negra, botão dourado elevado no centro ---------- */
 export const TABS = [
   { id: 'home', label: 'Início', icon: House },
-  { id: 'scan', label: 'Scanner', icon: Scan },
-  { id: 'list', label: 'Lista', icon: ListChecks },
+  { id: 'list', label: 'Lista', icon: UsersThree },
+  { id: 'deps', label: 'Saídas', icon: Boat },
   { id: 'me', label: 'Perfil', icon: UserCircle },
 ]
 
-export function BottomNav({ tab, onChange }) {
-  const uid = useId()
+export function BottomNav({ tab, onChange, onScan, dark }) {
+  const Item = ({ t }) => {
+    const active = tab === t.id
+    const Icon = t.icon
+    return (
+      <button
+        aria-label={t.label}
+        aria-current={active ? 'page' : undefined}
+        onClick={() => onChange(t.id)}
+        className={cx('grid h-14 flex-1 place-items-center transition-colors duration-150', active ? 'text-white' : 'text-white/40 hover:text-white/70')}
+      >
+        <Icon size={24} weight={active ? 'fill' : 'regular'} />
+      </button>
+    )
+  }
   return (
-    <nav className="pointer-events-none absolute inset-x-0 z-40 flex justify-center px-4" style={{ bottom: 'calc(14px + var(--sab))' }} aria-label="Navegação do app">
-      <div className="pointer-events-auto flex items-center gap-1 rounded-full bg-negro/95 p-1.5 shadow-[0_1px_0_rgba(255,255,255,0.08)_inset,0_18px_40px_-12px_rgba(22,19,15,0.6)] ring-1 ring-white/[0.07] backdrop-blur-xl">
-        {TABS.map((t) => {
-          const active = t.id === tab
-          const Icon = t.icon
-          return (
-            <motion.button
-              layout
-              key={t.id}
-              aria-label={t.label}
-              aria-current={active ? 'page' : undefined}
-              onClick={() => onChange(t.id)}
-              transition={{ type: 'spring', stiffness: 520, damping: 42 }}
-              className={cx(
-                'relative flex h-12 items-center justify-center rounded-full transition-colors duration-150 active:scale-[0.96]',
-                active ? 'pl-4 pr-5 text-white' : 'w-12 text-white/50 hover:text-white/85',
-              )}
-            >
-              {active && (
-                <motion.span
-                  layoutId={`guia-nav-${uid}`}
-                  className="absolute inset-0 rounded-full bg-white/[0.13] ring-1 ring-inset ring-white/[0.09]"
-                  transition={{ type: 'spring', stiffness: 520, damping: 42 }}
-                />
-              )}
-              <motion.span layout="position" className="relative grid place-items-center">
-                <Icon size={20} weight={active ? 'fill' : 'regular'} />
-              </motion.span>
-              {active && (
-                <motion.span
-                  layout="position"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2, delay: 0.06 }}
-                  className="relative ml-2 whitespace-nowrap text-[13px] font-medium tracking-[-0.005em]"
-                >
-                  {t.label}
-                </motion.span>
-              )}
-            </motion.button>
-          )
-        })}
+    <nav className="absolute inset-x-3 z-40" style={{ bottom: 'calc(10px + var(--sab))' }} aria-label="Navegação do app">
+      <div className={cx('relative flex items-center rounded-[26px] bg-negro px-2 shadow-dark', dark && 'ring-1 ring-white/10')}>
+        <Item t={TABS[0]} />
+        <Item t={TABS[1]} />
+        <div className="w-20 shrink-0" />
+        <Item t={TABS[2]} />
+        <Item t={TABS[3]} />
+        <button
+          aria-label={tab === 'scan' ? 'Ler próximo' : 'Scanner'}
+          onClick={onScan}
+          className={cx('absolute left-1/2 top-0 grid size-16 -translate-x-1/2 -translate-y-[38%] place-items-center rounded-full bg-gold text-negro ring-[6px] transition-transform active:scale-95', dark ? 'ring-negro' : 'ring-frame')}
+        >
+          <Scan size={26} weight="bold" />
+        </button>
       </div>
     </nav>
+  )
+}
+
+/** Avatar plano com iniciais, como na referência */
+export function FlatAvatar({ name, hue, size = 52 }) {
+  return (
+    <span className="grid shrink-0 place-items-center rounded-full font-semibold text-white" style={{ width: size, height: size, background: hue, fontSize: Math.round(size * 0.33) }}>
+      {initialsOf(name)}
+    </span>
   )
 }
 
@@ -172,7 +166,7 @@ export function Screen({ children, className }) {
   return (
     <div
       className={cx('no-scrollbar absolute inset-0 overflow-y-auto overscroll-contain', className)}
-      style={{ paddingTop: 'calc(52px + var(--sat))', paddingBottom: 'calc(116px + var(--sab))' }}
+      style={{ paddingTop: 'calc(52px + var(--sat))', paddingBottom: 'calc(120px + var(--sab))' }}
     >
       {children}
     </div>
@@ -208,35 +202,23 @@ export function Sheet({ open, onClose, children, label }) {
   )
 }
 
-/* ---------- pílula de rede (sem internet / enviado) ---------- */
-export function NetPill({ className, glass }) {
+/* ---------- aviso de rede (sem internet / enviado), texto simples ---------- */
+export function NetPill({ className, glass, plain }) {
   const { stats, synced } = useGuia()
   const online = useOps((s) => s.online)
-  const motionProps = {
-    initial: { opacity: 0, scale: 0.92, y: -4 },
-    animate: { opacity: 1, scale: 1, y: 0 },
-    exit: { opacity: 0, scale: 0.96, y: -2 },
-    transition: { duration: 0.24, ease },
-  }
+  const look = plain ? '' : glass ? 'h-8 rounded-full bg-white/10 px-3 backdrop-blur-md' : 'h-8 rounded-full bg-surface px-3'
+  const mp = { initial: { opacity: 0, y: -3 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0 }, transition: { duration: 0.22, ease } }
   return (
     <AnimatePresence mode="wait" initial={false}>
       {!online ? (
-        <motion.span
-          key="off"
-          {...motionProps}
-          className={cx('inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full pl-3 pr-3.5 text-[12px] font-semibold', glass ? 'bg-white/10 text-gold-light ring-1 ring-inset ring-white/15 backdrop-blur-md' : 'bg-gold-tint text-gold-deep', className)}
-        >
-          <span className="live-dot !size-[6px] text-gold" />
-          <span className="tnum">Sem internet{stats.queued ? ` · ${stats.queued} ${stats.queued === 1 ? 'salvo' : 'salvos'}` : ''}</span>
+        <motion.span key="off" {...mp} className={cx('inline-flex items-center gap-1.5 whitespace-nowrap text-[13.5px] font-medium tnum', glass || plain ? 'text-gold-light' : 'text-gold-deep', look, className)}>
+          <WifiSlash size={15} />
+          Sem internet{stats.queued ? ` · ${stats.queued} no celular` : ''}
         </motion.span>
       ) : synced ? (
-        <motion.span
-          key={`sync-${synced.id}`}
-          {...motionProps}
-          className={cx('inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full pl-2.5 pr-3.5 text-[12px] font-semibold', glass ? 'bg-ok/30 text-ok-tint ring-1 ring-inset ring-ok/40 backdrop-blur-md' : 'bg-ok-tint text-ok', className)}
-        >
-          <CheckCircle size={15} weight="fill" />
-          <span className="tnum">{synced.n} {synced.n === 1 ? 'enviado' : 'enviados'}</span>
+        <motion.span key={`sync-${synced.id}`} {...mp} className={cx('inline-flex items-center gap-1.5 whitespace-nowrap text-[13.5px] font-medium tnum', glass || plain ? 'text-ok-tint' : 'text-ok', look, className)}>
+          <Check size={15} weight="bold" />
+          {synced.n} {synced.n === 1 ? 'enviado' : 'enviados'}
         </motion.span>
       ) : null}
     </AnimatePresence>
@@ -244,17 +226,16 @@ export function NetPill({ className, glass }) {
 }
 
 /* ---------- switch ---------- */
-export function Switch({ checked, onChange, label }) {
+export function Switch({ checked, onChange, label, onDark }) {
   return (
     <button
       role="switch"
       aria-checked={checked}
       aria-label={label}
-      onClick={() => onChange(!checked)}
-      className="flex h-11 shrink-0 items-center px-0.5"
+      onClick={(e) => { e.stopPropagation(); onChange(!checked) }} className="flex h-11 shrink-0 items-center px-0.5"
     >
-      <span className={cx('relative flex h-[30px] w-[50px] items-center rounded-full p-[3px] transition-colors duration-200', checked ? 'justify-end bg-negro' : 'justify-start bg-ink-4/45')}>
-        <motion.span layout transition={{ type: 'spring', stiffness: 600, damping: 36 }} className={cx('size-6 rounded-full shadow-[0_2px_6px_rgba(19,19,22,.25)]', checked ? 'bg-lime' : 'bg-surface')} />
+      <span className={cx('relative flex h-[30px] w-[50px] items-center rounded-full p-[3px] transition-colors duration-200', checked ? (onDark ? 'justify-end bg-gold' : 'justify-end bg-negro') : (onDark ? 'justify-start bg-white/20' : 'justify-start bg-ink-4/45'))}>
+        <motion.span layout transition={{ type: 'spring', stiffness: 600, damping: 36 }} className={cx('size-6 rounded-full shadow-[0_2px_6px_rgba(19,19,22,.25)]', checked ? (onDark ? 'bg-negro' : 'bg-gold') : 'bg-surface')} />
       </span>
     </button>
   )

@@ -3,9 +3,9 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Wrench, Boat, Van, Car } from '@phosphor-icons/react'
-import { CardHeader, StatusChip, KindDot, Avatar, cx, ease, useMedia } from '../../components/ui'
+import { KindDot, Avatar, cx, ease, useMedia } from '../../components/ui'
 import { DEPARTURES, VEHICLES, KIND, tourOf, guideById, vehicleOf } from '../../data/mock'
-import { viewStats, vehicleUse, DAY_START, DAY_END, PHASE, PHASE_TONE, UNAVAILABLE, clamp01, range, t } from './helpers'
+import { viewStats, vehicleUse, DAY_START, DAY_END, PHASE, UNAVAILABLE, clamp01, range, t } from './helpers'
 
 const HOURS = Array.from({ length: (DAY_END - DAY_START) / 60 }, (_, i) => DAY_START / 60 + i)
 const HEAD_H = 68
@@ -65,21 +65,20 @@ export default function Timeline({ now, status }) {
   const showNow = now >= DAY_START && now <= DAY_END
 
   return (
-    <section className="rounded-[24px] bg-frame p-4 shadow-soft md:p-5">
-      <CardHeader
-        className="px-1"
-        title="Linha do dia"
-        right={
+    <section className="rounded-[32px] bg-surface p-4 md:p-6">
+      <div className="flex items-center justify-between gap-3 px-1">
+        <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-ink">Linha do dia</h2>
+        {(
           <div className="hidden items-center gap-4 pr-1 md:flex">
             {Object.entries(KIND).map(([k, v]) => (
-              <span key={k} className="inline-flex items-center gap-1.5 text-[12px] text-ink-2">
+              <span key={k} className="inline-flex items-center gap-1.5 text-[13px] text-ink-3">
                 <KindDot kind={k} className="!size-[7px]" />
                 {v.label}
               </span>
             ))}
           </div>
-        }
-      />
+        )}
+      </div>
 
       <div className="relative mt-3">
         <div
@@ -90,7 +89,7 @@ export default function Timeline({ now, status }) {
           <div className="relative" style={{ width: leftW + gridW }}>
             {/* Cabeçalho de horas */}
             <div className="relative flex" style={{ height: HEAD_H }}>
-              <div className="sticky left-0 z-20 shrink-0 bg-frame" style={{ width: leftW }} />
+              <div className="sticky left-0 z-20 shrink-0 bg-surface" style={{ width: leftW }} />
               {HOURS.map((h) => {
                 const isNow = h === nowHour
                 const past = h < nowHour
@@ -98,8 +97,8 @@ export default function Timeline({ now, status }) {
                   <div key={h} className="shrink-0 px-[3px]" style={{ width: hourW }}>
                     <div
                       className={cx(
-                        'flex h-[40px] items-center justify-center rounded-[12px] font-mono text-[12.5px] tnum transition-colors duration-500',
-                        isNow ? 'bg-now font-semibold text-white shadow-dark' : past ? 'bg-surface/50 font-medium text-ink-4' : 'bg-surface font-semibold text-ink shadow-pill',
+                        'flex h-[40px] items-center justify-center rounded-[14px] font-mono text-[13px] tnum transition-colors duration-500',
+                        isNow ? 'bg-now font-semibold text-white' : past ? 'bg-frame/60 font-medium text-ink-4' : 'bg-frame font-semibold text-ink',
                       )}
                     >
                       {h}:00
@@ -116,15 +115,15 @@ export default function Timeline({ now, status }) {
               const use = vehicleUse(v.id)
               return (
                 <div key={v.id} className="relative flex" style={{ height: rowH }}>
-                  <div className="sticky left-0 z-20 shrink-0 bg-frame py-[3px] pr-[3px]" style={{ width: leftW }}>
-                    <div className="flex h-full flex-col justify-center rounded-[14px] bg-surface px-3 shadow-pill">
+                  <div className="sticky left-0 z-20 shrink-0 bg-surface py-[3px] pr-[3px]" style={{ width: leftW }}>
+                    <div className="flex h-full flex-col justify-center rounded-[16px] bg-frame px-3.5">
                       <div className="flex min-w-0 items-center gap-2">
                         <KindDot kind={v.kind} className="!size-[7px] shrink-0" />
-                        <span className="truncate text-[12.5px] font-semibold leading-tight text-ink md:text-[13px]">{v.name}</span>
+                        <span className="truncate text-[13px] font-medium leading-tight text-ink md:text-[14px]">{v.name}</span>
                       </div>
                       <div className="mt-2 flex items-center gap-2">
-                        <span className="shrink-0 text-[11px] text-ink-3 tnum">{v.capacity} lugares</span>
-                        <div className="hidden h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-sunken md:block">
+                        <span className="shrink-0 text-[12px] text-ink-3 tnum">{v.capacity} lugares</span>
+                        <div className="hidden h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-line md:block">
                           <motion.div
                             className="h-full rounded-full"
                             style={{ background: KIND[v.kind].color }}
@@ -141,7 +140,7 @@ export default function Timeline({ now, status }) {
                     <div className="absolute inset-0 flex">
                       {HOURS.map((h) => (
                         <div key={h} className="shrink-0 p-[3px]" style={{ width: hourW }}>
-                          <div className={cx('h-full rounded-[12px]', h < nowHour ? 'bg-surface/45' : 'bg-surface/80')} />
+                          <div className={cx('h-full rounded-[12px]', h < nowHour ? 'bg-frame/50' : 'bg-frame')} />
                         </div>
                       ))}
                     </div>
@@ -202,7 +201,7 @@ export default function Timeline({ now, status }) {
           className={cx('pointer-events-none absolute inset-y-0 z-30 w-6 bg-gradient-to-r from-ink/[0.06] to-transparent transition-opacity duration-200', edge.l ? 'opacity-100' : 'opacity-0')}
           style={{ left: leftW }}
         />
-        <div className={cx('pointer-events-none absolute inset-y-0 right-0 z-30 w-10 bg-gradient-to-l from-frame to-transparent transition-opacity duration-200', edge.r ? 'opacity-100' : 'opacity-0')} />
+        <div className={cx('pointer-events-none absolute inset-y-0 right-0 z-30 w-10 bg-gradient-to-l from-surface to-transparent transition-opacity duration-200', edge.r ? 'opacity-100' : 'opacity-0')} />
       </div>
 
       <Tip tip={tip} now={now} status={status} />
@@ -224,7 +223,6 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
   const prog = clamp01((now - d.start) / (d.end - d.start))
   const compact = width < 118
   const showIcon = width >= 84
-  const showChip = width >= 250
   const solid = st.phase !== 'scheduled'
   const done = st.phase === 'done'
   const live = st.phase === 'live' || st.phase === 'boarding'
@@ -283,19 +281,14 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
             <span className="block truncate font-mono text-[11.5px] font-semibold tnum">{t(d.start)}</span>
           ) : (
             <>
-              <span className="block truncate text-[12.5px] font-semibold leading-[1.2]">{tour.short}</span>
-              <span className="mt-[3px] flex items-center gap-2 overflow-hidden whitespace-nowrap text-[11px] opacity-75">
+              <span className="block truncate text-[13px] font-semibold leading-[1.2]">{tour.short}</span>
+              <span className="mt-[3px] flex items-center gap-2 overflow-hidden whitespace-nowrap text-[12px] opacity-75">
                 <span className="shrink-0 font-mono tnum">{over ? t(d.start) : range(d)}</span>
                 {over && <span className="shrink-0 font-semibold text-alert tnum">{st.total}/{vehicle.capacity}</span>}
               </span>
             </>
           )}
         </span>
-        {showChip && (
-          <StatusChip tone={PHASE_TONE[st.phase]} live={live} className="shrink-0 !text-ink">
-            {PHASE[st.phase]}
-          </StatusChip>
-        )}
       </span>
     </motion.button>
   )

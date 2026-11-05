@@ -1,44 +1,43 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { MagnifyingGlass, X, Check, ArrowCounterClockwise, CaretRight } from '@phosphor-icons/react'
-import { Avatar, Card, Reveal, cx, ease } from '../../components/ui'
+import { motion } from 'framer-motion'
+import { MagnifyingGlass, X, Check, Clock, ArrowRight, ArrowCounterClockwise } from '@phosphor-icons/react'
+import { Reveal, cx, ease } from '../../components/ui'
 import { LANGS, fmt } from '../../data/mock'
 import { useOps } from '../../store'
-import { useGuia, Screen, Sheet, Seg, NetPill, paxHue, initialsOf, beepOk, haptic, unlockAudio } from './parts'
+import { useGuia, Screen, Sheet, NetPill, FlatAvatar, paxHue, beepOk, haptic, unlockAudio } from './parts'
 
-const STATE = {
-  boarded: { label: 'Embarcado', cls: 'text-ok', dot: 'bg-ok' },
-  waiting: { label: 'Aguardando', cls: 'text-ink-3', dot: 'bg-ink-4' },
-  noshow: { label: 'Faltou', cls: 'text-alert', dot: 'bg-alert' },
-}
+const FILTERS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'waiting', label: 'Aguardando' },
+  { value: 'boarded', label: 'Embarcados' },
+]
+const STATE_LABEL = { boarded: 'Embarcado', waiting: 'Aguardando', noshow: 'Faltou' }
 
-function StateText({ st, className }) {
-  const k = STATE[st?.s] ?? STATE.waiting
-  return (
-    <span className={cx('inline-flex items-center gap-1.5 whitespace-nowrap text-[13px] font-medium', k.cls, className)}>
-      <span className={cx('size-[6px] rounded-full', k.dot)} />
-      {k.label}
-    </span>
-  )
+function StatusIcon({ s }) {
+  if (s === 'boarded') return <span className="grid size-6 place-items-center rounded-full bg-ok text-white"><Check size={13} weight="bold" /></span>
+  if (s === 'noshow') return <span className="grid size-6 place-items-center rounded-full bg-alert-tint text-alert"><X size={12} weight="bold" /></span>
+  return <span className="grid size-6 place-items-center rounded-full bg-surface text-ink-2"><Clock size={14} weight="bold" /></span>
 }
 
 function Info({ label, children }) {
   return (
-    <div className="min-w-0 rounded-[14px] bg-sunken px-3.5 py-3">
-      <p className="text-[12px] text-ink-3">{label}</p>
+    <div className="min-w-0 rounded-[16px] bg-sunken px-4 py-3">
+      <p className="text-[13px] text-ink-3">{label}</p>
       <p className="mt-0.5 truncate text-[16px] font-medium text-ink">{children}</p>
     </div>
   )
 }
 
 export default function Lista() {
-  const { pax, stats, dep, vehicle, listFilter, setListFilter } = useGuia()
+  const { pax, stats, dep, vehicle, listFilter, setListFilter, query, setQuery, go } = useGuia()
   const status = useOps((s) => s.status)
-  const [q, setQ] = useState('')
   const [selId, setSelId] = useState(null)
 
   const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
-  const nq = norm(q.trim())
+  const nq = norm(query.trim())
+  const size = (booking) => pax.filter((p) => p.booking === booking).length
+  const nextUp = pax.find((p) => status[p.id]?.s === 'waiting')
+
   const rows = pax.filter((p) => {
     const s = status[p.id]?.s
     if (listFilter === 'boarded' && s !== 'boarded') return false
@@ -46,6 +45,16 @@ export default function Lista() {
     if (!nq) return true
     return norm(`${p.name} ${p.booking}`).includes(nq)
   })
+  // agrupa por reserva, na ordem do manifesto
+  const groups = []
+  rows.forEach((p) => {
+    const g = groups.find((x) => x.booking === p.booking)
+    if (g) g.items.push(p)
+    else groups.push({ booking: p.booking, items: [p] })
+  })
+
+  const fi = FILTERS.findIndex((f) => f.value === listFilter)
+  const cycle = () => setListFilter(FILTERS[(fi + 1) % FILTERS.length].value)
 
   const sel = selId && pax.find((p) => p.id === selId)
   const selSt = sel && status[sel.id]
@@ -55,81 +64,97 @@ export default function Lista() {
 
   return (
     <Screen>
-      <Reveal i={0} className="px-5 pt-2">
-        <p className="truncate text-[13px] text-ink-3">{vehicle.name} · <span className="font-mono">{fmt(dep.start)}</span></p>
-        <h1 className="text-[24px] font-semibold leading-tight tracking-[-0.025em]">Passageiros</h1>
-        <div className="empty:hidden [&:not(:empty)]:mt-2.5"><NetPill /></div>
+      <Reveal i={0} className="flex items-center justify-between gap-3 px-5 pt-2">
+        <h1 className="truncate text-[26px] font-semibold tracking-[-0.03em]">{vehicle.name}</h1>
+        <div className="flex shrink-0 items-center gap-1 rounded-[16px] bg-surface p-1.5">
+          <span className="inline-flex h-9 items-center rounded-[11px] bg-sunken px-3.5 text-[14px] font-medium">{FILTERS[fi].label}</span>
+          <button aria-label="Trocar filtro" onClick={cycle} className="grid size-9 place-items-center rounded-[11px] text-ink transition-colors hover:bg-sunken">
+            <ArrowRight size={17} weight="bold" />
+          </button>
+        </div>
       </Reveal>
 
       <Reveal i={1} className="mt-4 px-4">
-        <label className="flex h-12 items-center gap-2.5 rounded-full bg-surface pl-4 pr-1.5 shadow-pill">
-          <MagnifyingGlass size={18} className="shrink-0 text-ink-3" />
+        <label className="flex h-[52px] items-center gap-3 rounded-[18px] border border-line bg-surface px-4">
+          <MagnifyingGlass size={20} className="shrink-0 text-ink-3" />
           <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar"
+            autoFocus={!!query}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar passageiro"
             aria-label="Buscar passageiro"
-            className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3"
+            className="h-full min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none placeholder:text-ink-3"
           />
-          {q && (
-            <button onClick={() => setQ('')} aria-label="Limpar busca" className="grid size-9 place-items-center rounded-full bg-sunken text-ink-2">
-              <X size={14} weight="bold" />
+          {query && (
+            <button onClick={() => setQuery('')} aria-label="Limpar busca" className="-mr-2 grid size-10 place-items-center rounded-full text-ink-3">
+              <X size={16} weight="bold" />
             </button>
           )}
         </label>
-        <Seg
-          className="mt-3"
-          value={listFilter}
-          onChange={setListFilter}
-          options={[
-            { value: 'all', label: 'Todos', count: stats.total },
-            { value: 'boarded', label: 'A bordo', count: stats.boarded },
-            { value: 'waiting', label: 'Aguardando', count: stats.waiting },
-          ]}
-        />
       </Reveal>
 
       <Reveal i={2} className="mt-3 px-4">
-        <Card className="overflow-hidden">
-          <AnimatePresence initial={false}>
-            {rows.map((p) => {
-              const st = status[p.id]
-              return (
-                <motion.button
-                  layout="position"
-                  key={p.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, ease }}
-                  onClick={() => setSelId(p.id)}
-                  className="relative flex min-h-[68px] w-full items-center gap-3 px-4 py-3 text-left transition-colors active:bg-sunken [&+&]:before:absolute [&+&]:before:left-[68px] [&+&]:before:right-4 [&+&]:before:top-0 [&+&]:before:h-px [&+&]:before:bg-line"
-                >
-                  <Avatar initials={initialsOf(p.name)} hue={paxHue(p)} size={40} />
-                  <span className="min-w-0 flex-1">
-                    <span className={cx('block truncate text-[15px] font-medium', st?.s === 'noshow' ? 'text-ink-3' : 'text-ink')}>{p.name}</span>
-                    <StateText st={st} className="mt-0.5" />
-                  </span>
-                  <span className="shrink-0 font-mono text-[12.5px] text-ink-3">{p.booking}</span>
-                  <CaretRight size={15} className="-mr-1 shrink-0 text-ink-4" />
-                </motion.button>
-              )
-            })}
-          </AnimatePresence>
-          {rows.length === 0 && (
-            <p className="px-6 py-10 text-center text-[14px] text-ink-3">{listFilter === 'waiting' && !q ? 'Todos a bordo' : 'Ninguém encontrado'}</p>
-          )}
-        </Card>
+        <div className="rounded-[28px] bg-surface p-3 pt-4">
+          <div className="flex items-baseline justify-between px-2 pb-3">
+            <h2 className="text-[21px] font-semibold tracking-[-0.02em]">Quarta 4</h2>
+            <span className="text-[15px] text-ink-3 tnum"><span className="font-mono">{fmt(dep.start)}</span> · {stats.boarded} de {stats.total}</span>
+          </div>
+          <div className="empty:hidden [&:not(:empty)]:px-2 [&:not(:empty)]:pb-3"><NetPill /></div>
+
+          <div className="flex flex-col gap-3">
+            {groups.map((g) => (
+              <div key={g.booking} className="flex flex-col gap-1.5">
+                {g.items.map((p) => {
+                  const s = status[p.id]?.s ?? 'waiting'
+                  const hot = nextUp && p.id === nextUp.id
+                  const n = size(p.booking)
+                  return (
+                    <motion.div
+                      layout="position"
+                      key={p.id}
+                      transition={{ duration: 0.25, ease }}
+                      onClick={() => setSelId(p.id)}
+                      className={cx('relative flex cursor-pointer items-center gap-3.5 rounded-[20px] p-3.5 transition-colors', hot ? 'dots bg-gold-tint' : 'bg-sunken active:bg-line')}
+                    >
+                      <FlatAvatar name={p.name} hue={paxHue(p)} size={52} />
+                      <div className="min-w-0 flex-1">
+                        <p className={cx('truncate text-[17px] font-medium tracking-[-0.01em]', s === 'noshow' ? 'text-ink-3' : 'text-ink')}>{p.name}</p>
+                        <p className="mt-0.5 truncate text-[14px] text-ink-3">Reserva <span className="font-mono">{p.booking}</span></p>
+                        <p className="truncate text-[14px] text-ink-3 tnum">{n} {n === 1 ? 'pessoa' : 'pessoas'} · {LANGS[p.lang]?.label}{s === 'noshow' ? ' · Faltou' : ''}</p>
+                      </div>
+                      {hot ? (
+                        <button
+                          aria-label="Ler QR Code"
+                          onClick={(e) => { e.stopPropagation(); go('scan') }}
+                          className="grid size-[52px] shrink-0 place-items-center rounded-full bg-negro text-white transition-transform active:scale-95"
+                        >
+                          <ArrowRight size={20} weight="bold" className="-rotate-45" />
+                        </button>
+                      ) : (
+                        <span className="self-start"><StatusIcon s={s} /></span>
+                      )}
+                    </motion.div>
+                  )
+                })}
+              </div>
+            ))}
+            {groups.length === 0 && (
+              <p className="px-6 py-10 text-center text-[15px] text-ink-3">{listFilter === 'waiting' && !query ? 'Todos a bordo' : 'Ninguém encontrado'}</p>
+            )}
+          </div>
+        </div>
       </Reveal>
 
       <Sheet open={!!sel} onClose={() => setSelId(null)} label="Passageiro">
         {sel && (
           <div>
             <div className="flex items-center gap-3.5">
-              <Avatar initials={initialsOf(sel.name)} hue={paxHue(sel)} size={52} />
+              <FlatAvatar name={sel.name} hue={paxHue(sel)} size={52} />
               <div className="min-w-0 flex-1">
                 <h3 className="truncate text-[20px] font-semibold leading-tight tracking-[-0.02em]">{sel.name}</h3>
-                <StateText st={selSt} className="mt-1" />
+                <p className={cx('mt-0.5 text-[15px]', selSt?.s === 'boarded' ? 'text-ok' : selSt?.s === 'noshow' ? 'text-alert' : 'text-ink-3')}>
+                  {STATE_LABEL[selSt?.s ?? 'waiting']}{selSt?.s === 'boarded' ? <> às <span className="font-mono">{fmt(selSt.at)}</span></> : null}
+                </p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
@@ -138,32 +163,29 @@ export default function Lista() {
               <Info label="Idioma">{LANGS[sel.lang]?.label}</Info>
               <Info label="Hotel">{sel.hotel}</Info>
             </div>
-            {selSt?.s === 'boarded' && (
-              <p className="mt-3 text-[14px] text-ink-2">Embarcou às <span className="font-mono">{fmt(selSt.at)}</span></p>
-            )}
             <div className="mt-4 flex flex-col gap-2">
               {selSt?.s !== 'boarded' ? (
                 <>
-                  <button onClick={() => act(() => { useOps.getState().board(sel.id, 'manual'); beepOk(); haptic(15) })} className="flex h-[54px] items-center justify-center gap-2 rounded-full bg-negro text-[15px] font-semibold text-white shadow-dark active:scale-[0.98]">
+                  <button onClick={() => act(() => { useOps.getState().board(sel.id, 'manual'); beepOk(); haptic(15) })} className="flex h-[54px] items-center justify-center gap-2 rounded-full bg-negro text-[15px] font-semibold text-white active:scale-[0.98]">
                     <Check size={17} weight="bold" /> Embarcar
                   </button>
                   {selLeft.length > 1 && (
-                    <button onClick={() => act(() => { const st = useOps.getState(); selLeft.forEach((p) => st.board(p.id, 'manual')); beepOk(); haptic(15) })} className="flex h-12 items-center justify-center rounded-full bg-gold-tint text-[14px] font-semibold text-gold-deep active:scale-[0.98]">
+                    <button onClick={() => act(() => { const st = useOps.getState(); selLeft.forEach((p) => st.board(p.id, 'manual')); beepOk(); haptic(15) })} className="flex h-12 items-center justify-center rounded-full bg-gold-light text-[15px] font-semibold text-ink active:scale-[0.98]">
                       Embarcar o grupo todo
                     </button>
                   )}
                   {selSt?.s === 'noshow' ? (
-                    <button onClick={() => act(() => useOps.getState().unboard(sel.id))} className="flex h-12 items-center justify-center gap-2 rounded-full bg-sunken text-[14px] font-medium text-ink-2 active:scale-[0.98]">
+                    <button onClick={() => act(() => useOps.getState().unboard(sel.id))} className="flex h-12 items-center justify-center gap-2 rounded-full bg-sunken text-[15px] font-medium text-ink-2 active:scale-[0.98]">
                       <ArrowCounterClockwise size={16} /> Desfazer
                     </button>
                   ) : (
-                    <button onClick={() => act(() => useOps.getState().markNoShow(sel.id))} className="flex h-12 items-center justify-center rounded-full bg-alert-tint text-[14px] font-medium text-alert active:scale-[0.98]">
+                    <button onClick={() => act(() => useOps.getState().markNoShow(sel.id))} className="flex h-12 items-center justify-center rounded-full bg-sunken text-[15px] font-medium text-alert active:scale-[0.98]">
                       Faltou
                     </button>
                   )}
                 </>
               ) : (
-                <button onClick={() => act(() => useOps.getState().unboard(sel.id))} className="flex h-12 items-center justify-center gap-2 rounded-full bg-sunken text-[14px] font-medium text-ink-2 active:scale-[0.98]">
+                <button onClick={() => act(() => useOps.getState().unboard(sel.id))} className="flex h-12 items-center justify-center gap-2 rounded-full bg-sunken text-[15px] font-medium text-ink-2 active:scale-[0.98]">
                   <ArrowCounterClockwise size={16} /> Desfazer
                 </button>
               )}

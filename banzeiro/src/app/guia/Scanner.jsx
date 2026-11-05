@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion, useAnimationControls } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
-import { Boat, Flashlight, Repeat, Keyboard, Scan, ArrowUpRight, ListChecks } from '@phosphor-icons/react'
+import { Flashlight, Repeat, Keyboard, ArrowUpRight, ListChecks } from '@phosphor-icons/react'
 import { cx, ease } from '../../components/ui'
 import { fmt } from '../../data/mock'
 import { useOps } from '../../store'
@@ -66,7 +66,7 @@ function Corners({ color, reading }) {
 }
 
 export default function Scanner() {
-  const { pax, stats, dep, vehicle, released, setReleased, go } = useGuia()
+  const { pax, stats, dep, vehicle, released, setReleased, go, scanSignal } = useGuia()
   const status = useOps((s) => s.status)
   const online = useOps((s) => s.online)
   const reduce = useReducedMotion()
@@ -122,6 +122,12 @@ export default function Scanner() {
     read(firstWaiting())
   }
   const firstWaiting = () => pax.find((x) => useOps.getState().status[x.id]?.s === 'waiting')
+  const sig = useRef(scanSignal)
+  useEffect(() => {
+    if (scanSignal === sig.current) return
+    sig.current = scanSignal
+    if (!showDone) readNext()
+  }, [scanSignal])
 
   const readRepeat = () => {
     if (phase === 'reading') return
@@ -239,27 +245,21 @@ export default function Scanner() {
         </motion.button>
       </div>
 
-      {/* barra superior */}
-      <div className="absolute inset-x-0 z-20 flex flex-col items-center gap-2.5 px-4" style={{ top: 'calc(54px + var(--sat))' }}>
-        <div className="flex w-full items-center justify-between gap-2">
-          <span className="inline-flex h-11 min-w-0 items-center gap-2 rounded-full bg-white/10 pl-3 pr-4 text-[13px] font-medium ring-1 ring-inset ring-white/15 backdrop-blur-md">
-            <Boat size={17} className="shrink-0 text-white/80" />
-            <span className="truncate">{vehicle.name} · <span className="font-mono tnum">{fmt(dep.start)}</span></span>
-          </span>
-          <button
-            onClick={() => setTorch((v) => !v)}
-            aria-label="Lanterna"
-            aria-pressed={torch}
-            className={cx('grid size-11 shrink-0 place-items-center rounded-full ring-1 ring-inset backdrop-blur-md transition-colors active:scale-95', torch ? 'bg-white text-negro ring-white' : 'bg-white/10 text-white ring-white/15')}
-          >
-            <Flashlight size={19} weight={torch ? 'fill' : 'regular'} />
-          </button>
+      {/* topo: texto simples */}
+      <div className="absolute inset-x-0 z-20 flex items-start justify-between gap-3 px-5" style={{ top: 'calc(56px + var(--sat))' }}>
+        <div className="min-w-0">
+          <p className="text-[34px] font-semibold leading-none tracking-[-0.04em] tnum">{stats.boarded} <span className="text-white/45">de {stats.total}</span></p>
+          <p className="mt-1.5 truncate text-[15px] text-white/70">{vehicle.name} às <span className="font-mono">{fmt(dep.start)}</span></p>
+          <div className="empty:hidden [&:not(:empty)]:mt-1.5"><NetPill plain /></div>
         </div>
-        <span className="inline-flex h-8 items-center gap-2 rounded-full bg-negro/70 pl-3 pr-3.5 text-[12.5px] ring-1 ring-inset ring-white/10 backdrop-blur-md">
-          <span className="font-semibold tnum">{stats.boarded} de {stats.total}</span>
-          <span className="text-white/60">a bordo</span>
-        </span>
-        <NetPill glass />
+        <button
+          onClick={() => setTorch((v) => !v)}
+          aria-label="Lanterna"
+          aria-pressed={torch}
+          className={cx('grid size-14 shrink-0 place-items-center rounded-full backdrop-blur-md transition-colors active:scale-95', torch ? 'bg-white text-negro' : 'bg-white/10 text-white')}
+        >
+          <Flashlight size={20} weight="fill" />
+        </button>
       </div>
 
       {/* dica */}
@@ -272,23 +272,15 @@ export default function Scanner() {
       </div>
 
       {/* controles */}
-      <div className="absolute inset-x-4 z-20 flex flex-col gap-2.5" style={{ bottom: 'calc(92px + var(--sab))' }}>
+      <div className="absolute inset-x-4 z-20 flex flex-col gap-2.5" style={{ bottom: 'calc(116px + var(--sab))' }}>
         <div className="flex gap-2.5">
-          <button onClick={readRepeat} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-white/10 text-[13px] font-medium ring-1 ring-inset ring-white/15 backdrop-blur-md transition-transform active:scale-[0.97]">
+          <button onClick={readRepeat} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-white/10 text-[14px] font-medium backdrop-blur-md transition-transform active:scale-[0.97]">
             <Repeat size={17} /> Ler QR repetido
           </button>
-          <button onClick={() => { setManual(true); setCodeErr('') }} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-white/10 text-[13px] font-medium ring-1 ring-inset ring-white/15 backdrop-blur-md transition-transform active:scale-[0.97]">
+          <button onClick={() => { setManual(true); setCodeErr('') }} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-full bg-white/10 text-[14px] font-medium backdrop-blur-md transition-transform active:scale-[0.97]">
             <Keyboard size={17} /> Digitar código
           </button>
         </div>
-        <button
-          onClick={readNext}
-          disabled={!waitingPax.length && phase === 'idle'}
-          className="flex h-[58px] w-full items-center justify-between rounded-full bg-lime pl-6 pr-2 text-negro transition-transform duration-150 active:scale-[0.98] disabled:opacity-50"
-        >
-          <span className="text-[15px] font-semibold tracking-[-0.01em]">Ler próximo</span>
-          <span className="grid size-[42px] place-items-center rounded-full bg-negro text-lime"><Scan size={19} weight="bold" /></span>
-        </button>
       </div>
 
       {/* concluído */}
@@ -296,7 +288,7 @@ export default function Scanner() {
         {showDone && (
           <motion.div
             className="smoke absolute inset-0 z-30 flex flex-col items-center justify-center px-7 text-center"
-            style={{ paddingBottom: 'calc(96px + var(--sab))', paddingTop: 'calc(40px + var(--sat))' }}
+            style={{ paddingBottom: 'calc(120px + var(--sab))', paddingTop: 'calc(40px + var(--sat))' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.6, ease } }}
             exit={{ opacity: 0 }}
@@ -330,7 +322,7 @@ export default function Scanner() {
               {released ? (
                 <div className="flex flex-col items-center gap-3">
                   <p className="text-[15px] text-white/80">Saída liberada às <span className="font-mono text-white">{fmt(released)}</span></p>
-                  <button onClick={() => go('list')} className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white/10 text-[14px] font-medium ring-1 ring-inset ring-white/15">
+                  <button onClick={() => go('list')} className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-white/10 text-[14px] font-medium ">
                     <ListChecks size={18} /> Ver lista
                   </button>
                 </div>
