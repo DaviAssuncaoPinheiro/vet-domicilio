@@ -139,8 +139,8 @@ function PlanCard({ dep, pax, status, stats, hoverId, setHoverId, selectedId, se
     const H = computeLayout(vehicle, s, 'h')
     const V = computeLayout(vehicle, s, 'v')
     if (!mobile && W >= H.width + STAGE_PAD + PANEL + GAP) return { layout: H, side: true }
-    if (!mobile && W >= V.width + STAGE_PAD + 40 + PANEL + GAP && V.height <= 760) return { layout: V, side: true }
     if (W >= H.width + STAGE_PAD && !mobile) return { layout: H, side: false }
+    if (!mobile && W >= V.width + STAGE_PAD + 40 + PANEL + GAP && V.height <= 760) return { layout: V, side: true }
     return { layout: V, side: false }
   }, [W, vehicle, mobile])
 
@@ -264,6 +264,7 @@ export default function Embarque() {
   const status = useOps((s) => s.status)
   const [guideOpen, setGuideOpen] = useState(false)
   const xl = useMedia('(min-width: 1280px)')
+  const wide = useMedia('(min-width: 1680px)')
   const groups = useMemo(() => groupDepartures(DEPARTURES, now), [now])
   const pick = (did) => navigate(`/embarque/${did}`)
 
@@ -273,7 +274,7 @@ export default function Embarque() {
     <div className="flex min-w-0 flex-col gap-3 md:gap-4">
       <DepartureStrip groups={groups} status={status} activeId={dep.id} onPick={pick} />
       <div className="flex min-w-0 items-start gap-4">
-        <DepartureList groups={groups} now={now} status={status} activeId={dep.id} onPick={pick} compact={guideOpen} />
+        {(!guideOpen || wide) && <DepartureList groups={groups} now={now} status={status} activeId={dep.id} onPick={pick} compact={guideOpen} />}
         <div className="min-w-0 flex-1">
           <DepartureView key={dep.id} dep={dep} guideOpen={guideOpen} onToggleGuide={() => setGuideOpen((o) => !o)} />
         </div>
