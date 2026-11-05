@@ -109,20 +109,30 @@ function TopBar() {
 
 function BottomNav() {
   const loc = useLocation()
-  const items = [...NAV, { to: '/guia', label: 'App', icon: DeviceMobile }]
+  const nav = useNavigate()
+  const left = NAV.slice(0, 2)
+  const right = NAV.slice(2)
+  const Item = ({ n }) => {
+    const active = n.end ? loc.pathname === n.to : loc.pathname.startsWith(n.to)
+    return (
+      <NavLink to={n.to} end={n.end} aria-label={n.label} className={cx('grid h-14 flex-1 place-items-center transition-colors', active ? 'text-white' : 'text-white/40')}>
+        <n.icon size={24} weight={active ? 'fill' : 'regular'} />
+      </NavLink>
+    )
+  }
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(14px,env(safe-area-inset-bottom))] md:hidden">
-      <div className="flex items-center gap-1 rounded-full bg-negro p-1.5 shadow-dark">
-        {items.map((n) => {
-          const active = n.end ? loc.pathname === n.to : loc.pathname.startsWith(n.to)
-          return (
-            <NavLink key={n.to} to={n.to} end={n.end} aria-label={n.label} className={cx('relative flex h-11 items-center gap-2 rounded-full px-3.5 text-[12.5px] font-medium transition-colors', active ? 'text-white' : 'text-white/55')}>
-              {active && <motion.span layoutId="bottomnav" className="absolute inset-0 rounded-full bg-white/[0.13]" transition={{ type: 'spring', stiffness: 520, damping: 40 }} />}
-              <n.icon size={19} weight={active ? 'fill' : 'regular'} className="relative" />
-              {active && <span className="relative">{n.label}</span>}
-            </NavLink>
-          )
-        })}
+    <nav className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(12px,env(safe-area-inset-bottom))] md:hidden">
+      <div className="relative flex items-center rounded-[26px] bg-negro px-2 shadow-dark">
+        {left.map((n) => <Item key={n.to} n={n} />)}
+        <div className="w-20 shrink-0" />
+        {right.map((n) => <Item key={n.to} n={n} />)}
+        <button
+          aria-label="Nova reserva"
+          onClick={() => nav('/reservas?nova=1')}
+          className="absolute left-1/2 top-0 grid size-[64px] -translate-x-1/2 -translate-y-[38%] place-items-center rounded-full bg-gold text-negro ring-[6px] ring-canvas transition-transform active:scale-95"
+        >
+          <Plus size={26} weight="bold" />
+        </button>
       </div>
     </nav>
   )

@@ -125,7 +125,7 @@ export function Avatar({ initials, hue = '#14120F', size = 32, ring, className }
   return (
     <span
       className={cx('inline-grid shrink-0 place-items-center rounded-full font-semibold text-white', ring && 'ring-2 ring-surface', className)}
-      style={{ width: size, height: size, fontSize: size * 0.36, background: `linear-gradient(140deg, ${hue}, color-mix(in oklab, ${hue} 70%, black))` }}
+      style={{ width: size, height: size, fontSize: size * 0.36, background: hue }}
     >
       {initials}
     </span>
