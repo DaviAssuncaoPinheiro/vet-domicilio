@@ -17,12 +17,16 @@ const FILTERS = [
 const preview = (it) => it.segs.map((s) => s.t).join('').slice(0, 90)
 const isPending = (it, st) => (it.missing && !st.asked[it.id]) || (it.dup && !st.merged[it.id])
 
-function ChannelGlyph({ k, size = 40 }) {
+function LineTag({ n, active }) {
+  return <span className={cx('shrink-0 rounded-full px-1.5 text-[10.5px] font-medium leading-[16px]', active ? 'bg-negro/10 text-negro' : 'bg-sunken text-ink-3')}>WhatsApp {n}</span>
+}
+
+function ChannelGlyph({ k, size = 40, active }) {
   const Icon = ICONS[k]
   return (
-    <span className="relative grid shrink-0 place-items-center rounded-full bg-sunken text-ink-2" style={{ width: size, height: size }}>
+    <span className={cx('relative grid shrink-0 place-items-center rounded-full', active ? 'bg-white/45 text-negro' : 'bg-sunken text-ink-2')} style={{ width: size, height: size }}>
       <Icon size={size * 0.45} />
-      <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full ring-2 ring-surface" style={{ background: CHANNELS[k].color }} />
+      <span className={cx('absolute -bottom-0.5 -right-0.5 size-3 rounded-full ring-2', active ? 'ring-gold' : 'ring-surface')} style={{ background: CHANNELS[k].color }} />
     </span>
   )
 }
@@ -34,17 +38,18 @@ const ListRow = forwardRef(function ListRow({ it, active, read, onOpen }, ref) {
     <motion.li ref={ref} layout="position" exit={{ opacity: 0, x: -28, scale: 0.97 }} transition={{ duration: 0.3, ease }}>
       <button
         onClick={onOpen}
-        className={cx('flex w-full items-start gap-3 rounded-[18px] p-3 text-left transition-colors duration-150', active ? 'bg-now-tint' : 'hover:bg-frame')}
+        className={cx('flex w-full items-start gap-3 rounded-[18px] p-3 text-left transition-colors duration-150', active ? 'bg-gold text-negro' : 'hover:bg-frame')}
       >
-        <ChannelGlyph k={it.channel} />
+        <ChannelGlyph k={it.channel} active={active} />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
-            <span className={cx('truncate text-[13.5px] text-ink', unread ? 'font-semibold' : 'font-medium')}>{it.sender}</span>
-            <span className="ml-auto shrink-0 font-mono text-[11.5px] text-ink-3 tnum">{fmt(it.time)}</span>
+            <span className={cx('truncate text-[13.5px]', active ? 'text-negro' : 'text-ink', unread ? 'font-semibold' : 'font-medium')}>{it.sender}</span>
+            {it.line && <LineTag n={it.line} active={active} />}
+            <span className={cx('ml-auto shrink-0 font-mono text-[11.5px] tnum', active ? 'text-negro/70' : 'text-ink-3')}>{fmt(it.time)}</span>
           </span>
           <span className="mt-0.5 flex items-center gap-2">
-            <span className="line-clamp-1 flex-1 text-[12.5px] text-ink-3">{preview(it)}</span>
-            {unread && <span className="size-2 shrink-0 rounded-full bg-now" aria-label="Não lida" />}
+            <span className={cx('line-clamp-1 flex-1 text-[12.5px]', active ? 'text-negro/70' : 'text-ink-3')}>{preview(it)}</span>
+            {unread && <span className={cx('size-2 shrink-0 rounded-full', active ? 'bg-negro' : 'bg-gold')} aria-label="Não lida" />}
           </span>
         </span>
       </button>
@@ -230,7 +235,7 @@ function Detail({ it, st, setSt, onConfirm, onBack }) {
         <ChannelGlyph k={it.channel} size={36} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[14.5px] font-semibold text-ink">{it.sender}</p>
-          <p className="flex items-center gap-1.5 text-[12px] text-ink-3"><span className="size-1.5 rounded-full" style={{ background: ch.color }} />{ch.label} · <span className="font-mono tnum">{fmt(it.time)}</span></p>
+          <p className="flex items-center gap-1.5 text-[12px] text-ink-3"><span className="size-1.5 rounded-full" style={{ background: ch.color }} />{it.line ? `WhatsApp ${it.line}` : ch.label} · <span className="font-mono tnum">{fmt(it.time)}</span></p>
         </div>
       </div>
       <div className="grid flex-1 content-start gap-5 overflow-y-auto p-4 md:p-6 xl:grid-cols-2">

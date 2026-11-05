@@ -137,12 +137,25 @@ export default function Scanner() {
     later(() => read(p), 40)
   }
 
-  // sucesso fecha sozinho em 2.5s
+  // grupo da reserva (o QR do voucher é por reserva)
+  const group = result ? pax.filter((x) => x.booking === result.p.booking) : []
+  const groupIn = group.filter((x) => status[x.id]?.s === 'boarded').length
+  const groupLeft = group.filter((x) => status[x.id]?.s === 'waiting')
+
+  const boardGroup = () => {
+    const st = useOps.getState()
+    groupLeft.forEach((x) => st.board(x.id, 'qr'))
+    haptic(15)
+    beepOk()
+  }
+
+  // sucesso fecha sozinho em 2.5s, a não ser que falte alguém do grupo
+  const autoClose = phase === 'ok' && result && groupLeft.length === 0
   useEffect(() => {
-    if (phase !== 'ok' || !result) return
+    if (!autoClose) return
     const t = setTimeout(() => setPhase('idle'), 2500)
     return () => clearTimeout(t)
-  }, [phase, result?.t])
+  }, [autoClose, result?.t])
 
   function submitCode(e) {
     e?.preventDefault()
@@ -355,7 +368,7 @@ export default function Scanner() {
             animate={{ y: 0, transition: { duration: 0.32, ease: SHEET_EASE } }}
             exit={{ y: '100%', transition: { duration: 0.24, ease } }}
           >
-            {result.ok && <motion.span className="absolute left-0 top-0 h-[3px] bg-ok/70" initial={{ width: '100%' }} animate={{ width: '0%' }} transition={{ duration: 2.5, ease: 'linear' }} />}
+            {autoClose && <motion.span key={`bar-${groupIn}`} className="absolute left-0 top-0 h-[3px] bg-ok/70" initial={{ width: '100%' }} animate={{ width: '0%' }} transition={{ duration: 2.5, ease: 'linear' }} />}
             <div className="mx-auto mb-4 h-[5px] w-10 rounded-full bg-ink-4/50" />
             <div className="flex items-center gap-4">
               <DrawnMark ok={result.ok} />
@@ -366,14 +379,29 @@ export default function Scanner() {
                 </p>
                 {result.ok && result.queued && <p className="text-[13px] text-gold-deep">Salvo no celular</p>}
               </div>
-              <div className="shrink-0 rounded-[16px] bg-sunken px-3.5 py-2 text-center">
-                <p className="text-[11px] text-ink-3">Assento</p>
-                <p className="font-mono text-[24px] font-medium leading-tight tracking-[-0.03em]">{result.p.seat}</p>
-              </div>
             </div>
+            <div className="mt-4 rounded-[16px] bg-sunken px-4 py-3">
+              <p className="text-[14px] text-ink-2">Reserva <span className="font-mono font-medium text-ink">{result.p.booking}</span> · <span className="tnum">{group.length} {group.length === 1 ? 'pessoa' : 'pessoas'}</span></p>
+              {result.ok && group.length > 1 && (
+                <div className="mt-2.5 flex items-center gap-3">
+                  <div className="flex flex-1 gap-1">
+                    {group.map((x) => <span key={x.id} className={cx('h-1 flex-1 rounded-full transition-colors duration-300', status[x.id]?.s === 'boarded' ? 'bg-ok' : 'bg-ink-4/40')} />)}
+                  </div>
+                  <p className="shrink-0 text-[13px] font-medium text-ink tnum">{groupIn} de {group.length} do grupo embarcados</p>
+                </div>
+              )}
+            </div>
+            {result.ok && groupLeft.length > 0 && (
+              <button
+                onClick={boardGroup}
+                className="mt-3 flex h-12 w-full items-center justify-center rounded-full bg-gold-tint text-[14.5px] font-semibold text-gold-deep transition-transform active:scale-[0.98]"
+              >
+                Embarcar o grupo todo
+              </button>
+            )}
             <button
               onClick={readNext}
-              className="mt-5 flex h-[54px] w-full items-center justify-center rounded-full bg-negro text-[15px] font-semibold text-white shadow-dark transition-transform active:scale-[0.98]"
+              className={cx('flex h-[54px] w-full items-center justify-center rounded-full bg-negro', result.ok && groupLeft.length > 0 ? 'mt-2' : 'mt-4', 'text-[15px] font-semibold text-white shadow-dark transition-transform active:scale-[0.98]')}
             >
               Próximo
             </button>

@@ -51,4 +51,4 @@ export function countdown(mins) {
   return m ? `${h}h ${String(m).padStart(2, '0')}` : `${h}h`
 }
 
-export const range = (d) => `${t(d.start)} às ${t(d.end)}`
+export const range = (d) => `${t(d.start)} a ${t(d.end)}`

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MagnifyingGlass, X, Check, ArrowCounterClockwise } from '@phosphor-icons/react'
+import { MagnifyingGlass, X, Check, ArrowCounterClockwise, CaretRight } from '@phosphor-icons/react'
 import { Avatar, Card, Reveal, cx, ease } from '../../components/ui'
 import { LANGS, fmt } from '../../data/mock'
 import { useOps } from '../../store'
@@ -44,11 +44,13 @@ export default function Lista() {
     if (listFilter === 'boarded' && s !== 'boarded') return false
     if (listFilter === 'waiting' && s !== 'waiting') return false
     if (!nq) return true
-    return norm(`${p.name} ${p.booking} ${p.seat}`).includes(nq)
+    return norm(`${p.name} ${p.booking}`).includes(nq)
   })
 
   const sel = selId && pax.find((p) => p.id === selId)
   const selSt = sel && status[sel.id]
+  const selGroup = sel ? pax.filter((p) => p.booking === sel.booking) : []
+  const selLeft = selGroup.filter((p) => status[p.id]?.s === 'waiting')
   const act = (fn) => { unlockAudio(); fn(); setSelId(null) }
 
   return (
@@ -108,7 +110,8 @@ export default function Lista() {
                     <span className={cx('block truncate text-[15px] font-medium', st?.s === 'noshow' ? 'text-ink-3' : 'text-ink')}>{p.name}</span>
                     <StateText st={st} className="mt-0.5" />
                   </span>
-                  <span className="shrink-0 font-mono text-[16px] font-medium text-ink">{p.seat}</span>
+                  <span className="shrink-0 font-mono text-[12.5px] text-ink-3">{p.booking}</span>
+                  <CaretRight size={15} className="-mr-1 shrink-0 text-ink-4" />
                 </motion.button>
               )
             })}
@@ -130,8 +133,8 @@ export default function Lista() {
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
-              <Info label="Assento"><span className="font-mono">{sel.seat}</span></Info>
               <Info label="Reserva"><span className="font-mono">{sel.booking}</span></Info>
+              <Info label="Grupo"><span className="tnum">{selGroup.length} {selGroup.length === 1 ? 'pessoa' : 'pessoas'}</span></Info>
               <Info label="Idioma">{LANGS[sel.lang]?.label}</Info>
               <Info label="Hotel">{sel.hotel}</Info>
             </div>
@@ -144,6 +147,11 @@ export default function Lista() {
                   <button onClick={() => act(() => { useOps.getState().board(sel.id, 'manual'); beepOk(); haptic(15) })} className="flex h-[54px] items-center justify-center gap-2 rounded-full bg-negro text-[15px] font-semibold text-white shadow-dark active:scale-[0.98]">
                     <Check size={17} weight="bold" /> Embarcar
                   </button>
+                  {selLeft.length > 1 && (
+                    <button onClick={() => act(() => { const st = useOps.getState(); selLeft.forEach((p) => st.board(p.id, 'manual')); beepOk(); haptic(15) })} className="flex h-12 items-center justify-center rounded-full bg-gold-tint text-[14px] font-semibold text-gold-deep active:scale-[0.98]">
+                      Embarcar o grupo todo
+                    </button>
+                  )}
                   {selSt?.s === 'noshow' ? (
                     <button onClick={() => act(() => useOps.getState().unboard(sel.id))} className="flex h-12 items-center justify-center gap-2 rounded-full bg-sunken text-[14px] font-medium text-ink-2 active:scale-[0.98]">
                       <ArrowCounterClockwise size={16} /> Desfazer

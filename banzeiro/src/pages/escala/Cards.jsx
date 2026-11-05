@@ -5,15 +5,17 @@ import { cx } from '../../components/ui'
 import { GUIDES, KIND, WEEK } from '../../data/mock'
 import { tourOf, missingLangs, overlaps, dayLabel, fmtT } from './logic'
 
-const strong = (k) => `color-mix(in oklab, ${KIND[k].color} 62%, var(--color-ink))`
+const TEXT = { boat: 'var(--color-negro)', land: 'white', transfer: 'white' }
 
 export function Chip({ children, alert }) {
   return (
-    <span className={cx('inline-flex h-[18px] items-center rounded-full px-1.5 text-[10px] font-semibold leading-none shadow-[0_1px_2px_rgba(0,0,0,.08)]', alert ? 'bg-alert text-white' : 'bg-white text-ink')}>
+    <span className={cx('inline-flex h-[18px] items-center rounded-full px-1.5 text-[10px] font-semibold leading-none shadow-[0_1px_2px_rgba(0,0,0,.12)]', alert ? 'bg-alert text-white' : 'bg-white text-ink')}>
       {children}
     </span>
   )
 }
+
+const PAST = (d) => d < (WEEK.find((w) => w.today)?.idx ?? 0)
 
 /** Visual puro do cartão de saída */
 export const ShiftBody = forwardRef(function ShiftBody({ shift, shifts = [], lifted, ghost, className, ...rest }, ref) {
@@ -22,27 +24,25 @@ export const ShiftBody = forwardRef(function ShiftBody({ shift, shifts = [], lif
   const miss = missingLangs(g, shift)
   const clash = g && overlaps(shifts, shift, g.id)
   const bad = miss.length > 0 || clash
+  const past = PAST(shift.day)
   return (
     <div
       ref={ref}
       {...rest}
       className={cx(
-        'relative flex min-h-[52px] select-none flex-col justify-between gap-1 overflow-hidden rounded-[12px] py-1.5 pl-3 pr-2 text-left',
-        bad && 'ring-2 ring-alert',
+        'relative flex min-h-[52px] select-none flex-col justify-between gap-1 overflow-hidden rounded-[12px] px-2.5 py-1.5 text-left',
+        bad && 'ring-2 ring-alert ring-offset-1 ring-offset-sunken',
         lifted && 'shadow-lift',
         ghost && 'opacity-30',
         className,
       )}
-      style={{ background: KIND[t.kind].tint, ...rest.style }}
+      style={{ background: KIND[t.kind].color, color: TEXT[t.kind], opacity: past && !lifted && !ghost ? 0.6 : undefined, ...rest.style }}
     >
-      <span className="absolute inset-y-1.5 left-1 w-[3px] rounded-full" style={{ background: KIND[t.kind].color }} />
       <div className="flex items-center justify-between gap-1.5">
-        <span className="font-mono text-[11.5px] font-semibold tnum" style={{ color: strong(t.kind) }}>{fmtT(shift.start)}</span>
-        <div className="flex items-center gap-1">
-          {miss.length > 0 ? <Chip alert>Sem {miss[0]}</Chip> : clash ? <Chip alert>Sobrepõe</Chip> : <Chip>{shift.need[0]}</Chip>}
-        </div>
+        <span className="font-mono text-[11.5px] font-semibold tnum opacity-80">{fmtT(shift.start)}</span>
+        {miss.length > 0 ? <Chip alert>Sem {miss[0]}</Chip> : clash ? <Chip alert>Sobrepõe</Chip> : past ? <Chip><span className="mr-1 size-[5px] rounded-full bg-ok" />Feita</Chip> : <Chip>{shift.need[0]}</Chip>}
       </div>
-      <p className="truncate text-[12.5px] font-semibold leading-tight tracking-[-0.005em] text-ink">{t.short}</p>
+      <p className="truncate text-[12.5px] font-semibold leading-tight tracking-[-0.005em]">{t.short}</p>
     </div>
   )
 })

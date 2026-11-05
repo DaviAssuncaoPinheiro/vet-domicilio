@@ -66,8 +66,7 @@ function Body({ t, lang, code, pax, dep, status, walletDone, setWalletDone, flas
   const guide = GUIDES.find((g) => g.id === dep.guideIds[0])
   const boarded = pax.filter((p) => status[p.id]?.s === 'boarded')
   const all = boarded.length === pax.length
-    const seats = pax.map((p) => p.seat).filter(Boolean).join(' · ')
-  const kind = KIND[tour.kind]
+    const kind = KIND[tour.kind]
   const bring = [
     { k: 'sun', icon: Sun },
     { k: 'hat', icon: BaseballCap },
@@ -120,21 +119,13 @@ function Body({ t, lang, code, pax, dep, status, walletDone, setWalletDone, flas
             </div>
             <p className="mt-5 text-center font-mono text-[22px] font-medium tracking-[0.04em] tnum">{code}</p>
 
-            <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
-              <div className="min-w-0">
-                <p className="text-[12px] text-white/50">{t.passengers}</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {pax.map((p) => (
-                    <span key={p.id} className="inline-flex h-7 items-center rounded-full bg-white/10 px-3 text-[12.5px] font-medium">{p.name}</span>
-                  ))}
-                </div>
+            <div className="mt-5 border-t border-white/10 pt-4">
+              <p className="text-[12px] text-white/50">{pax.length} {pax.length === 1 ? t.person : t.people}</p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {pax.map((p) => (
+                  <span key={p.id} className="inline-flex h-7 items-center rounded-full bg-white/10 px-3 text-[12.5px] font-medium">{p.name}</span>
+                ))}
               </div>
-              {seats && (
-                <div className="shrink-0 text-right">
-                  <p className="text-[12px] text-white/50">{t.seats}</p>
-                  <p className="mt-2 font-mono text-[15px] font-medium text-lime tnum">{seats}</p>
-                </div>
-              )}
             </div>
           </div>
         </div>

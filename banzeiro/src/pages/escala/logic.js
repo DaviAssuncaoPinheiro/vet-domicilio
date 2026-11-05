@@ -56,3 +56,10 @@ export function conflictsOf(shifts) {
 
 export const fmtT = (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`
 export const dayShort = (d) => WEEK[d].short
+
+/** Saídas que nenhum guia disponível cobre: sem guia ou com idioma divergente. */
+export function uncoverable(shifts) {
+  return shifts
+    .filter((s) => !s.guideId || missingLangs(GUIDES.find((g) => g.id === s.guideId), s).length)
+    .filter((s) => !GUIDES.some((g) => !isOff(g.id, s.day) && !missingLangs(g, s).length))
+}

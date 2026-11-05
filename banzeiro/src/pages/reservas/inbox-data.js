@@ -5,7 +5,7 @@ export const CONFIRMED_BASE = 14
 
 export const INBOX = [
   {
-    id: 'i1', channel: 'whatsapp', sender: 'Valentina Ruiz', time: 604, unread: true, code: 'EA-51902',
+    id: 'i1', channel: 'whatsapp', line: 1, sender: 'Valentina Ruiz', time: 604, unread: true, code: 'EA-51902',
     segs: [T('Hola, ', null), T('buen día', 'lang'), T('. Queremos '), T('3 lugares', 'pax'), T(' para el paseo del '), T('encuentro de las aguas', 'tour'), T(' el '), T('viernes 6', 'date'), T(', somos de Rosario. Nos alojamos en el '), T('Hotel Tropical', 'hotel'), T('. Soy '), T('Valentina Ruiz', 'pax'), T(', mi número es '), T('+54 341 555 0142', 'contact'), T('.')],
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Encontro das Águas', sub: 'Lancha · 4h30' },
@@ -19,7 +19,7 @@ export const INBOX = [
     missing: { label: 'o nome dos acompanhantes', btn: 'Pedir nomes', reply: 'Hola Valentina, para confirmar necesitamos el nombre completo de tus 2 acompañantes. Gracias.' },
   },
   {
-    id: 'i2', channel: 'whatsapp', sender: 'Rafael Monteiro', time: 601, unread: true, code: 'EA-51903',
+    id: 'i2', channel: 'whatsapp', line: 2, sender: 'Rafael Monteiro', time: 601, unread: true, code: 'EA-51903',
     segs: [T('Oi, tudo bem?', 'lang'), T(' Queria reservar o '), T('pôr do sol', 'tour'), T(' para '), T('amanhã', 'date'), T('. Somos '), T('2 pessoas', 'pax'), T(': eu, '), T('Rafael Monteiro', 'pax'), T(', e a '), T('Juliana Pires', 'pax'), T('. Estamos no '), T('Novotel Manaus', 'hotel'), T('. Pode confirmar neste número '), T('92 99108 0187', 'contact'), T('?')],
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Pôr do sol no Rio Negro', sub: 'Lancha · 2h' },
@@ -32,7 +32,7 @@ export const INBOX = [
     ],
   },
   {
-    id: 'i3', channel: 'whatsapp', sender: 'Sofía Fernández', time: 592, unread: true, code: 'EA-51904',
+    id: 'i3', channel: 'whatsapp', line: 1, sender: 'Sofía Fernández', time: 592, unread: true, code: 'EA-51904',
     segs: [T('Hola, '), T('confirmo mi reserva', 'lang'), T(' de '), T('hoy', 'date'), T(' para el '), T('encuentro de las aguas', 'tour'), T(' de las 10:30. Somos '), T('Sofía Fernández', 'pax'), T(' y '), T('Mateo González', 'pax'), T(', en el '), T('Juma Ópera', 'hotel'), T('. Escríbanme a '), T('+54 11 5550 0173', 'contact'), T('.')],
     fields: [
       { key: 'tour', label: 'Passeio', value: 'Encontro das Águas', sub: 'Lancha · 4h30' },
@@ -46,11 +46,11 @@ export const INBOX = [
     dup: 'EA-51844',
   },
   {
-    id: 'i4', channel: 'agencia', sender: 'Rio Negro Viagens', subject: 'Grupo de 6 para Anavilhanas', time: 580, unread: true, code: 'EA-51905',
-    segs: [T('Bom dia, segue a lista do grupo para o '), T('passeio a Anavilhanas', 'tour'), T(' no '), T('sábado, 7 de novembro', 'date'), T('. São '), T('6 passageiros', 'pax'), T(' (planilha anexa), todos falam '), T('alemão', 'lang'), T('. Contato da agência: '), T('reservas@rionegroviagens.com', 'contact'), T('.')],
+    id: 'i4', channel: 'agencia', sender: 'Rio Negro Viagens', subject: 'Grupo de 6 para os botos', time: 580, unread: true, code: 'EA-51905',
+    segs: [T('Bom dia, segue a lista do grupo para o '), T('interação com os botos', 'tour'), T(' no '), T('sábado, 7 de novembro', 'date'), T('. São '), T('6 passageiros', 'pax'), T(' (planilha anexa), todos falam '), T('alemão', 'lang'), T('. Contato da agência: '), T('reservas@rionegroviagens.com', 'contact'), T('.')],
     sheet: { file: 'grupo_anavilhanas.xlsx', cols: ['Nome', 'País', 'Idioma'], rows: [['Lukas Schneider', 'DE', 'DE'], ['Hannah Weber', 'DE', 'DE'], ['Felix Wagner', 'DE', 'DE'], ['Noah Becker', 'DE', 'DE'], ['Emma Fischer', 'DE', 'EN'], ['Marco Bianchi', 'IT', 'DE']] },
     fields: [
-      { key: 'tour', label: 'Passeio', value: 'Arquipélago de Anavilhanas', sub: 'Lancha · 9h30' },
+      { key: 'tour', label: 'Passeio', value: 'Interação com os botos', sub: 'Lancha · 5h30' },
       { key: 'date', label: 'Data', value: 'Sáb, 7 nov' },
       { key: 'dep', label: 'Saída', value: '07:30', mono: true, sub: 'Lancha Pirarucu', seats: '8 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '6 passageiros', names: [{ n: 'Lukas Schneider', c: 'DE' }, { n: 'Hannah Weber', c: 'DE' }], more: 4 },
@@ -100,17 +100,31 @@ export const INBOX = [
     ],
   },
   {
-    id: 'i8', channel: 'whatsapp', sender: 'Daniel Kim', time: 520, unread: true, code: 'EA-51909',
-    segs: [T('Hi', 'lang'), T(', is there space '), T('tomorrow', 'date'), T(' for the '), T('Anavilhanas day trip', 'tour'), T('? '), T('2 of us', 'pax'), T(', I am '), T('Daniel Kim', 'pax'), T(', visiting from New York.')],
+    id: 'i8', channel: 'whatsapp', line: 2, sender: 'Daniel Kim', time: 520, unread: true, code: 'EA-51909',
+    segs: [T('Hi', 'lang'), T(', is there space '), T('tomorrow', 'date'), T(' for the '), T('Novo Airão day trip', 'tour'), T('? '), T('2 of us', 'pax'), T(', I am '), T('Daniel Kim', 'pax'), T(', visiting from New York.')],
     fields: [
-      { key: 'tour', label: 'Passeio', value: 'Arquipélago de Anavilhanas', sub: 'Lancha · 9h30' },
+      { key: 'tour', label: 'Passeio', value: 'Novo Airão bate e volta', sub: 'Terrestre · 11h30' },
       { key: 'date', label: 'Data', value: 'Qui, 5 nov' },
-      { key: 'dep', label: 'Saída', value: '07:30', mono: true, sub: 'Lancha Pirarucu', seats: '3 lugares livres', spans: ['date', 'pax'] },
+      { key: 'dep', label: 'Saída', value: '06:30', mono: true, sub: 'Micro-ônibus', seats: '12 lugares livres', spans: ['date', 'pax'] },
       { key: 'pax', label: 'Passageiros', value: '2 passageiros', names: [{ n: 'Daniel Kim', c: 'US' }], more: 1 },
       { key: 'lang', label: 'Idioma', value: 'Inglês' },
       { key: 'hotel', label: 'Hotel', value: null },
       { key: 'contact', label: 'Contato', value: 'Mesmo número do WhatsApp' },
     ],
     missing: { label: 'o hotel e o nome do acompanhante', btn: 'Pedir dados', reply: 'Hi Daniel, yes there is space. Could you share your hotel and your companion\'s full name so we can confirm?' },
+  },
+  {
+    id: 'i9', channel: 'whatsapp', line: 1, sender: 'Beatriz Nogueira', time: 505, unread: true, code: 'EA-51910',
+    segs: [T('Boa tarde', 'lang'), T('. Tem vaga na '), T('interação com os botos', 'tour'), T(' para '), T('amanhã', 'date'), T('? Somos '), T('4 pessoas', 'pax'), T(', eu '), T('Beatriz Nogueira', 'pax'), T(' e mais três da família. Ficamos no '), T('Blue Tree Manaus', 'hotel'), T('.')],
+    fields: [
+      { key: 'tour', label: 'Passeio', value: 'Interação com os botos', sub: 'Lancha · 5h30' },
+      { key: 'date', label: 'Data', value: 'Qui, 5 nov' },
+      { key: 'dep', label: 'Saída', value: '07:30', mono: true, sub: 'Lancha Pirarucu', seats: '5 lugares livres', spans: ['date', 'pax'] },
+      { key: 'pax', label: 'Passageiros', value: '4 passageiros', names: [{ n: 'Beatriz Nogueira', c: 'BR' }], more: 3 },
+      { key: 'lang', label: 'Idioma', value: 'Português' },
+      { key: 'hotel', label: 'Hotel', value: 'Blue Tree Manaus' },
+      { key: 'contact', label: 'Contato', value: 'Mesmo número do WhatsApp' },
+    ],
+    missing: { label: 'o nome dos acompanhantes', btn: 'Pedir nomes', reply: 'Boa tarde, Beatriz. Tem vaga sim. Pode nos enviar o nome completo dos outros três?' },
   },
 ]

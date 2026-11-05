@@ -6,7 +6,7 @@ import { Card, Reveal, Pill, Button, IconButton, Segmented, Avatar, LangTag, Pro
 import { GUIDES, WEEK } from '../data/mock'
 import { useOps } from '../store'
 import { DragShift, ShiftBody, TrayBody } from './escala/Cards'
-import { isOff, missingLangs, fit, plan, conflictsOf, hoursOf, fmtH, dayLabel, dayShort, firstName } from './escala/logic'
+import { isOff, missingLangs, fit, plan, conflictsOf, uncoverable, hoursOf, fmtH, dayLabel, dayShort, firstName } from './escala/logic'
 
 const GRID = 'grid grid-cols-[208px_repeat(7,minmax(138px,1fr))] gap-1.5'
 const FILTERS = ['Todos', 'EN', 'ES', 'FR', 'DE', 'IT', 'JA']
@@ -151,24 +151,22 @@ function Sheet({ shift, shifts, onClose, onChoose }) {
 }
 
 function Summary({ shifts }) {
-  const langs = ['EN', 'ES', 'FR', 'DE', 'IT', 'JA']
-  const missing = langs.filter((l) => shifts.some((s) => !s.guideId && s.need.includes(l)))
-  const ok = langs.filter((l) => !missing.includes(l) && shifts.some((s) => s.need.includes(l)))
+  const gaps = uncoverable(shifts)
   const c = conflictsOf(shifts)
   const total = c.lang + c.overlap + c.off
-  const tag = 'inline-flex h-[24px] items-center rounded-md px-2 text-[11.5px] font-semibold'
   return (
-    <Card className="flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4 md:px-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-[13px] text-ink-3">Idiomas</span>
-        {ok.map((l) => <span key={l} className={cx(tag, 'bg-sunken text-ink-2')}>{l}</span>)}
-        {missing.length > 0 && <span className="ml-2 mr-1 text-[13px] text-ink-3">Falta</span>}
-        {missing.map((l) => <span key={l} className={cx(tag, 'bg-alert-tint text-alert')}>{l}</span>)}
+    <Card className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-4 md:px-6">
+      <div className="flex flex-wrap items-center gap-2 text-[13px]">
+        {gaps.length === 0 ? (
+          <span className="flex items-center gap-1.5 text-ink-3"><Check size={14} weight="bold" className="text-ok" />Todos os idiomas cobertos</span>
+        ) : (
+          <>
+            <span className="mr-1 text-ink-3">Falta guia de</span>
+            {gaps.map((s) => <span key={s.id} className="inline-flex h-[24px] items-center rounded-md bg-alert-tint px-2 text-[11.5px] font-semibold text-alert">{s.need.join(' + ')} · {dayShort(s.day)}</span>)}
+          </>
+        )}
       </div>
-      <div className="ml-auto flex items-center gap-2 text-[13px]">
-        {total === 0 ? <span className="flex items-center gap-1.5 text-ink-3"><Check size={14} weight="bold" className="text-ok" />Sem conflitos</span>
-          : <span className="flex items-center gap-1.5 font-medium text-alert"><span className="size-1.5 rounded-full bg-alert" /><span className="tnum">{total}</span> {total === 1 ? 'conflito' : 'conflitos'}</span>}
-      </div>
+      {total > 0 && <span className="ml-auto flex items-center gap-1.5 text-[13px] font-medium text-alert"><span className="size-1.5 rounded-full bg-alert" /><span className="tnum">{total}</span> {total === 1 ? 'conflito' : 'conflitos'}</span>}
     </Card>
   )
 }
@@ -251,8 +249,8 @@ export default function Escala() {
                   <Button icon={UserPlus} onClick={suggest} disabled={running} className="max-md:w-full">Preencher escala</Button>
                 </div>
               </div>
-              <div className="no-scrollbar -mx-1 mt-4 flex items-center gap-2 overflow-x-auto px-1 py-1">
-                {FILTERS.map((f) => <Pill key={f} active={lang === f} onClick={() => setLang(f)} className={cx('!h-9 !px-3.5', f !== 'Todos' && '!text-[12px]')}>{f}</Pill>)}
+              <div className="no-scrollbar -mx-1 mt-4 overflow-x-auto px-1 py-1">
+                <Segmented size="sm" value={lang} onChange={setLang} options={FILTERS.map((f) => ({ value: f, label: f }))} className="w-max" />
               </div>
             </Card>
           </Reveal>
