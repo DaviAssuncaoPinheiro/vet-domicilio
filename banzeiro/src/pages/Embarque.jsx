@@ -1,13 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { DeviceMobile, Scan, SteeringWheel, Timer, User, UsersThree, WifiHigh, WifiSlash } from '@phosphor-icons/react'
-import { Avatar, Button, CountUp, IconButton, LangTag, Reveal, cx, ease, useMedia } from '../components/ui'
+import { ArrowUp, DeviceMobile, Scan, WifiHigh, WifiSlash } from '@phosphor-icons/react'
+import { Button, CountUp, IconButton, Reveal, cx, ease, useMedia } from '../components/ui'
 import { DEPARTURES, depById, fmt, guideById, tourOf, vehicleOf } from '../data/mock'
 import { useOps, depPhase, depStats, paxOfDep } from '../store'
 import { SeatPlan, CapacityLine, computeLayout, orderByBooking } from './embarque/SeatPlan'
 import {
-  BottomSheet, DepartureList, DepartureStrip, GuideColumn, GuideSheet, Manifest, PaxDetail, PhaseChip, depTitle, groupDepartures, paxState,
+  BottomSheet, DepartureList, DepartureStrip, GuideColumn, GuideSheet, Manifest, PaxDetail, depTitle, groupDepartures, paxState,
 } from './embarque/parts'
 
 const PANEL = 272
@@ -27,22 +27,21 @@ function useWidth(ref) {
   return w
 }
 
-function Metric({ icon: Icon, label, children, className }) {
-  return (
-    <div className={cx('flex min-w-0 items-center gap-3', className)}>
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sunken text-ink-2"><Icon size={18} /></span>
-      <div className="min-w-0">
-        <p className="text-[12px] text-ink-3">{label}</p>
-        <div className="mt-0.5 truncate">{children}</div>
-      </div>
-    </div>
-  )
-}
-
 const fmtDiff = (m) => {
   if (m < 60) return `${m} min`
   const h = Math.floor(m / 60), r = m % 60
   return r ? `${h} h ${r} min` : `${h} h`
+}
+
+const PHASE_WORD = { boarding: 'embarcando', live: 'em andamento', scheduled: 'agendada', done: 'concluída' }
+
+function Stat({ label, children, className }) {
+  return (
+    <div className={cx('min-w-0', className)}>
+      <p className="text-[13px] text-ink-3">{label}</p>
+      <div className="mt-1 truncate text-[16px] font-medium">{children}</div>
+    </div>
+  )
 }
 
 /* ---------------- cabeçalho da saída ---------------- */
@@ -55,70 +54,74 @@ function Hero({ dep, now, pax, status, stats, online, guideOpen, onToggleGuide, 
   const setOnline = useOps((s) => s.setOnline)
   const boat = tour.kind === 'boat'
   const diff = dep.start - now
-  const order = { boarded: 0, waiting: 1, noshow: 2 }
-  const segs = [...pax].sort((a, b) => order[paxState(status[a.id])] - order[paxState(status[b.id])])
   const canSim = stats.waiting > 0 && phase !== 'done'
+
+  // embarques feitos desde que a tela abriu
+  const initial = useRef(null)
+  if (initial.current === null) initial.current = new Set(pax.filter((p) => status[p.id]?.s === 'boarded').map((p) => p.id))
+  const fresh = pax.filter((p) => status[p.id]?.s === 'boarded' && !initial.current.has(p.id)).length
 
   const time =
     phase === 'boarding' || phase === 'scheduled'
-      ? { label: 'Sai em', value: <span className="text-[16px] font-semibold tnum">{fmtDiff(Math.max(0, diff))}</span> }
-      : { label: phase === 'live' ? 'Volta às' : 'Voltou às', value: <span className="font-mono text-[16px] font-medium">{fmt(dep.end)}</span> }
+      ? { label: 'Sai em', value: fmtDiff(Math.max(0, diff)) }
+      : { label: phase === 'live' ? 'Volta às' : 'Voltou às', value: fmt(dep.end) }
 
   return (
-    <section className="@container rounded-[24px] bg-surface p-4 shadow-soft sm:p-6">
+    <section className="@container rounded-[28px] bg-surface p-5 shadow-soft sm:p-7">
       <div className="flex flex-col gap-4 @3xl:flex-row @3xl:items-start @3xl:justify-between">
         <div className="min-w-0">
-          {online ? <PhaseChip phase={phase} /> : (
-            <span className="inline-flex h-[22px] items-center gap-1.5 rounded-full bg-gold-tint px-2 text-[11px] font-semibold text-ink">
-              <span className="live-dot !size-[6px] text-gold-deep" />
-              Sem internet{stats.queued > 0 && <> · <span className="tnum">{stats.queued}</span> salvo{stats.queued > 1 ? 's' : ''} no celular</>}
-            </span>
-          )}
-          <h1 className="mt-3 truncate text-[26px] font-semibold leading-[1.1] tracking-[-0.025em] sm:text-[30px]">{dep.route || tour.name}</h1>
-          <p className="mt-1.5 truncate text-[13.5px] text-ink-3">{vehicle.name} · <span className="font-mono text-ink-2">{fmt(dep.start)}</span></p>
+          <h1 className="truncate text-[26px] font-semibold leading-[1.1] tracking-[-0.025em] sm:text-[30px]">{dep.route || tour.name}</h1>
+          <p className="mt-1.5 truncate text-[15px] text-ink-3">
+            {vehicle.name} · <span className="tnum text-ink-2">{fmt(dep.start)}</span> · {PHASE_WORD[phase]}
+          </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <IconButton
             label={online ? 'Simular sem internet' : 'Reconectar'}
             onClick={() => setOnline(!online)}
-            className={cx('shadow-pill', online ? 'bg-surface !text-ink-2' : 'bg-gold-tint !text-ink')}
+            className={cx('!size-11', online ? 'bg-sunken !text-ink-2' : 'bg-gold-tint !text-ink')}
           >
-            {online ? <WifiHigh size={17} /> : <WifiSlash size={17} />}
+            {online ? <WifiHigh size={18} /> : <WifiSlash size={18} />}
           </IconButton>
-          <Button variant="light" icon={Scan} onClick={onSimulate} disabled={!canSim}>Ler QR</Button>
-          <Button variant={guideOpen ? 'light' : 'dark'} icon={DeviceMobile} onClick={onToggleGuide} aria-pressed={guideOpen}>App do guia</Button>
+          <Button variant="light" size="lg" icon={Scan} onClick={onSimulate} disabled={!canSim} className="!h-11 !shadow-none bg-sunken hover:!bg-line">Ler QR</Button>
+          <Button size="lg" icon={DeviceMobile} onClick={onToggleGuide} aria-pressed={guideOpen} className="!h-11">App do guia</Button>
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-line pt-5 @4xl:flex @4xl:items-center @4xl:gap-0">
-        <div className="col-span-2 min-w-0 @4xl:flex-1 @4xl:pr-6">
-          <Metric icon={UsersThree} label="Embarcados">
-            <span className="text-[22px] font-semibold tracking-[-0.02em] tnum">
-              <CountUp value={stats.boarded} /> <span className="text-ink-3">de {stats.total}</span>
-            </span>
-          </Metric>
-          <div className="mt-3 flex gap-[3px]" aria-hidden>
-            {segs.map((p) => {
-              const s = paxState(status[p.id])
-              return <span key={p.id} className={cx('h-[5px] flex-1 rounded-full transition-colors duration-300', s === 'boarded' ? 'bg-ok' : s === 'noshow' ? 'bg-ink-4' : 'bg-sunken')} />
-            })}
+      <div className="mt-7 flex flex-col gap-6 @4xl:flex-row @4xl:items-end @4xl:justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <CountUp value={stats.boarded} className="text-[60px] font-semibold leading-none tracking-[-0.04em]" />
+            {fresh > 0 ? (
+              <span className="inline-flex h-7 items-center gap-1 rounded-full bg-sunken px-2.5 text-[14px] text-ink-2">
+                <ArrowUp size={14} weight="bold" className="text-ok" />
+                <span className="font-semibold text-ink tnum">{fresh}</span> agora
+              </span>
+            ) : stats.waiting > 0 ? (
+              <span className="inline-flex h-7 items-center gap-1 rounded-full bg-sunken px-2.5 text-[14px] text-ink-2">
+                <span className="font-semibold text-ink tnum">{stats.waiting}</span> {stats.waiting === 1 ? 'falta' : 'faltam'}
+              </span>
+            ) : null}
+            {!online && (
+              <span className="inline-flex h-7 items-center rounded-full bg-gold-tint px-2.5 text-[14px] text-ink-2">
+                Sem internet{stats.queued > 0 && <>&nbsp;·&nbsp;<span className="font-semibold text-ink tnum">{stats.queued}</span>&nbsp;no celular</>}
+              </span>
+            )}
           </div>
+          <p className="mt-2 text-[16px] text-ink">Embarcados de <span className="tnum">{stats.total}</span></p>
         </div>
-        <Metric icon={Timer} label={time.label} className="@4xl:border-l @4xl:border-line @4xl:px-6">{time.value}</Metric>
-        <Metric icon={SteeringWheel} label={boat ? 'Piloto' : 'Motorista'} className="@4xl:order-3 @4xl:border-l @4xl:border-line @4xl:pl-6">
-          <span className="text-[14px] font-medium">{vehicle.skipper}</span>
-        </Metric>
-        <div className="col-span-2 flex min-w-0 items-center gap-3 @4xl:order-2 @4xl:border-l @4xl:border-line @4xl:px-6">
-          {guide ? <Avatar initials={guide.initials} hue={guide.hue} size={40} /> : <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sunken text-ink-3"><User size={18} /></span>}
-          <div className="min-w-0">
-            <p className="text-[12px] text-ink-3">Guia</p>
+
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 @4xl:flex @4xl:items-center @4xl:gap-0 @4xl:divide-x @4xl:divide-line">
+          <Stat label={time.label} className="@4xl:px-7"><span className="tnum">{time.value}</span></Stat>
+          <Stat label={boat ? 'Piloto' : 'Motorista'} className="@4xl:order-3 @4xl:pl-7">{vehicle.skipper}</Stat>
+          <Stat label="Guia" className="col-span-2 @4xl:order-2 @4xl:px-7">
             {guide ? (
-              <div className="mt-0.5 flex items-center gap-2">
-                <span className="truncate text-[14px] font-medium">{guide.name}</span>
-                <span className="flex gap-1">{guide.langs.map((l) => <LangTag key={l} code={l} />)}</span>
-              </div>
-            ) : <p className="mt-0.5 text-[14px] text-ink-3">Sem guia</p>}
-          </div>
+              <span className="flex items-center gap-2">
+                <span className="truncate">{guide.name}</span>
+                <span className="text-[13px] font-normal text-ink-3">{guide.langs.join(' · ')}</span>
+              </span>
+            ) : <span className="text-ink-3">Sem guia</span>}
+          </Stat>
         </div>
       </div>
     </section>

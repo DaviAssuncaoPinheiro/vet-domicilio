@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { ArrowCounterClockwise, Check, Clock, HandTap, MagnifyingGlass, QrCode, X } from '@phosphor-icons/react'
-import { cx, ease, StatusChip, LangTag, Segmented, Button, IconButton, PhoneFrame } from '../../components/ui'
-import { CHANNELS, KIND, LANGS, fmt, tourOf } from '../../data/mock'
+import { ArrowCounterClockwise, Check, Clock, MagnifyingGlass, X } from '@phosphor-icons/react'
+import { cx, ease, Segmented, Button, IconButton, PhoneFrame } from '../../components/ui'
+import { CHANNELS, LANGS, fmt, tourOf } from '../../data/mock'
 import { depPhase, depStats } from '../../store'
 import { GuideAppEmbed } from '../../app/GuiaApp'
 
@@ -10,11 +10,11 @@ import { GuideAppEmbed } from '../../app/GuiaApp'
 
 export const initials = (name) => name.split(' ').map((w) => w[0]).slice(0, 2).join('')
 
-export function PaxAvatar({ p, size = 32, className }) {
+export function PaxAvatar({ p, size = 52, className }) {
   return (
     <span
-      className={cx('inline-grid shrink-0 place-items-center rounded-full bg-sunken font-semibold text-ink-2', className)}
-      style={{ width: size, height: size, fontSize: size * 0.36 }}
+      className={cx('inline-grid shrink-0 place-items-center rounded-full bg-surface font-semibold text-ink-2', className)}
+      style={{ width: size, height: size, fontSize: size * 0.32 }}
     >
       {initials(p.name)}
     </span>
@@ -23,21 +23,28 @@ export function PaxAvatar({ p, size = 32, className }) {
 
 export const paxState = (st) => (st?.s === 'boarded' ? 'boarded' : st?.s === 'noshow' ? 'noshow' : 'waiting')
 
-export function PaxStatusChip({ st }) {
+export function StatusIcon({ st, size = 24 }) {
   const s = paxState(st)
-  if (s === 'boarded') return <StatusChip tone="ok">Embarcado</StatusChip>
-  if (s === 'noshow') return <StatusChip tone="alert">Faltou</StatusChip>
-  return <StatusChip tone="muted">Aguardando</StatusChip>
+  const ic = Math.round(size * 0.55)
+  if (s === 'boarded')
+    return (
+      <span title={st.synced === false ? 'Salvo no celular' : 'Embarcado'} className={cx('grid shrink-0 place-items-center rounded-full', st.synced === false ? 'bg-gold text-negro' : 'bg-ok text-white')} style={{ width: size, height: size }}>
+        <Check size={ic} weight="bold" />
+      </span>
+    )
+  if (s === 'noshow')
+    return <span title="Faltou" className="grid shrink-0 place-items-center rounded-full bg-alert-tint text-alert" style={{ width: size, height: size }}><X size={ic} weight="bold" /></span>
+  return <span title="Aguardando" className="grid shrink-0 place-items-center rounded-full bg-surface text-ink-3" style={{ width: size, height: size }}><Clock size={ic} weight="bold" /></span>
+}
+
+export const statusText = (st) => {
+  const s = paxState(st)
+  if (s === 'boarded') return `Embarcou ${fmt(st.at)}`
+  if (s === 'noshow') return 'Faltou'
+  return 'Aguardando'
 }
 
 export const depTitle = (d) => (d.route ? d.route : tourOf(d).short)
-export const PHASE_LABEL = { boarding: 'Embarcando', live: 'Em andamento', scheduled: 'Agendada', done: 'Concluída' }
-
-export function PhaseChip({ phase }) {
-  if (phase === 'boarding') return <StatusChip tone="ink" live>{PHASE_LABEL.boarding}</StatusChip>
-  if (phase === 'live') return <StatusChip tone="ok">{PHASE_LABEL.live}</StatusChip>
-  return <StatusChip tone="muted">{PHASE_LABEL[phase]}</StatusChip>
-}
 
 export function groupDepartures(deps, now) {
   const order = { boarding: 0, live: 1 }
@@ -51,38 +58,37 @@ export function groupDepartures(deps, now) {
   ].filter((g) => g.items.length)
 }
 
-/* ---------- lista de saídas ---------- */
+/* ---------- lista de saídas (coluna de horas + cartões) ---------- */
 
 function DepartureItem({ d, now, status, active, onClick }) {
   const st = depStats(d.id, status)
   const done = depPhase(d, now) === 'done'
   return (
-    <button
-      onClick={onClick}
-      aria-current={active ? 'true' : undefined}
-      className={cx(
-        'relative flex h-12 w-full items-center gap-3 rounded-[16px] pl-4 pr-3 text-left transition-[background,box-shadow] duration-150 active:scale-[0.99]',
-        active ? 'bg-gold text-negro shadow-[0_8px_20px_-12px_rgba(20,18,15,.45)]' : 'hover:bg-surface/60',
-      )}
-    >
-      {!active && <span className="absolute bottom-3.5 left-[7px] top-3.5 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color, opacity: done ? 0.4 : 1 }} />}
-      <span className={cx('w-[42px] shrink-0 font-mono text-[13px] tnum', active ? 'text-negro' : 'text-ink-2')}>{fmt(d.start)}</span>
-      <span className={cx('min-w-0 flex-1 truncate text-[13.5px] font-medium', done && !active ? 'text-ink-3' : active ? 'text-negro' : 'text-ink')}>{depTitle(d)}</span>
-      <span className={cx('shrink-0 text-[12.5px] tnum', active ? 'text-negro/70' : 'text-ink-3')}><span className={active ? 'text-negro' : 'text-ink'}>{st.boarded}</span>/{st.total}</span>
-    </button>
+    <div className="flex items-start gap-3 border-t border-line py-1.5 first:border-0">
+      <span className={cx('w-[46px] shrink-0 pt-3 text-[15px] font-semibold tnum', done ? 'text-ink-3' : 'text-ink')}>{fmt(d.start)}</span>
+      <button
+        onClick={onClick}
+        aria-current={active ? 'true' : undefined}
+        className={cx(
+          'min-w-0 flex-1 rounded-[16px] px-3.5 py-2.5 text-left transition-[background] duration-150 active:scale-[0.99]',
+          active ? 'bg-gold text-negro' : 'bg-surface hover:bg-sunken',
+        )}
+      >
+        <span className={cx('block truncate text-[15px] font-medium', done && !active && 'text-ink-2')}>{depTitle(d)}</span>
+        <span className={cx('block text-[13px] tnum', active ? 'text-negro/65' : 'text-ink-3')}>{st.boarded} de {st.total}</span>
+      </button>
+    </div>
   )
 }
 
 export function DepartureList({ groups, now, status, activeId, onPick, compact }) {
   return (
-    <aside className={cx('no-scrollbar hidden shrink-0 flex-col overflow-y-auto rounded-[28px] bg-frame p-2 shadow-soft xl:sticky xl:top-4 xl:flex xl:max-h-[calc(100dvh-2rem)]', compact ? 'xl:w-[264px]' : 'xl:w-[288px]')}>
-      <h2 className="px-3 pb-1 pt-3 text-[17px] font-semibold tracking-[-0.01em]">Saídas de hoje</h2>
+    <aside className={cx('no-scrollbar hidden shrink-0 flex-col overflow-y-auto rounded-[28px] bg-frame px-4 pb-3 shadow-soft xl:sticky xl:top-4 xl:flex xl:max-h-[calc(100dvh-2rem)]', compact ? 'xl:w-[264px]' : 'xl:w-[288px]')}>
+      <h2 className="pb-1 pt-5 text-[21px] font-semibold tracking-[-0.02em]">Saídas de hoje</h2>
       {groups.map((g) => (
         <div key={g.key} className="mt-3">
-          <p className="px-3 pb-1.5 text-[12px] text-ink-3">{g.label}</p>
-          <div className="flex flex-col gap-0.5">
-            {g.items.map((d) => <DepartureItem key={d.id} d={d} now={now} status={status} active={d.id === activeId} onClick={() => onPick(d.id)} />)}
-          </div>
+          <p className="pb-1 text-[13px] text-ink-3">{g.label}</p>
+          {g.items.map((d) => <DepartureItem key={d.id} d={d} now={now} status={status} active={d.id === activeId} onClick={() => onPick(d.id)} />)}
         </div>
       ))}
     </aside>
@@ -97,98 +103,81 @@ export function DepartureStrip({ groups, status, activeId, onPick }) {
   }, [activeId])
   return (
     <div ref={ref} className="no-scrollbar relative -mx-2 flex snap-x gap-2 overflow-x-auto px-2 pb-1 sm:-mx-3 sm:px-3 md:-mx-4 md:px-4 xl:hidden">
-      {groups.flatMap((g, gi) => [
-        gi > 0 ? <span key={`sep-${g.key}`} className="my-3 w-px shrink-0 bg-ink/10" /> : null,
-        ...g.items.map((d) => {
-          const active = d.id === activeId
-          const st = depStats(d.id, status)
-          return (
-            <button
-              key={d.id}
-              onClick={() => onPick(d.id)}
-              aria-current={active ? 'true' : undefined}
-              className={cx(
-                'relative flex w-[164px] shrink-0 snap-start flex-col gap-1 overflow-hidden rounded-[18px] py-2.5 pl-4 pr-3 text-left transition-[background,box-shadow] duration-150 active:scale-[0.98]',
-                active ? 'bg-gold text-negro' : 'bg-frame/70 hover:bg-surface/70',
-              )}
-            >
-              {!active && <span className="absolute bottom-3 left-[7px] top-3 w-[3px] rounded-full" style={{ background: KIND[tourOf(d).kind].color }} />}
-              <span className="flex items-center justify-between">
-                <span className="font-mono text-[13px] tnum">{fmt(d.start)}</span>
-                <span className={cx('text-[12px] tnum', active ? 'text-negro/70' : 'text-ink-3')}><span className={active ? 'text-negro' : 'text-ink'}>{st.boarded}</span>/{st.total}</span>
-              </span>
-              <span className="truncate text-[13px] font-medium">{depTitle(d)}</span>
-            </button>
-          )
-        }),
-      ])}
+      {groups.flatMap((g) => g.items).map((d) => {
+        const active = d.id === activeId
+        const st = depStats(d.id, status)
+        return (
+          <button
+            key={d.id}
+            onClick={() => onPick(d.id)}
+            aria-current={active ? 'true' : undefined}
+            className={cx(
+              'flex w-[150px] shrink-0 snap-start flex-col rounded-[20px] px-4 py-3 text-left transition-[background] duration-150 active:scale-[0.98]',
+              active ? 'bg-gold text-negro' : 'bg-surface',
+            )}
+          >
+            <span className="text-[16px] font-semibold tnum">{fmt(d.start)}</span>
+            <span className="mt-1 truncate text-[13.5px] font-medium">{depTitle(d)}</span>
+            <span className={cx('text-[12.5px] tnum', active ? 'text-negro/65' : 'text-ink-3')}>{st.boarded} de {st.total}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }
 
 /* ---------- detalhe do passageiro ---------- */
 
-function Row({ label, children }) {
-  return (
-    <div className="flex min-h-[40px] items-center justify-between gap-3 border-b border-line/70 py-1.5">
-      <span className="text-[12.5px] text-ink-3">{label}</span>
-      <span className="flex min-w-0 items-center gap-1.5 truncate text-right text-[13px] text-ink">{children}</span>
-    </div>
-  )
-}
-
 export function PaxDetail({ p, st, groupSize = 1, onClose, actions }) {
   const s = paxState(st)
-  const meta = [p.hotel, CHANNELS[p.channel].label, p.child && 'Criança'].filter(Boolean).join(' · ')
+  const lines = [
+    ['Idioma', LANGS[p.lang].label],
+    ['Hotel', p.hotel],
+    ['Canal', CHANNELS[p.channel].label],
+  ]
   return (
     <div className="flex flex-col">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-[17px] font-semibold tracking-[-0.01em]">{p.name}</h3>
-          <p className="mt-0.5 truncate text-[12.5px] text-ink-3">{meta}</p>
+          <h3 className="truncate text-[21px] font-semibold tracking-[-0.02em]">{p.name}</h3>
+          <p className="mt-1 truncate text-[14px] text-ink-3">
+            Reserva {p.booking}{groupSize > 1 && <> · <span className="tnum">{groupSize}</span></>}{p.child && ' · criança'}
+          </p>
         </div>
         {onClose && <IconButton label="Fechar" onClick={onClose} className="-mr-1 -mt-1 !size-9"><X size={16} /></IconButton>}
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-[14px] bg-sunken px-3.5 py-3">
-        <span className="flex items-baseline gap-1.5">
-          <span className="font-mono text-[15px] font-medium">{p.booking}</span>
-          <span className="text-[12.5px] text-ink-3 tnum">· {groupSize} {groupSize === 1 ? 'pessoa' : 'pessoas'}</span>
+      <div className="mt-4 flex items-center gap-2.5">
+        <StatusIcon st={st} size={24} />
+        <span className="text-[15px] font-medium">
+          {s === 'boarded' ? <>Embarcou às <span className="tnum">{fmt(st.at)}</span>{st.via === 'manual' ? ', manual' : ', pelo QR'}</> : s === 'noshow' ? 'Faltou' : 'Aguardando'}
         </span>
-        <PaxStatusChip st={st} />
       </div>
+      {s === 'boarded' && <p className="ml-[34px] mt-0.5 text-[13.5px] text-ink-3">{st.synced === false ? 'Salvo no celular' : 'Enviado'}</p>}
 
-      <div className="mt-1.5 grid gap-x-8 @2xl:grid-cols-2">
-        <Row label="Idioma">{LANGS[p.lang].label}</Row>
-        {s === 'boarded' && (
-          <>
-            <Row label="Embarcou">
-              <span className="font-mono text-[12.5px]">{fmt(st.at)}</span>
-              <span className="text-ink-3">· {st.via === 'manual' ? 'manual' : 'QR'}</span>
-            </Row>
-            <Row label="Envio">
-              {st.synced === false ? <span className="text-gold-deep">Salvo no celular</span> : <span className="text-ink-2">Enviado</span>}
-            </Row>
-          </>
-        )}
-      </div>
+      <dl className="mt-4 grid gap-x-8 gap-y-2.5 @2xl:grid-cols-3">
+        {lines.map(([k, v]) => (
+          <div key={k} className="flex items-baseline justify-between gap-3 @2xl:block">
+            <dt className="text-[13px] text-ink-3">{k}</dt>
+            <dd className="truncate text-[14px]">{v}</dd>
+          </div>
+        ))}
+      </dl>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-5 flex gap-2">
         {s === 'waiting' && (
           <>
-            <Button icon={Check} onClick={actions.board} className="flex-1">Embarcar</Button>
-            <Button variant="light" onClick={actions.noshow} className="flex-1">Faltou</Button>
+            <Button size="lg" onClick={actions.board} className="flex-1">Embarcar</Button>
+            <Button size="lg" variant="light" onClick={actions.noshow} className="flex-1 !shadow-none bg-sunken hover:!bg-line">Faltou</Button>
           </>
         )}
-        {s !== 'waiting' && <Button variant="light" icon={ArrowCounterClockwise} onClick={actions.undo} className="flex-1">Desfazer</Button>}
+        {s !== 'waiting' && <Button size="lg" variant="light" icon={ArrowCounterClockwise} onClick={actions.undo} className="flex-1 !shadow-none bg-sunken hover:!bg-line">Desfazer</Button>}
       </div>
     </div>
   )
 }
 
-/* ---------- lista de embarque ---------- */
-
-const COLS = '@2xl:grid-cols-[minmax(0,1fr)_64px_128px_112px_56px]'
+/* ---------- passageiros (cartões de evento) ---------- */
 
 export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelect }) {
   const [filter, setFilter] = useState('all')
@@ -198,6 +187,7 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
     pax.forEach((p) => { const s = paxState(status[p.id]); if (s === 'boarded') boarded++; else if (s === 'waiting') waiting++ })
     return { all: pax.length, boarded, waiting }
   }, [pax, status])
+  const size = useMemo(() => { const m = {}; pax.forEach((p) => { m[p.booking] = (m[p.booking] || 0) + 1 }); return m }, [pax])
   const norm = (x) => x.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
   const rows = pax.filter((p) => {
     const s = paxState(status[p.id])
@@ -207,50 +197,38 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
     const n = norm(q)
     return [p.name, p.booking].some((f) => norm(String(f)).includes(n))
   })
-  const size = useMemo(() => { const m = {}; pax.forEach((p) => { m[p.booking] = (m[p.booking] || 0) + 1 }); return m }, [pax])
-  const label = (t, n) => <span className="inline-flex items-center gap-1.5">{t}<span className="text-[11.5px] tnum text-ink-3">{n}</span></span>
 
   return (
-    <section className="@container rounded-[24px] bg-surface p-4 shadow-soft sm:p-5">
-      <div className="flex flex-col gap-3 @2xl:flex-row @2xl:items-center @2xl:justify-between">
-        <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Passageiros</h2>
-        <div className="flex flex-col gap-2 @md:flex-row @md:items-center">
-          <label className="relative flex-1 @2xl:w-[200px] @2xl:flex-none">
-            <MagnifyingGlass size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-3" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar"
-              aria-label="Buscar passageiro"
-              className="h-10 w-full rounded-full bg-sunken pl-10 pr-4 text-[13px] text-ink outline-none transition-shadow placeholder:text-ink-3 focus:bg-surface focus:shadow-pill"
-            />
-          </label>
-          <Segmented
-            size="sm"
-            value={filter}
-            onChange={setFilter}
-            className="self-start"
-            options={[
-              { value: 'all', label: label('Todos', counts.all) },
-              { value: 'boarded', label: label('Embarcados', counts.boarded) },
-              { value: 'waiting', label: label('Aguardando', counts.waiting) },
-            ]}
-          />
-        </div>
+    <section className="@container rounded-[28px] bg-surface p-5 shadow-soft sm:p-6">
+      <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:justify-between">
+        <h2 className="text-[21px] font-semibold tracking-[-0.02em]">Passageiros</h2>
+        <Segmented
+          value={filter}
+          onChange={setFilter}
+          className="self-start @3xl:self-auto"
+          options={[
+            { value: 'all', label: `Todos ${counts.all}` },
+            { value: 'boarded', label: `Embarcados ${counts.boarded}` },
+            { value: 'waiting', label: `Aguardando ${counts.waiting}` },
+          ]}
+        />
       </div>
 
-      <div className={cx('mt-4 hidden h-8 items-center gap-3 rounded-[10px] bg-sunken px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-3 @2xl:grid', COLS)}>
-        <span>Nome</span><span>Idioma</span><span>Reserva</span><span>Status</span><span className="text-right">Hora</span>
-      </div>
+      <label className="relative mt-4 block">
+        <MagnifyingGlass size={20} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-3" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Buscar nome ou reserva"
+          aria-label="Buscar passageiro"
+          className="h-[52px] w-full rounded-[18px] border border-line bg-surface pl-12 pr-4 text-[16px] text-ink outline-none transition-[border-color] placeholder:text-ink-3 focus:border-ink-4"
+        />
+      </label>
 
-      <ul className="mt-2 flex flex-col gap-1.5 @2xl:gap-0">
+      <ul className="mt-4 grid gap-2.5 @3xl:grid-cols-2">
         <AnimatePresence initial={false}>
-          {rows.map((p, ri) => {
+          {rows.map((p) => {
             const st = status[p.id]
-            const prevSame = rows[ri - 1]?.booking === p.booking
-            const nextSame = rows[ri + 1]?.booking === p.booking
-            const inGroup = prevSame || nextSame
-            const s = paxState(st)
             const hot = hoverId === p.id
             const sel = selectedId === p.id
             return (
@@ -260,46 +238,26 @@ export function Manifest({ pax, status, hoverId, setHoverId, selectedId, onSelec
                   onMouseLeave={() => setHoverId(null)}
                   onClick={() => onSelect(sel ? null : p.id)}
                   className={cx(
-                    'relative flex w-full items-center gap-3 rounded-[14px] p-2.5 pl-4 text-left transition-[background,box-shadow] duration-150 @2xl:grid @2xl:min-h-[50px] @2xl:p-0 @2xl:px-3',
-                    COLS,
-                    sel ? 'bg-sunken ring-1 ring-ink/15' : hot ? 'bg-sunken' : 'bg-sunken/60 @2xl:bg-transparent',
+                    'relative flex w-full items-center gap-3.5 rounded-[20px] p-3.5 pr-12 text-left transition-[background,box-shadow] duration-150',
+                    sel ? 'dots bg-gold-tint' : 'bg-sunken',
+                    hot && !sel && 'ring-1 ring-ink/10',
                   )}
                 >
-                  {inGroup && (
-                    <span aria-hidden className={cx('absolute left-1.5 w-[2px] rounded-full bg-ink/15', prevSame ? 'top-0 @2xl:top-0' : 'top-3', nextSame ? 'bottom-0' : 'bottom-3')} />
-                  )}
-                  <span className="flex min-w-0 flex-1 items-center gap-2.5">
-                    <PaxAvatar p={p} size={32} />
-                    <span className="truncate text-[13.5px] font-medium">{p.name}</span>
-                    <LangTag code={p.lang} className="@2xl:hidden" />
+                  <PaxAvatar p={p} size={52} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-[17px] font-medium leading-tight">{p.name}</span>
+                    <span className="mt-0.5 block truncate text-[14px] text-ink-3">
+                      Reserva {p.booking}{size[p.booking] > 1 && ` · ${size[p.booking]}`} · {p.lang}
+                    </span>
+                    <span className="mt-0.5 block text-[14px] text-ink-3 tnum">{statusText(st)}</span>
                   </span>
-                  <span className="hidden @2xl:block"><LangTag code={p.lang} /></span>
-                  <span className="hidden text-[12px] text-ink-2 @2xl:block">
-                    <span className="font-mono">{p.booking}</span>
-                    {size[p.booking] > 1 && <span className="text-ink-3 tnum"> · {size[p.booking]}</span>}
-                  </span>
-                  <span className="hidden @2xl:block"><PaxStatusChip st={st} /></span>
-                  <span className="hidden items-center justify-end gap-1 font-mono text-[12px] text-ink-2 @2xl:flex">
-                    {s === 'boarded' && (
-                      <>
-                        {st.synced === false && <Clock size={12} className="text-gold-deep" weight="bold" aria-label="Salvo no celular" />}
-                        {fmt(st.at)}
-                      </>
-                    )}
-                  </span>
-                  <span className="shrink-0 @2xl:hidden">
-                    {s === 'boarded' ? (
-                      <span className={cx('grid size-7 place-items-center rounded-full', st.synced === false ? 'bg-gold text-negro' : 'bg-ok text-white')}>
-                        {st.synced === false ? <Clock size={13} weight="bold" /> : <Check size={13} weight="bold" />}
-                      </span>
-                    ) : s === 'noshow' ? <StatusChip tone="alert">Faltou</StatusChip> : <span className="block size-7" />}
-                  </span>
+                  <span className="absolute right-3.5 top-3.5"><StatusIcon st={st} /></span>
                 </button>
               </motion.li>
             )
           })}
         </AnimatePresence>
-        {rows.length === 0 && <li className="grid h-24 place-items-center text-[13px] text-ink-3">Ninguém encontrado</li>}
+        {rows.length === 0 && <li className="grid h-24 place-items-center text-[14px] text-ink-3 @3xl:col-span-2">Ninguém encontrado</li>}
       </ul>
     </section>
   )

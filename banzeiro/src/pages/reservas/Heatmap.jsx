@@ -73,14 +73,7 @@ export default function Heatmap({ extra, flash, onOpen }) {
       <Card className="p-5 md:p-7">
         <CardHeader
           title="Mapa da semana"
-          sub="Ocupação de cada saída"
-          right={
-            <div className="hidden items-center gap-4 text-[12px] text-ink-3 sm:flex">
-              <span className="flex items-center gap-1.5"><span className="size-3 rounded-[4px] bg-sunken ring-1 ring-line" />Vago</span>
-              <span className="flex items-center gap-1.5"><span className="size-3 rounded-[4px] bg-gold" />Enchendo</span>
-              <span className="flex items-center gap-1.5"><span className="size-3 rounded-[4px] bg-negro" />Lotado</span>
-            </div>
-          }
+          sub="Claro é vago, dourado enchendo, preto lotado"
         />
 
         <div className="-mx-5 mt-5 overflow-x-auto px-5 no-scrollbar md:mx-0 md:px-0">
@@ -88,8 +81,10 @@ export default function Heatmap({ extra, flash, onOpen }) {
             <span className="sticky left-0 z-20 self-stretch bg-surface" aria-hidden />
             {DAYS.map((d) => (
               <div key={d.idx} className="flex justify-center">
-                <span className={cx('inline-flex h-8 items-center gap-1 rounded-full px-3 text-[12.5px] font-medium', d.idx === TODAY ? 'bg-negro text-white' : d.idx < TODAY ? 'text-ink-4' : 'text-ink-2')}>
-                  {d.short} <span className="tnum">{d.day}</span>
+                <span className={cx('flex w-full max-w-[104px] flex-col items-center rounded-[16px] pb-3 pt-2.5', d.idx === TODAY && 'bg-sunken', d.idx < TODAY && 'opacity-50')}>
+                  <span className="text-[13px] text-ink-3">{d.short}</span>
+                  <span className="mt-1 text-[18px] font-medium leading-none text-ink tnum">{d.day}</span>
+                  <span className={cx('mt-2 size-1.5 rounded-full', d.idx === TODAY ? 'bg-gold' : 'bg-transparent')} />
                 </span>
               </div>
             ))}
@@ -118,8 +113,8 @@ function RowFragment({ row, ri, extra, flash, reduce, entered, onOpen, onTip }) 
   return (
     <>
       <div className="sticky left-0 z-20 flex min-w-0 flex-col justify-center self-stretch bg-surface pr-2">
-        <span className="truncate text-[13px] font-semibold text-ink md:text-[14px]">{row.label}</span>
-        <span className="font-mono text-[12px] text-ink-3 tnum">{tm(row.start)}</span>
+        <span className="truncate text-[14px] font-medium text-ink md:text-[15px]">{row.label}</span>
+        <span className="text-[13px] text-ink-3 tnum">{tm(row.start)}</span>
       </div>
       {DAYS.map((d) => (
         <Cell

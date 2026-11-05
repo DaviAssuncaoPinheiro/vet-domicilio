@@ -1,5 +1,6 @@
 import { forwardRef } from 'react'
 import { motion } from 'framer-motion'
+import { Check, Clock } from '@phosphor-icons/react'
 import { useDraggable } from '@dnd-kit/core'
 import { cx } from '../../components/ui'
 import { GUIDES, KIND, WEEK } from '../../data/mock'
@@ -39,8 +40,8 @@ export const ShiftBody = forwardRef(function ShiftBody({ shift, shifts = [], lif
       style={{ background: KIND[t.kind].color, color: TEXT[t.kind], opacity: past && !lifted && !ghost ? 0.6 : undefined, ...rest.style }}
     >
       <div className="flex items-center justify-between gap-1.5">
-        <span className="font-mono text-[11.5px] font-semibold tnum opacity-80">{fmtT(shift.start)}</span>
-        {miss.length > 0 ? <Chip alert>Sem {miss[0]}</Chip> : clash ? <Chip alert>Sobrepõe</Chip> : past ? <Chip><span className="mr-1 size-[5px] rounded-full bg-ok" />Feita</Chip> : <Chip>{shift.need[0]}</Chip>}
+        <span className="text-[12px] font-medium tnum opacity-80">{fmtT(shift.start)}{miss.length === 0 && !clash && <> · {shift.need[0]}</>}</span>
+        {miss.length > 0 ? <Chip alert>Sem {miss[0]}</Chip> : clash ? <Chip alert>Sobrepõe</Chip> : past ? <span className="grid size-[18px] place-items-center rounded-full bg-ok text-white"><Check size={11} weight="bold" /></span> : null}
       </div>
       <p className="truncate text-[12.5px] font-semibold leading-tight tracking-[-0.005em]">{t.short}</p>
     </div>
@@ -63,14 +64,11 @@ export function DragShift({ shift, shifts, activeId, onClick, tray }) {
 export function TrayBody({ shift, ghost, lifted }) {
   const t = tourOf(shift)
   return (
-    <div className={cx('flex min-w-[196px] items-center gap-3 rounded-[16px] border border-dashed border-ink-4 bg-surface px-3 py-2.5', ghost && 'opacity-30', lifted && 'shadow-lift border-solid border-transparent')}>
-      <span className="h-8 w-[3px] shrink-0 rounded-full" style={{ background: KIND[t.kind].color }} />
+    <div className={cx('relative flex min-w-[200px] items-center gap-3 overflow-hidden rounded-[18px] bg-sunken py-3 pl-4 pr-4', ghost && 'opacity-30', lifted && 'bg-surface shadow-lift')}>
+      <span className="absolute inset-y-3 left-1.5 w-[3px] rounded-full" style={{ background: KIND[t.kind].color }} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-semibold leading-tight text-ink">{t.short}</p>
-        <p className="mt-0.5 text-[11.5px] text-ink-3"><span className="font-medium text-ink-2">{dayLabel(shift.day)}</span> · <span className="font-mono tnum">{fmtT(shift.start)}</span></p>
-      </div>
-      <div className="flex gap-1">
-        <span className="inline-flex h-[20px] items-center rounded-md bg-sunken px-1.5 text-[10.5px] font-semibold text-ink-2">{shift.need[0]}</span>
+        <p className="truncate text-[14.5px] font-medium leading-tight text-ink">{t.short}</p>
+        <p className="mt-1 flex items-center gap-1.5 text-[12.5px] text-ink-3"><Clock size={13} />{dayLabel(shift.day)} · <span className="tnum">{fmtT(shift.start)}</span> · {shift.need[0]}</p>
       </div>
     </div>
   )

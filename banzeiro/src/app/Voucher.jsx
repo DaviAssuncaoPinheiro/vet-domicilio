@@ -66,8 +66,7 @@ function Body({ t, lang, code, pax, dep, status, walletDone, setWalletDone, flas
   const guide = GUIDES.find((g) => g.id === dep.guideIds[0])
   const boarded = pax.filter((p) => status[p.id]?.s === 'boarded')
   const all = boarded.length === pax.length
-    const kind = KIND[tour.kind]
-  const bring = [
+    const bring = [
     { k: 'sun', icon: Sun },
     { k: 'hat', icon: BaseballCap },
     { k: 'id', icon: IdentificationCard },
@@ -80,10 +79,8 @@ function Body({ t, lang, code, pax, dep, status, walletDone, setWalletDone, flas
         <div className="smoke grain relative rounded-[32px] text-white shadow-dark">
           <div className="relative p-6 pb-4">
             <div className="flex items-center justify-between">
-              <span className="inline-flex h-7 items-center gap-2 rounded-full bg-white/10 px-3 text-[11.5px] font-semibold">
-                <span className="size-1.5 rounded-full" style={{ background: kind.color }} /> {veh.name}
-              </span>
-              <span className="font-mono text-[12px] text-white/55 tnum">{t.date}</span>
+              <span className="text-[13px] font-medium text-white/70">{veh.name}</span>
+              <span className="text-[13px] text-white/55 tnum">{t.date}</span>
             </div>
             <h1 className="mt-5 text-[26px] font-semibold leading-[1.1] tracking-[-0.025em]">{t.tours[tour.id] ?? tour.name}</h1>
             <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-white/60"><MapPin size={14} /> {tour.meeting}</p>

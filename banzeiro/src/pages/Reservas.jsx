@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { UploadSimple, Plus } from '@phosphor-icons/react'
 import { Button, Reveal } from '../components/ui'
 import { useOps } from '../store'
@@ -15,7 +15,14 @@ export default function Reservas() {
   const [flash, setFlash] = useState(new Set())
   const [cell, setCell] = useState(null)
   const [importing, setImporting] = useState(false)
-  const [creating, setCreating] = useState(false)
+  const [params, setParams] = useSearchParams()
+  const [creating, setCreating] = useState(params.get('nova') === '1')
+
+  useEffect(() => { if (params.get('nova') === '1') setCreating(true) }, [params])
+  const closeCreate = () => {
+    setCreating(false)
+    if (params.has('nova')) { const p = new URLSearchParams(params); p.delete('nova'); setParams(p, { replace: true }) }
+  }
 
   const pulse = (keys) => {
     setFlash(new Set(keys))
@@ -41,7 +48,7 @@ export default function Reservas() {
   }
 
   const save = ({ ri, di, group }) => {
-    setCreating(false)
+    closeCreate()
     setTimeout(() => {
       add([{ ri, di, group }])
       useOps.getState().showToast('Reserva salva · voucher pronto', { label: 'Ver voucher', fn: () => nav('/voucher/EA-51877') })
@@ -56,9 +63,11 @@ export default function Reservas() {
             <h1 className="text-[30px] font-semibold leading-tight tracking-[-0.025em] text-ink">Reservas</h1>
             <p className="mt-1 text-[14px] text-ink-3">2 a 8 de novembro</p>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <Button variant="light" icon={UploadSimple} onClick={() => setImporting(true)}>Importar planilha</Button>
-            <Button icon={Plus} onClick={() => setCreating(true)}>Nova reserva</Button>
+            <button onClick={() => setCreating(true)} aria-label="Nova reserva" title="Nova reserva" className="grid size-14 place-items-center rounded-full bg-negro text-white shadow-dark transition-[background,transform] duration-150 hover:bg-negro-2 active:scale-95">
+              <Plus size={24} weight="bold" />
+            </button>
           </div>
         </div>
       </Reveal>
@@ -67,7 +76,7 @@ export default function Reservas() {
 
       <CellSheet cell={cell} extra={extra} onClose={() => setCell(null)} />
       <ImportModal open={importing} onClose={() => setImporting(false)} onApply={applyImport} />
-      <NewBooking open={creating} extra={extra} onClose={() => setCreating(false)} onSave={save} />
+      <NewBooking open={creating} extra={extra} onClose={closeCreate} onSave={save} />
     </div>
   )
 }

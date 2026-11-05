@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence, MotionConfig, useAnimationControls } from 'framer-motion'
 import { DndContext, DragOverlay, MouseSensor, TouchSensor, useSensor, useSensors, useDroppable, pointerWithin, rectIntersection } from '@dnd-kit/core'
-import { CaretLeft, CaretRight, UserPlus, Prohibit, X, Check } from '@phosphor-icons/react'
+import { ArrowLeft, ArrowRight, UserPlus, Prohibit, X, Check, Clock } from '@phosphor-icons/react'
 import { Card, Reveal, Pill, Button, IconButton, Segmented, Avatar, LangTag, Progress, StatusChip, cx, ease, useMedia } from '../components/ui'
-import { GUIDES, WEEK } from '../data/mock'
+import { GUIDES, WEEK, KIND } from '../data/mock'
 import { useOps } from '../store'
 import { DragShift, ShiftBody, TrayBody } from './escala/Cards'
-import { isOff, missingLangs, fit, plan, conflictsOf, uncoverable, hoursOf, fmtH, dayLabel, dayShort, firstName } from './escala/logic'
+import { isOff, missingLangs, fit, plan, conflictsOf, uncoverable, hoursOf, fmtH, fmtT, tourOf, dayLabel, dayShort, firstName } from './escala/logic'
 
 const GRID = 'grid grid-cols-[208px_repeat(7,minmax(138px,1fr))] gap-1.5'
 const FILTERS = ['Todos', 'EN', 'ES', 'FR', 'DE', 'IT', 'JA']
@@ -25,11 +25,11 @@ function Meter({ h, max }) {
 function GuideInfo({ g, shifts, dim, compact }) {
   return (
     <div className={cx('flex items-center gap-3 transition-opacity duration-200', dim && 'opacity-35')}>
-      <Avatar initials={g.initials} hue={g.hue} size={compact ? 34 : 38} />
+      <Avatar initials={g.initials} hue={g.hue} size={compact ? 44 : 42} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13.5px] font-semibold leading-tight text-ink">{g.name}</p>
-        <div className="mt-1 flex items-center gap-1">{g.langs.map((l) => <LangTag key={l} code={l} className="!h-[17px] !px-1 !text-[9.5px] !font-sans" />)}</div>
-        <div className="mt-2"><Meter h={hoursOf(shifts, g)} max={g.max} /></div>
+        <p className="truncate text-[15px] font-medium leading-tight text-ink">{g.name}</p>
+        <p className="mt-0.5 text-[12.5px] text-ink-3">{g.langs.join(' · ')}</p>
+        <div className="mt-1.5"><Meter h={hoursOf(shifts, g)} max={g.max} /></div>
       </div>
     </div>
   )
@@ -75,10 +75,11 @@ function Cell({ g, day, shifts, active, activeId, shake, onPick, dim, minH = 76,
 function DayHead({ d }) {
   const w = WEEK[d]
   return (
-    <div className="grid place-items-center pb-1">
-      <span className={cx('flex h-[46px] w-[54px] flex-col items-center justify-center rounded-[14px] leading-none', w.today ? 'bg-now text-white shadow-dark' : 'bg-sunken text-ink-2')}>
-        <span className={cx('text-[10.5px] font-semibold', w.today ? 'text-white/80' : 'text-ink-3')}>{w.short}</span>
-        <span className="mt-1 text-[15px] font-semibold tnum">{w.day}</span>
+    <div className="grid place-items-center">
+      <span className={cx('flex h-[62px] w-full max-w-[84px] flex-col items-center justify-center gap-1 rounded-[16px] leading-none', w.today && 'bg-sunken')}>
+        <span className="text-[13px] uppercase text-ink-3">{w.short}</span>
+        <span className="text-[18px] font-medium tnum text-ink">{w.day}</span>
+        <span className={cx('size-[6px] rounded-full', w.today ? 'bg-boat' : 'bg-transparent')} />
       </span>
     </div>
   )
@@ -155,19 +156,57 @@ function Summary({ shifts }) {
   const c = conflictsOf(shifts)
   const total = c.lang + c.overlap + c.off
   return (
-    <Card className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-4 md:px-6">
-      <div className="flex flex-wrap items-center gap-2 text-[13px]">
-        {gaps.length === 0 ? (
-          <span className="flex items-center gap-1.5 text-ink-3"><Check size={14} weight="bold" className="text-ok" />Todos os idiomas cobertos</span>
-        ) : (
-          <>
-            <span className="mr-1 text-ink-3">Falta guia de</span>
-            {gaps.map((s) => <span key={s.id} className="inline-flex h-[24px] items-center rounded-md bg-alert-tint px-2 text-[11.5px] font-semibold text-alert">{s.need.join(' + ')} · {dayShort(s.day)}</span>)}
-          </>
-        )}
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-1 px-2 text-[13.5px] text-ink-3">
+      {gaps.length === 0 ? <span>Todos os idiomas cobertos</span> : <span>Falta guia de <span className="text-ink-2">{gaps.map((s) => `${s.need.join(' e ')} ${dayShort(s.day)}`).join(', ')}</span></span>}
+      {total > 0 && <span className="ml-auto text-alert"><span className="tnum">{total}</span> {total === 1 ? 'conflito' : 'conflitos'}</span>}
+    </div>
+  )
+}
+
+const FULL = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+
+function Agenda({ day, setDay, shifts, onPick }) {
+  const list = shifts.filter((s) => s.day === day).sort((a, b) => a.start - b.start)
+  const hours = [...new Set(list.map((s) => Math.floor(s.start / 60)))]
+  const past = day < (WEEK.find((w) => w.today)?.idx ?? 0)
+  const off = GUIDES.filter((g) => isOff(g.id, day))
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-[21px] font-semibold tracking-[-0.015em]">{FULL[day]} {WEEK[day].day}</h2>
+        <div className="flex gap-2">
+          <button aria-label="Dia anterior" disabled={day === 0} onClick={() => setDay(day - 1)} className="grid size-11 place-items-center rounded-[12px] bg-sunken text-ink-2 disabled:opacity-40"><ArrowLeft size={16} /></button>
+          <button aria-label="Próximo dia" disabled={day === 6} onClick={() => setDay(day + 1)} className="grid size-11 place-items-center rounded-[12px] bg-sunken text-ink-2 disabled:opacity-40"><ArrowRight size={16} /></button>
+        </div>
       </div>
-      {total > 0 && <span className="ml-auto flex items-center gap-1.5 text-[13px] font-medium text-alert"><span className="size-1.5 rounded-full bg-alert" /><span className="tnum">{total}</span> {total === 1 ? 'conflito' : 'conflitos'}</span>}
-    </Card>
+      <div>
+        {hours.map((h) => (
+          <div key={h} className="grid grid-cols-[52px_1fr] gap-2 border-t border-line py-2.5">
+            <p className="pt-1 text-[15px] font-semibold tnum">{h}:00</p>
+            <div className="flex flex-col gap-2">
+              {list.filter((s) => Math.floor(s.start / 60) === h).map((s) => {
+                const g = GUIDES.find((x) => x.id === s.guideId)
+                const t = tourOf(s)
+                const miss = missingLangs(g, s)
+                return (
+                  <button key={s.id} onClick={() => onPick(s)} className={cx('relative flex items-center gap-3 rounded-[20px] bg-sunken p-3 pr-4 text-left', miss.length > 0 && 'ring-2 ring-alert')}>
+                    <span className="absolute inset-y-4 left-1 w-[3px] rounded-full" style={{ background: KIND[t.kind].color }} />
+                    {g ? <Avatar initials={g.initials} hue={g.hue} size={48} /> : <span className="grid size-12 shrink-0 place-items-center rounded-full border border-dashed border-ink-4 text-ink-3"><UserPlus size={18} /></span>}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[16px] font-medium leading-tight">{g ? g.name : 'Sem guia'}</p>
+                      <p className="mt-0.5 truncate text-[13.5px] text-ink-3">{t.short} · {s.need[0]}{miss.length > 0 && <span className="text-alert"> · Sem {miss[0]}</span>}</p>
+                      <p className="mt-0.5 text-[13px] text-ink-3 tnum">{fmtT(s.start)} a {fmtT(s.start + t.duration)}</p>
+                    </div>
+                    {past ? <span className="grid size-6 place-items-center rounded-full bg-ok text-white"><Check size={13} weight="bold" /></span> : <span className="grid size-6 place-items-center rounded-full bg-surface text-ink-3"><Clock size={13} /></span>}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      {off.length > 0 && <p className="mt-2 border-t border-line pt-3 text-[13.5px] text-ink-3">Folga: {off.map(firstName).join(', ')}</p>}
+    </div>
   )
 }
 
@@ -176,6 +215,7 @@ export default function Escala() {
   const moveShift = useOps((s) => s.moveShift)
   const setShifts = useOps((s) => s.setShifts)
   const showToast = useOps((s) => s.showToast)
+  const mobile = useMedia('(max-width: 767px)')
   const [view, setView] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 768 ? 'dia' : 'semana'))
   const [day, setDay] = useState(2)
   const [lang, setLang] = useState('Todos')
@@ -238,16 +278,15 @@ export default function Escala() {
             <Card className="p-5 md:p-6">
               <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
                 <div>
-                  <h1 className="text-[26px] font-semibold tracking-[-0.025em] text-ink md:text-[30px]">Escala</h1>
-                  <p className="mt-1 text-[13px] text-ink-3">2 a 8 de novembro</p>
+                  <h1 className="text-[26px] font-semibold tracking-[-0.025em] text-ink">Novembro 2026</h1>
+                  <p className="mt-1 text-[13px] text-ink-3">2 a 8</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <IconButton label="Semana anterior" className="bg-surface shadow-pill !size-10"><CaretLeft size={16} weight="bold" /></IconButton>
-                    <Pill active>Hoje</Pill>
-                    <IconButton label="Próxima semana" className="bg-surface shadow-pill !size-10"><CaretRight size={16} weight="bold" /></IconButton>
+                  <div className="flex items-center gap-1 rounded-[18px] bg-surface p-1.5 shadow-pill">
+                    <button aria-label="Semana anterior" className="grid size-9 place-items-center rounded-[12px] text-ink-2 hover:bg-sunken"><ArrowLeft size={16} /></button>
+                    <Segmented value={view} onChange={setView} options={[{ value: 'semana', label: 'Semana' }, { value: 'dia', label: 'Dia' }]} />
+                    <button aria-label="Próxima semana" className="grid size-9 place-items-center rounded-[12px] text-ink-2 hover:bg-sunken"><ArrowRight size={16} /></button>
                   </div>
-                  <Segmented value={view} onChange={setView} options={[{ value: 'semana', label: 'Semana' }, { value: 'dia', label: 'Dia' }]} />
                   <Button icon={UserPlus} onClick={suggest} disabled={running} className="max-md:w-full">Preencher escala</Button>
                 </div>
               </div>
@@ -265,7 +304,7 @@ export default function Escala() {
                 <div className="no-scrollbar overflow-x-auto">
                   <div className="min-w-[1250px]">
                     <div className={cx(GRID, 'mb-1')}>
-                      <div className="sticky left-0 z-30 flex items-end bg-surface px-2 pb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-3">Guias</div>
+                      <div className="sticky left-0 z-30 bg-surface" />
                       {WEEK.map((w) => <DayHead key={w.idx} d={w.idx} />)}
                     </div>
                     <div className="flex flex-col gap-1.5">
@@ -280,20 +319,17 @@ export default function Escala() {
                 </div>
               ) : (
                 <div>
-                  <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-3">
-                    {WEEK.map((w) => {
-                      const sel = day === w.idx
-                      const open = unassigned.filter((s) => s.day === w.idx).length
-                      return (
-                        <button key={w.idx} onClick={() => setDay(w.idx)} className={cx('relative flex h-[60px] w-[56px] shrink-0 flex-col items-center justify-center rounded-[16px] leading-none transition-colors duration-150 active:scale-[0.97]', sel ? (w.today ? 'bg-now text-white' : 'bg-negro text-white shadow-dark') : 'bg-sunken text-ink-2')}>
-                          <span className={cx('text-[10.5px] font-semibold', sel ? 'text-white/70' : 'text-ink-3')}>{w.short}</span>
-                          <span className="mt-1.5 text-[16px] font-semibold tnum">{w.day}</span>
-                          {open > 0 && <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-alert" />}
-                        </button>
-                      )
-                    })}
+                  <div className="mb-4 grid grid-cols-7 gap-1 rounded-[22px] bg-frame p-2">
+                    {WEEK.map((w) => (
+                      <button key={w.idx} onClick={() => setDay(w.idx)} className={cx('flex h-[66px] flex-col items-center justify-center gap-1 rounded-[16px] leading-none transition-colors duration-150 active:scale-[0.97]', day === w.idx && 'bg-surface shadow-pill')}>
+                        <span className="text-[12px] uppercase text-ink-3">{w.short}</span>
+                        <span className="text-[18px] font-medium tnum text-ink">{w.day}</span>
+                        <span className={cx('size-[6px] rounded-full', day === w.idx ? 'bg-boat' : 'bg-transparent')} />
+                      </button>
+                    ))}
                   </div>
-                  <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+                  {mobile ? <Agenda day={day} setDay={setDay} shifts={shifts} onPick={setSheet} /> : null}
+                  <div className={cx('grid gap-2.5 md:grid-cols-2 xl:grid-cols-3', mobile && 'hidden')}>
                     {GUIDES.map((g) => {
                       const off = isOff(g.id, day)
                       return (
