@@ -259,9 +259,9 @@ function Block({ d, i, now, status, x, rowH, reduce, onOpen, onHover, onLeave })
     >
       {/* Progresso do passeio em curso */}
       {live && prog > 0 && (
-        <span className={cx('absolute inset-x-3 bottom-[5px] h-[2px] overflow-hidden rounded-full', dark ? 'bg-negro/15' : 'bg-white/25')}>
+        <span className="absolute inset-x-3 bottom-[5px] h-[2px] overflow-hidden rounded-full">
           <motion.span
-            className={cx('block h-full rounded-full', dark ? 'bg-negro/60' : 'bg-white/85')}
+            className={cx('block h-full rounded-full', dark ? 'bg-negro/35' : 'bg-white/55')}
             initial={false}
             animate={{ width: `${prog * 100}%` }}
             transition={{ duration: reduce ? 0 : 1.4, ease: 'linear' }}
