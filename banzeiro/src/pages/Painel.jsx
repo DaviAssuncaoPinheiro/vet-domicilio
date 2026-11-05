@@ -1,13 +1,11 @@
-import { CalendarBlank, CaretDown, Faders, Television } from '@phosphor-icons/react'
-import { useNavigate } from 'react-router-dom'
-import { Reveal, Pill, IconButton, Button } from '../components/ui'
+import { CalendarBlank, CaretDown, Faders } from '@phosphor-icons/react'
+import { Reveal, Pill, IconButton } from '../components/ui'
 import { TODAY_LABEL } from '../data/mock'
 import { useOps } from '../store'
 import Timeline from './painel/Timeline'
 import { Kpis, NowCard, Proximas, Pendencias, Atividade } from './painel/Cards'
 
 export default function Painel() {
-  const nav = useNavigate()
   const now = useOps((s) => s.now)
   const status = useOps((s) => s.status)
 
@@ -28,7 +26,6 @@ export default function Painel() {
               <Pill icon={Faders}>Filtro</Pill>
             </span>
             <IconButton label="Filtro" className="bg-surface !text-ink-2 shadow-pill sm:hidden"><Faders size={17} /></IconButton>
-            <Button icon={Television} onClick={() => nav('/tv')}>Modo TV</Button>
           </div>
         </header>
       </Reveal>

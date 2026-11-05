@@ -6,7 +6,6 @@ import Escala from './pages/Escala'
 import Reservas from './pages/Reservas'
 import GuiaApp from './app/GuiaApp'
 import Voucher from './app/Voucher'
-import PierTV from './pages/PierTV'
 
 export default function App() {
   return (
@@ -20,7 +19,6 @@ export default function App() {
       </Route>
       <Route path="guia/*" element={<GuiaApp />} />
       <Route path="voucher/:code" element={<Voucher />} />
-      <Route path="tv" element={<PierTV />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
