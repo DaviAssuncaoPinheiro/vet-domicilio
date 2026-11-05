@@ -68,9 +68,11 @@ function Rail() {
 
 function TopBar() {
   const nav = useNavigate()
+  const loc = useLocation()
+  const home = loc.pathname === '/'
   const divergences = useOps((s) => s.divergences.filter((d) => !d.resolved).length)
   return (
-    <header className="flex items-center gap-3 rounded-[28px] bg-frame p-2.5 shadow-soft md:gap-4">
+    <header className={cx('flex items-center gap-3 rounded-[28px] bg-frame p-2.5 shadow-soft md:gap-4', home && 'max-md:hidden')}>
       <div className="xl:hidden"><Logo size={40} /></div>
       <nav className="no-scrollbar hidden min-w-0 items-center gap-1.5 overflow-x-auto md:flex">
         {NAV.map((n) => (
